@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardware Design | Park Hae-jin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- 메인 페이지와 동일한 스타일 변수 --- */
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-muted: #888888;
+            --accent-point: #3b82f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 80px;
+        }
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+
+        /* --- Header & Nav --- */
+        header {
+            padding: 40px 10%;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(18, 18, 18, 0.95);
+            position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn {
+            font-size: 0.9rem; font-weight: 600; color: var(--text-muted);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .back-btn:hover { color: var(--accent-point); transform: translateX(-5px); }
+
+        .page-title { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
+
+        /* --- Content Layout --- */
+        .container { max-width: 1000px; margin: 60px auto; padding: 0 20px; }
+        
+        .intro { text-align: center; margin-bottom: 60px; }
+        .intro h1 { font-size: 2.5rem; margin-bottom: 15px; font-weight: 800; }
+        .intro p { color: var(--text-muted); }
+
+        /* --- Spec Card --- */
+        .spec-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 40px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: 150px 1fr; /* 아이콘 영역 + 내용 영역 */
+            gap: 40px;
+            transition: transform 0.3s;
+        }
+
+        .spec-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.1); }
+
+        .icon-box {
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding-top: 10px;
+        }
+        .icon-box i { font-size: 3rem; color: var(--accent-point); margin-bottom: 15px; }
+        .model-name { font-size: 0.8rem; color: var(--text-muted); text-align: center; font-family: monospace; }
+
+        .content-box h2 { font-size: 1.5rem; margin-bottom: 10px; color: var(--text-main); }
+        .badge {
+            display: inline-block; padding: 4px 10px; border-radius: 4px;
+            background: rgba(59, 130, 246, 0.1); color: var(--accent-point);
+            font-size: 0.75rem; font-weight: 600; margin-bottom: 20px;
+        }
+
+        .reason-title { font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 8px; display: block; }
+        .reason-text { color: #bbb; font-size: 0.95rem; margin-bottom: 20px; }
+        
+        /* Mobile */
+        @media (max-width: 768px) {
+            .spec-card { grid-template-columns: 1fr; text-align: center; }
+            .icon-box { margin-bottom: 20px; }
+            header { padding: 20px 5%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+        <div class="page-title">Hardware Selection</div>
+    </header>
+
+    <div class="container">
+        <div class="intro">
+            <h1>Why these Components?</h1>
+            <p>프로젝트의 목표 성능과 제약 사항을 고려한 하드웨어 선정 근거입니다.</p>
+        </div>
+
+        <div class="spec-card">
+            <div class="icon-box">
+                <i class="fab fa-raspberry-pi"></i>
+                <span class="model-name">Raspberry Pi 5<br>(8GB RAM)</span>
+            </div>
+            <div class="content-box">
+                <h2>Main Computer</h2>
+                <span class="badge">Processing Unit</span>
+                
+                <span class="reason-title">선정 이유 (Why Pi 5?)</span>
+                <p class="reason-text">
+                    기존 Pi 4 대비 CPU 성능이 2~3배 향상되어, 향후 OpenCV 기반의 차선 인식 및 AI 모델(TensorFlow Lite)을 온디바이스(On-device)로 구동하기 위해 선정했습니다. 특히 8GB RAM 모델을 선택하여 고해상도 영상 처리 시 병목 현상을 방지했습니다.
+                </p>
+
+                <span class="reason-title">⚠️ 고려 사항 (Trade-off)</span>
+                <p class="reason-text">
+                    전력 소모가 커짐에 따라(5V 5A 권장), 모터 드라이버와 전원을 분리하고 별도의 액티브 쿨러(Active Cooler)를 장착하여 발열을 관리했습니다.
+                </p>
+            </div>
+        </div>
+
+        <div class="spec-card">
+            <div class="icon-box">
+                <i class="fas fa-car-side"></i>
+                <span class="model-name">Ackermann<br>Steering Chassis</span>
+            </div>
+            <div class="content-box">
+                <h2>Vehicle Platform</h2>
+                <span class="badge">Mechanism</span>
+                
+                <span class="reason-title">선정 이유 (Why Ackermann?)</span>
+                <p class="reason-text">
+                    일반적인 교육용 로봇의 차동 구동(Differential Drive) 방식은 제자리 회전이 가능하여 제어가 쉽지만, 실제 자동차의 물리적 특성과는 거리가 멉니다. <br>
+                    실제 차량과 동일한 조향 기하학(Geometry)을 가진 플랫폼을 사용하여, <strong>비홀로노믹(Non-holonomic) 제약 조건</strong> 하에서의 경로 계획 알고리즘을 연구하기 위해 채택했습니다.
+                </p>
+            </div>
+        </div>
+
+        <div class="spec-card">
+            <div class="icon-box">
+                <i class="fas fa-microchip"></i>
+                <span class="model-name">Waveshare<br>Motor Driver HAT</span>
+            </div>
+            <div class="content-box">
+                <h2>Actuator Controller</h2>
+                <span class="badge">PCA9685 I2C</span>
+                
+                <span class="reason-title">선정 이유 (Why PCA9685?)</span>
+                <p class="reason-text">
+                    라즈베리파이의 소프트웨어 PWM은 OS 부하에 따라 지터(Jitter)가 발생하여 모터가 떨리는 문제가 있습니다. <br>
+                    이를 해결하기 위해 I2C 통신으로 제어되는 <strong>하드웨어 PWM 전용 칩셋(PCA9685)</strong>을 사용하여, CPU 리소스를 점유하지 않고도 정밀하고 부드러운 모터 제어를 구현했습니다.
+                </p>
+            </div>
+        </div>
+
+        <div class="spec-card">
+            <div class="icon-box">
+                <i class="fas fa-battery-full"></i>
+                <span class="model-name">Li-Po 2S<br>7.4V</span>
+            </div>
+            <div class="content-box">
+                <h2>Power Source</h2>
+                <span class="badge">Energy</span>
+                
+                <span class="reason-title">선정 이유 (Why Li-Po?)</span>
+                <p class="reason-text">
+                    DC 모터와 서보 모터가 동시에 작동할 때 발생하는 급격한 전류 소모(Peak Current)를 감당하기 위해, 일반 건전지 대신 방전율(C-rate)이 높은 리튬 폴리머 배터리를 사용했습니다. 라즈베리파이와 모터의 전원을 물리적으로 분리하여, 모터 노이즈로 인한 시스템 리셋을 방지했습니다.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

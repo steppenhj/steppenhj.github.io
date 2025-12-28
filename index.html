@@ -17,6 +17,7 @@
             --text-muted: #888888;
             --accent: #d4d4d8;
             --accent-point: #3b82f6;
+            --kmong-green: #00C73C;
             
             /* [수정] 네비게이션 높이를 늘려서 여유 공간 확보 */
             --nav-height: 90px; 
@@ -42,7 +43,7 @@
             height: var(--nav-height);
             background: rgba(18, 18, 18, 0.95); /* 가독성을 위해 불투명도 약간 상향 */
             backdrop-filter: blur(10px);
-            display: flex; justify-content: space-between; items-center;
+            display: flex; justify-content: space-between;
             padding: 0 5%;
             z-index: 1000;
             border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -58,34 +59,98 @@
         .nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
         .nav-links a:hover { color: var(--text-main); }
 
-        /* --- 3. Hero Section --- */
+        /* --- 3. Hero Section (좌측 사진, 우측 텍스트 레이아웃) --- */
         .hero {
-            height: 100vh;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            text-align: center;
-            padding: 0 20px;
-            background: radial-gradient(circle at 50% 50%, #1e1e1e 0%, #121212 70%);
+            min-height: 100vh; /* height 대신 min-height로 변경하여 유연성 확보 */
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            padding: 0 10%; /* 좌우 여백 확보 */
+            background: radial-gradient(circle at 30% 50%, #1e1e1e 0%, #121212 70%); /* 그라데이션 중심 이동 */
+        }
+
+        /* 사진과 텍스트를 감싸는 컨테이너 */
+        .hero-content {
+            display: flex;
+            align-items: center; /* 수직 중앙 정렬 */
+            gap: 60px; /* 사진과 글자 사이 간격 */
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* --- 프로필 사진 스타일 --- */
+        .profile-container {
+            flex-shrink: 0; /* 화면이 줄어도 사진이 찌그러지지 않게 함 */
+        }
+
+        .profile-img {
+            width: 280px;       /* 사진 크기를 좀 더 키워서 임팩트 있게 */
+            height: 280px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--bg-card);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.25); /* 글로우 효과 */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+
+        /* --- 텍스트 스타일 (왼쪽 정렬) --- */
+        .hero-text {
+            text-align: left; /* 왼쪽 정렬 핵심 */
         }
 
         .hero h2 {
-            font-size: 1.2rem; color: var(--accent-point);
-            margin-bottom: 15px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+            font-size: 1.1rem; 
+            color: var(--accent-point);
+            margin-bottom: 10px; 
+            font-weight: 700; 
+            letter-spacing: 2px; 
+            text-transform: uppercase;
         }
 
         .hero h1 {
-            font-size: 4.5rem; font-weight: 800;
+            font-size: 4rem; /* 폰트 사이즈 조절 */
+            font-weight: 800;
             color: var(--text-main);
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             line-height: 1.1;
         }
 
         .hero p {
-            font-size: 1.1rem; color: var(--text-muted);
-            max-width: 600px; margin-bottom: 40px;
+            font-size: 1.1rem; 
+            color: var(--text-muted);
+            max-width: 600px; 
+            margin-bottom: 40px;
+            line-height: 1.7;
         }
 
-        .btn-group { display: flex; gap: 15px; }
+        .btn-group { 
+            display: flex; 
+            gap: 15px; 
+            /* 버튼도 왼쪽 정렬이 되도록 별도 설정 없음 (부모 따라감) */
+        }
+
+        /* --- 반응형 (모바일에서는 다시 위아래로 배치) --- */
+        @media (max-width: 900px) {
+            .hero-content {
+                flex-direction: column; /* 세로 배치로 변경 */
+                text-align: center;     /* 다시 가운데 정렬 */
+                gap: 40px;
+                padding-top: 80px;      /* 네비게이션 겹침 방지 */
+            }
+
+            .hero-text {
+                text-align: center; /* 모바일엔 가운데가 예쁨 */
+                display: flex; flex-direction: column; align-items: center;
+            }
+
+            .profile-img {
+                width: 200px;  /* 모바일에서는 사진 조금 작게 */
+                height: 200px;
+            }
+
+            .hero h1 { font-size: 3rem; }
+        }
 
         .btn {
             padding: 14px 35px;
@@ -219,6 +284,67 @@
             .nav-links { display: none; } 
             section { padding: 80px 5%; }
         }
+
+        /* --- [추가] Professional Experience (Kmong) --- */
+        .experience-section {
+            margin-bottom: 120px;
+        }
+
+        .kmong-card {
+            background: linear-gradient(145deg, #1e1e1e, #121212);
+            border: 1px solid rgba(0, 199, 60, 0.2);
+            border-radius: 12px;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+
+        /* 왼쪽: 로고 및 타이틀 */
+        .kmong-info { flex: 1; }
+        
+        .kmong-label {
+            display: inline-block;
+            background: rgba(0, 199, 60, 0.1);
+            color: var(--kmong-green);
+            font-size: 0.8rem; font-weight: 700;
+            padding: 5px 12px; border-radius: 20px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .kmong-card h3 {
+            font-size: 1.8rem; color: var(--text-main); margin-bottom: 10px;
+        }
+
+        .kmong-card p {
+            color: var(--text-muted); font-size: 1rem; margin-bottom: 25px; max-width: 600px;
+        }
+
+        /* 오른쪽: 평점 및 통계 */
+        .kmong-stats {
+            display: flex; gap: 40px; text-align: center;
+            border-left: 1px solid rgba(255,255,255,0.1);
+            padding-left: 40px;
+        }
+
+        .stat-item h4 { font-size: 2rem; font-weight: 800; color: var(--text-main); }
+        .stat-item span { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; }
+        .star { color: #FFD400; }
+
+        /* 모바일 대응 */
+        @media (max-width: 768px) {
+            .kmong-card { flex-direction: column; text-align: center; padding: 30px; }
+            .kmong-stats { 
+                border-left: none; border-top: 1px solid rgba(255,255,255,0.1);
+                padding-left: 0; padding-top: 30px; margin-top: 30px;
+                width: 100%; justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -234,17 +360,25 @@
     </nav>
 
     <section id="home" class="hero">
-        <div class="hidden">
-            <h2>Hardware & Software Engineer</h2>
-            <h1>Park Hae-jin</h1>
-            <p>
-                임베디드 시스템의 정밀함과 웹 기술의 유연함을 연결합니다.<br>
-                현재 라즈베리파이 기반의 자율주행 플랫폼을 설계하고 있습니다.
-            </p>
-            <div class="btn-group">
-                <a href="#projects" class="btn btn-primary">View Projects</a>
-                <a href="https://github.com/steppenhj" target="_blank" class="btn btn-secondary"><i class="fab fa-github"></i> GitHub</a>
+        <div class="hero-content hidden">
+            
+            <div class="profile-container">
+                <img src="profile.jpg" alt="Park Hae-jin Profile" class="profile-img">
             </div>
+
+            <div class="hero-text">
+                <h2>Hardware & Software Engineer</h2>
+                <h1>Park Hae-jin</h1>
+                <p>
+                    임베디드 시스템의 정밀함과 웹 기술의 유연함을 연결합니다.<br>
+                    현재 라즈베리파이 기반의 자율주행 플랫폼을 설계하고 있습니다.
+                </p>
+                <div class="btn-group">
+                    <a href="#projects" class="btn btn-primary">View Projects</a>
+                    <a href="https://github.com/steppenhj" target="_blank" class="btn btn-secondary"><i class="fab fa-github"></i> GitHub</a>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -278,9 +412,52 @@
                     <a href="https://github.com/steppenhj/Neuro-Drive-CPP" target="_blank" class="link-item">
                         <i class="fab fa-github"></i> Visit Repository
                     </a>
+                    
+                    <a href="hardware.html" class="link-item" style="margin-left: 20px;">
+                        <i class="fas fa-microchip"></i> Hardware Specs
+                    </a>
                 </div>
             </div>
         </div>
+
+        <div class="section-header hidden" style="margin-top: 150px;">
+            <h2 class="section-title">Professional Experience</h2>
+            <p class="section-desc">실제 클라이언트의 요구사항을 분석하고 솔루션을 제공한 프리랜서 경험입니다.</p>
+        </div>
+
+        <div class="experience-section hidden">
+            <div class="kmong-card">
+                <div class="kmong-info">
+                    <span class="kmong-label">FREELANCE EXPERT</span>
+                    <h3>Web Development Specialist</h3>
+                    <p>
+                        프리랜서 플랫폼 '크몽(Kmong)'에서 웹 제작 전문가로 활동했습니다.<br>
+                        기획부터 배포까지, 클라이언트의 비즈니스 니즈에 맞춘 <strong>맞춤형 웹 솔루션</strong>을 제공하며 
+                        커뮤니케이션 능력과 문제 해결 역량을 입증했습니다.
+                    </p>
+                    <a href="https://kmong.com/gig/637739" target="_blank" class="btn btn-secondary" 
+                    style="border-color: #00C73C; color: #00C73C;">
+                        <i class="fas fa-external-link-alt"></i> View Service
+                    </a>
+                </div>
+                
+                <div class="kmong-stats">
+                    <div class="stat-item">
+                        <h4>4.9<span class="star">★</span></h4>
+                        <span>Client Rating</span>
+                    </div>
+                    <div class="stat-item">
+                        <h4>100%</h4>
+                        <span>Satisfaction</span>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Fast</h4>
+                        <span>Response</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <div class="section-header hidden" style="margin-top: 150px;">
             <h2 class="section-title">Other Projects</h2>
@@ -333,9 +510,9 @@
     <footer id="contact">
         <div class="footer-socials">
             <a href="https://github.com/steppenhj" target="_blank"><i class="fab fa-github"></i></a>
-            <a href="mailto:your.email@example.com"><i class="fas fa-envelope"></i></a>
+            <a href="mailto:hermann8hesse@gmail.com"><i class="fas fa-envelope"></i></a>
         </div>
-        <p class="footer-copy">© 2024 Park Hae-jin. All rights reserved.</p>
+        <p class="footer-copy">박해진 Park Hae-jin.</p>
     </footer>
 
     <script>
