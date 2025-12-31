@@ -403,11 +403,12 @@
                     <span class="tag">PCA9685</span>
                 </div>
                 <h3>Neuro-Drive RC Car</h3>
-                <p>
-                    라즈베리파이 5와 Ackermann Steering 메커니즘을 적용한 자율주행 RC카 프로젝트입니다.
-                    단순한 조종을 넘어, <strong>하이브리드 아키텍처(Python+C++)</strong>를 통해 웹 기반 실시간 원격 제어와 초저지연 모터 제어를 동시에 구현했습니다.
-                    독립 전원 시스템 설계로 하드웨어 안정성을 확보했습니다.
-                </p>
+                    <p>
+                        라즈베리파이 5 기반의 자율주행 RC카 플랫폼입니다.
+                        <strong>Dual-Power Isolation 설계</strong>를 통해 고전류 모터 구동 시 발생하는 전압 강하(Brown-out) 문제를 근본적으로 해결했습니다.
+                        또한, 최신 Linux GPIO 표준인 <strong>libgpiod v2</strong>를 도입하여 하드웨어 제어의 안정성을 확보하고, 
+                        Terminal Sharing 기법을 통해 제한된 인터페이스 내에서 서보 모터의 전력 효율을 최적화했습니다.
+                    </p>
                 <div class="project-links">
                     <a href="https://github.com/steppenhj/Neuro-Drive-CPP" target="_blank" class="link-item">
                         <i class="fab fa-github"></i> Visit Repository
