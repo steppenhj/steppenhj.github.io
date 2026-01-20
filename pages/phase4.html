@@ -1,0 +1,91 @@
+<div class="phase-header">
+    <span style="color: var(--accent-orange); font-weight: bold; letter-spacing: 2px;">PHASE 04: SAFETY & FAIL-SAFE</span>
+    <h1>Active Safety Protocol</h1>
+    <p class="page-subtitle">
+        단순한 정지를 넘어선 <strong>생존(Survival) 알고리즘</strong>.<br>
+        통신 두절이나 서버 장애 발생 시, 시스템이 스스로 위험을 감지하고<br> 
+        지정된 안전 구역으로 자동 복귀(RTH: Return To Home)합니다.
+    </p>
+</div>
+
+<div class="feature-card">
+    <h3><i class="fas fa-heartbeat" style="color: var(--accent-orange);"></i> Heartbeat Monitoring System</h3>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px; text-align: center; margin-top: 30px; flex-wrap: wrap;">
+        
+        <div style="flex: 1; min-width: 120px; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent-green); padding: 15px; border-radius: 8px;">
+            <i class="fas fa-wifi" style="color: var(--accent-green); font-size: 1.5rem; margin-bottom: 10px;"></i>
+            <h4 style="color: #fff; font-size: 0.9rem;">Connected</h4>
+            <small style="color: #888;">Ping < 100ms</small>
+        </div>
+
+        <i class="fas fa-long-arrow-alt-right" style="color: #555; font-size: 1.2rem;"></i>
+
+        <div style="flex: 1; min-width: 120px; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent-orange); padding: 15px; border-radius: 8px;">
+            <i class="fas fa-exclamation-triangle" style="color: var(--accent-orange); font-size: 1.5rem; margin-bottom: 10px;"></i>
+            <h4 style="color: #fff; font-size: 0.9rem;">Signal Loss</h4>
+            <small style="color: #888;">Timeout > 500ms</small>
+        </div>
+
+        <i class="fas fa-long-arrow-alt-right" style="color: #555; font-size: 1.2rem;"></i>
+
+        <div style="flex: 1; min-width: 120px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 15px; border-radius: 8px;">
+            <i class="fas fa-undo-alt" style="color: #ef4444; font-size: 1.5rem; margin-bottom: 10px;"></i>
+            <h4 style="color: #fff; font-size: 0.9rem;">Auto RTH</h4>
+            <small style="color: #888;">Backtracking</small>
+        </div>
+
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="feature-card">
+        <h3><i class="fas fa-shield-alt" style="color: var(--accent-orange);"></i> Fail-Safe Logic</h3>
+        <p style="color: var(--text-muted); margin-bottom: 15px;">
+            STM32(제어기)는 RPi(서버)로부터 <strong>Heartbeat 패킷</strong>을 주기적으로 수신합니다. 
+            만약 500ms 이상 패킷이 오지 않으면 즉시 <strong>비상 모드(Emergency Mode)</strong>로 진입합니다.
+        </p>
+        <ul style="color: #ccc; font-size: 0.9rem; line-height: 1.8; padding-left: 20px;">
+            <li><strong style="color: var(--accent-orange);">Level 1:</strong> 모터 즉시 정지 (PWM Disable)</li>
+            <li><strong style="color: var(--accent-orange);">Level 2:</strong> 비상등 점멸 (Visual Alert)</li>
+            <li><strong style="color: var(--accent-orange);">Level 3:</strong> 3초 후 RTH 시퀀스 시작</li>
+        </ul>
+    </div>
+
+    <div class="feature-card" style="padding: 0; overflow: hidden; background: #0d0d0d;">
+        <div style="padding: 15px; border-bottom: 1px solid #333; font-size: 0.8rem; color: #888;">
+            stm32_safety.c
+        </div>
+        <pre style="margin: 0; border: none;"><code class="cpp"><span class="keyword">void</span> <span class="function">Safety_Task</span>(<span class="keyword">void</span>) {
+    uint32_t current_time = HAL_GetTick();
+    
+    <span class="comment">// Check Heartbeat Timeout (500ms)</span>
+    <span class="keyword">if</span> (current_time - last_heartbeat > 500) {
+        
+        <span class="comment">// 1. Disengage Manual Control</span>
+        Motor_Stop();
+        
+        <span class="comment">// 2. Trigger Return-To-Home</span>
+        <span class="keyword">if</span> (is_safe_to_move()) {
+            RTH_Execute_Backtracking();
+        }
+    }
+}</code></pre>
+    </div>
+</div>
+
+<div class="info-box" style="border-left: 4px solid var(--accent-orange);">
+    <h3 style="color: #fff; margin-bottom: 15px;">
+        <i class="fas fa-map-marker-alt" style="color: var(--accent-orange); margin-right: 10px;"></i>
+        How RTH Works? (Odometry Backtracking)
+    </h3>
+    <p style="color: var(--text-muted); line-height: 1.7;">
+        별도의 GPS 없이도, 엔코더(Encoder)와 IMU 센서를 통해 이동 경로를 메모리에 스택(Stack) 형태로 저장합니다.<br>
+        비상 상황 발생 시, 저장된 경로의 <strong>역순(Reverse Stack)</strong>으로 주행하여 시작 지점으로 복귀합니다.
+    </p>
+    <div style="margin-top: 15px; display: flex; gap: 10px;">
+        <span class="spec-badge" style="color: var(--accent-orange); border-color: var(--accent-orange);">Dead Reckoning</span>
+        <span class="spec-badge">IMU Fusion</span>
+        <span class="spec-badge">Path Stack</span>
+    </div>
+</div>

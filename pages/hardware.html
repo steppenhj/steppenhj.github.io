@@ -1,0 +1,131 @@
+<div class="phase-header">
+    <span style="color: var(--text-muted); font-weight: bold; letter-spacing: 2px;">SYSTEM SPECIFICATION</span>
+    <h1>Hardware Architecture</h1>
+    <p class="page-subtitle">
+        자율주행 RC카 'Neuro-Driver'를 구성하는 핵심 하드웨어 스펙입니다.<br>
+        연산(Brain), 제어(Reflex), 구동(Body), 시각(Vision)의 4계층으로 설계되었습니다.
+    </p>
+</div>
+
+<h3 style="color: #fff; margin-bottom: 20px; border-left: 3px solid var(--accent-blue); padding-left: 15px;">
+    1. Computing Unit (Brain & Reflex)
+</h3>
+<div class="grid-container">
+    <div class="feature-card">
+        <h3><i class="fab fa-raspberry-pi" style="color: #d63384;"></i> Raspberry Pi 5</h3>
+        <span class="spec-badge">8GB RAM / Bookworm OS</span>
+        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
+            고성능 쿼드코어 CPU로 웹 서버, 영상 스트리밍, 자율주행(AI) 추론을 담당합니다. 
+            <strong>Active Cooler</strong>를 장착하여 쓰로틀링을 방지했습니다.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <h3><i class="fas fa-microchip" style="color: var(--accent-blue);"></i> STM32 Nucleo-F411RE</h3>
+        <span class="spec-badge">Cortex-M4 / 100MHz</span>
+        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
+            리눅스의 실시간성 한계를 보완하기 위한 하위 제어기입니다. 
+            <strong>Hardware Timer</strong>를 통해 모터 PWM 생성 및 엔코더 값을 정밀하게 측정합니다.
+        </p>
+    </div>
+</div>
+
+<h3 style="color: #fff; margin-bottom: 20px; border-left: 3px solid var(--accent-green); padding-left: 15px;">
+    2. Actuator & Power (Body)
+</h3>
+<div class="grid-container">
+    <div class="feature-card">
+        <h3><i class="fas fa-car-battery" style="color: var(--text-main);"></i> Ackermann Chassis</h3>
+        <span class="spec-badge">Front Steering / Rear Drive</span>
+        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
+            실제 자동차와 동일한 조향 구조를 가진 차체입니다. 
+            5.8kg.cm 토크의 DC 기어드 모터와 조향 서보모터로 구성되어 정밀한 주행이 가능합니다.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <h3><i class="fas fa-bolt" style="color: #f59e0b;"></i> L298N Motor Driver</h3>
+        <span class="spec-badge">Dual H-Bridge</span>
+        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
+            STM32의 제어 신호를 증폭하여 DC 모터를 구동합니다. 
+            최대 2A 전류 허용, 12V 외부 전원을 공급받아 5V 레귤레이터 기능을 겸합니다.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <h3><i class="fas fa-battery-full" style="color: var(--accent-green);"></i> Power System</h3>
+        <span class="spec-badge">7.4V Li-Po / 35C</span>
+        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
+            구동계(Motor)는 고출력 리튬폴리머 배터리(7.4V)로, 제어기(RPi)는 보조배터리(5V)로 
+            <strong>전원을 물리적으로 분리</strong>하여 전압 강하로 인한 셧다운을 방지했습니다.
+        </p>
+    </div>
+</div>
+
+<h3 style="color: #fff; margin-bottom: 20px; border-left: 3px solid var(--accent-purple); padding-left: 15px;">
+    3. Vision Sensor (Eyes)
+</h3>
+<div class="grid-container">
+    <div class="feature-card">
+        <h3><i class="fas fa-eye" style="color: var(--accent-purple);"></i> RPi Camera Module 3</h3>
+        <span class="spec-badge">IMX708 / 120° Wide</span>
+        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
+            120도 광각 렌즈를 탑재하여 넓은 시야각(FOV)을 확보했습니다. 
+            차선 인식(Lane Keeping) 및 주변 장애물 탐지에 최적화된 시각 정보를 제공합니다.
+        </p>
+    </div>
+</div>
+
+<h3 style="color: #fff; margin-bottom: 20px; border-left: 3px solid #888; padding-left: 15px;">
+    4. Bill of Materials (BOM)
+</h3>
+<div class="feature-card" style="padding: 0; overflow: hidden;">
+    <div style="overflow-x: auto;">
+        <table class="bom-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Item Name</th>
+                    <th>Specs / Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="tag main">Main Board</span></td>
+                    <td>Raspberry Pi 5</td>
+                    <td>8GB RAM</td>
+                </tr>
+                <tr>
+                    <td><span class="tag main">MCU</span></td>
+                    <td>STM32 Nucleo-F411RE</td>
+                    <td>Bare-metal Firmware</td>
+                </tr>
+                <tr>
+                    <td><span class="tag sub">Cooling</span></td>
+                    <td>RPi 5 Active Cooler</td>
+                    <td>PWM Fan Control</td>
+                </tr>
+                <tr>
+                    <td><span class="tag main">Platform</span></td>
+                    <td>Ackermann Chassis</td>
+                    <td>5kg Load, 12V Motor</td>
+                </tr>
+                <tr>
+                    <td><span class="tag main">Drive</span></td>
+                    <td>L298N Motor Driver</td>
+                    <td>Dual H-Bridge</td>
+                </tr>
+                <tr>
+                    <td><span class="tag main">Vision</span></td>
+                    <td>RPi Camera Module 3</td>
+                    <td>120° Wide Angle</td>
+                </tr>
+                <tr>
+                    <td><span class="tag main">Power</span></td>
+                    <td>Li-Po Battery</td>
+                    <td>7.4V, 2S1P, 35C+</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

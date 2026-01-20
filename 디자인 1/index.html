@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Park Hae-jin | Embedded Engineer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- Global Variables --- */
+        :root {
+            --bg-body: #101010;
+            --bg-sidebar: #161616;
+            --bg-card: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-muted: #9CA3AF;
+            --accent-point: #3b82f6;
+            --sidebar-width: 400px;
+            --kmong-green: #00C73C;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            display: flex;
+        }
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        ul { list-style: none; }
+
+        /* =========================================
+           1. Left Sidebar (Fixed Identity)
+           ========================================= */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            background: var(--bg-sidebar);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .profile-img {
+            width: 180px; height: 180px;
+            object-fit: cover;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            filter: grayscale(20%);
+            transition: filter 0.3s;
+        }
+        .profile-img:hover { filter: grayscale(0%); }
+
+        .sidebar h1 {
+            font-size: 2.5rem; font-weight: 800;
+            margin-bottom: 10px; line-height: 1.1;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .role-badge {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-point);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem; font-weight: 600;
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar p {
+            color: var(--text-muted);
+            font-size: 1rem; margin-bottom: 40px;
+            max-width: 300px;
+        }
+
+        .contact-info {
+            display: flex; flex-direction: column; gap: 15px;
+            font-size: 0.9rem; color: var(--text-muted);
+        }
+        .contact-item { display: flex; align-items: center; gap: 10px; }
+        .contact-item i { color: var(--accent-point); width: 20px; }
+        .contact-item:hover { color: var(--text-main); }
+
+        .social-links {
+            margin-top: 40px;
+            display: flex; gap: 15px;
+        }
+        .social-btn {
+            width: 45px; height: 45px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .social-btn:hover {
+            background: var(--text-main);
+            color: var(--bg-body);
+            transform: translateY(-3px);
+        }
+
+        /* =========================================
+           2. Right Content Area
+           ========================================= */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 80px 10%;
+            min-height: 100vh;
+        }
+
+        /* --- Floating Navigation --- */
+        .navbar {
+            position: fixed;
+            top: 30px; right: 5%;
+            z-index: 1000;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .nav-links {
+            display: flex; gap: 5px;
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(15px);
+            padding: 6px 8px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .nav-links a {
+            font-size: 0.85rem; font-weight: 500;
+            color: var(--text-muted);
+            padding: 10px 20px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- Section Styling --- */
+        section {
+            margin-bottom: 150px;
+            padding-top: 40px;
+        }
+
+        .section-tag {
+            font-size: 0.85rem; color: var(--accent-point);
+            font-weight: 700; text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 10px; display: block;
+        }
+        
+        .section-title {
+            font-size: 2.5rem; font-weight: 800; margin-bottom: 40px;
+            color: var(--text-main);
+        }
+
+        .text-block {
+            color: var(--text-muted); font-size: 1.05rem;
+            margin-bottom: 20px; max-width: 700px;
+        }
+
+        /* --- 5-Phase Grid System --- */
+        .phase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+            gap: 25px;
+        }
+
+        .phase-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 35px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            min-height: 380px;
+        }
+
+        /* Hover Effect */
+        .phase-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            background: linear-gradient(145deg, #1e1e1e, #161b22);
+        }
+
+        .phase-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 15px;
+        }
+
+        .phase-number {
+            font-size: 0.8rem; 
+            color: var(--accent-point); 
+            font-weight: 800; 
+            letter-spacing: 2px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .phase-icon {
+            font-size: 1.8rem; 
+            color: var(--text-muted); 
+            transition: 0.3s;
+        }
+        
+        .phase-card:hover .phase-icon { 
+            color: #fff; 
+            transform: scale(1.1) rotate(5deg); 
+        }
+
+        .phase-card h3 {
+            font-size: 1.4rem; 
+            font-weight: 700; 
+            margin-bottom: 15px; 
+            color: var(--text-main);
+        }
+        
+        .phase-card p {
+            font-size: 0.95rem; 
+            color: var(--text-muted); 
+            line-height: 1.6; 
+            margin-bottom: 25px;
+        }
+
+        .btn-link {
+            margin-top: auto;
+            font-size: 0.9rem; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            transition: 0.2s;
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px;
+            opacity: 0.8;
+        }
+        .btn-link:hover { 
+            color: var(--accent-point); 
+            opacity: 1; 
+            transform: translateX(5px);
+        }
+
+        /* --- Algorithm Grid (Mini Cards) --- */
+        .grid-2 {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .mini-card {
+            background: var(--bg-card);
+            padding: 30px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.3s;
+        }
+        .mini-card:hover { background: #252525; transform: translateY(-3px); }
+        .mini-card h4 { font-size: 1.2rem; margin-bottom: 10px; }
+        .mini-card p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px; }
+        
+        /* --- Kmong Card Style --- */
+        .kmong-card {
+            background: linear-gradient(145deg, #1e1e1e, #121212);
+            border: 1px solid rgba(0, 199, 60, 0.2);
+            border-radius: 12px;
+            padding: 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: relative; overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .kmong-card:hover { transform: translateY(-5px); }
+
+        .kmong-info { flex: 1; padding-right: 40px; }
+
+        .kmong-label {
+            display: inline-block;
+            background: rgba(0, 199, 60, 0.1);
+            color: var(--kmong-green);
+            font-size: 0.8rem; font-weight: 700;
+            padding: 5px 12px; border-radius: 20px;
+            margin-bottom: 15px; letter-spacing: 1px;
+        }
+        .kmong-card h3 { font-size: 1.8rem; color: var(--text-main); margin-bottom: 10px; }
+        .kmong-card p { color: var(--text-muted); font-size: 1rem; margin-bottom: 25px; max-width: 550px; }
+
+        .kmong-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 20px;
+            background: transparent;
+            color: var(--kmong-green);
+            border: 1px solid var(--kmong-green);
+            border-radius: 4px; font-weight: 600;
+            transition: 0.3s;
+        }
+        .kmong-btn:hover { background: var(--kmong-green); color: #000; }
+
+        .kmong-stats {
+            display: flex; gap: 25px;
+            text-align: center;
+            border-left: 1px solid rgba(255,255,255,0.1);
+            padding-left: 25px;
+            flex-shrink: 0;
+        }
+        .stat-item h4 { font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin-bottom: 5px; }
+        .stat-item span { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .star { color: #FFD400; }
+
+        /* --- CTA Container (Hardware Link) --- */
+        .cta-container { 
+            display: flex; justify-content: center; margin-top: 60px; margin-bottom: 60px;
+        }
+        .btn-ghost {
+            color: var(--text-main);
+            border: 1px solid var(--text-muted);
+            padding: 15px 30px; border-radius: 50px;
+            font-size: 1rem; font-weight: 600;
+            display: flex; align-items: center; gap: 10px;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.05);
+        }
+        .btn-ghost:hover {
+            color: var(--bg-body);
+            border-color: var(--text-main);
+            background: var(--text-main);
+            transform: translateY(-3px);
+        }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%; height: auto; position: relative;
+                padding: 60px 20px; text-align: center;
+                border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+            .main-content { margin-left: 0; width: 100%; padding: 40px 5%; }
+            .navbar { top: auto; bottom: 20px; right: 50%; transform: translateX(50%); }
+            
+            .kmong-card { flex-direction: column; text-align: center; padding: 30px; }
+            .kmong-stats { 
+                border-left: none; border-top: 1px solid rgba(255,255,255,0.1);
+                padding-left: 0; padding-top: 30px; margin-top: 30px;
+                width: 100%; justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="profile-area">
+            <img src="profile.jpg" alt="Park Hae-jin" class="profile-img">
+            
+            <h1>Park Hae-jin</h1>
+            <span class="role-badge">Embedded Software Engineer</span>
+            
+            <p>
+                임베디드 하드웨어 제어와<br>
+                자율주행 알고리즘의<br>
+                연결점을 연구합니다.
+            </p>
+
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i> hermann8hesse@gmail.com
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i> Daegu, South Korea
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-graduation-cap"></i> Kyungpook Nat'l Univ.
+                </div>
+            </div>
+
+            <div class="social-links">
+                <a href="https://github.com/steppenhj" target="_blank" class="social-btn" title="GitHub Repository">
+                    <i class="fab fa-github"></i>
+                </a>
+
+                <a href="https://kmong.com/gig/637739" target="_blank" class="social-btn" title="Freelance Profile (Kmong)">
+                    <i class="fas fa-briefcase"></i>
+                </a>
+
+                <a href="resume.pdf" class="social-btn" title="Download PDF Resume" download>
+                    <i class="fas fa-file-download"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="#about" class="active">About</a></li>
+                <li><a href="#engineering">Projects</a></li>
+                <li><a href="#research">Research</a></li>
+                <li><a href="#freelance">Freelance</a></li>
+            </ul>
+        </nav>
+
+        <section id="about">
+            <span class="section-tag">Introduction</span>
+            <h2 class="section-title">Bridging Hardware & Intelligence.</h2>
+            <div class="text-block">
+                <p>
+                    안녕하세요, 박해진입니다. 저는 하드웨어의 물리적 제약사항을 소프트웨어로 극복하는 과정에 매력을 느낍니다.
+                    현재는 라즈베리파이와 STM32 기반의 <strong>자율주행 RC카 플랫폼 'Neuro-Driver'</strong>를 밑바닥부터 구축하며 
+                    임베디드 리눅스와 제어 시스템 아키텍처를 깊이 있게 파고들고 있습니다.
+                </p>
+                <br>
+                <p>
+                    단순한 구현을 넘어, <strong>"안전하고 신뢰성 있는 시스템 설계"</strong>를 지향합니다.
+                    Linux와 RTOS 간의 이기종 통신 설계부터, 인지(Perception)와 제어(Control)의 계층 분리를 통해
+                    현대 자동차 산업과 방산 분야에서 요구하는 실전적인 엔지니어링 역량을 쌓아가고 있습니다.
+                </p>
+            </div>
+        </section>
+
+        <section id="engineering">
+            <span class="section-tag">System Integration Roadmap</span>
+            <h2 class="section-title">Neuro-Driver Architecture</h2>
+            <p class="text-block" style="margin-bottom: 50px;">
+                Neuro-Driver 플랫폼은 <strong>분산 제어(Distributed Control)</strong>와 <strong>생존형 AI</strong>가 결합된 
+                차세대 무인 지상 차량(UGV) 시스템입니다. 총 5단계의 기술적 마일스톤을 통해 완성됩니다.
+            </p>
+            
+            <div class="phase-grid">
+                
+                <div class="phase-card">
+                    <div class="card-content">
+                        <div class="phase-header">
+                            <span class="phase-number">PHASE 01</span>
+                            <div class="phase-icon"><i class="fas fa-gamepad"></i></div>
+                        </div>
+                        <h3>Monolithic Control</h3>
+                        <p>
+                            <strong>Raspberry Pi + Web</strong> 기반의 초기 프로토타이핑.
+                            Linux 환경에서의 하드웨어 제어 한계(OS Jitter)를 분석하고, 
+                            Watchdog을 통한 Fail-Safe 통신 프로토콜을 구현하여 시스템 안정성을 확보했습니다.
+                        </p>
+                    </div>
+                    <a href="phase1_manual.html" class="btn-link">View Architecture <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="phase-card">
+                    <div class="card-content">
+                        <div class="phase-header">
+                            <span class="phase-number">PHASE 02</span>
+                            <div class="phase-icon"><i class="fas fa-microchip"></i></div>
+                        </div>
+                        <h3>Distributed Control</h3>
+                        <p>
+                            <strong>STM32 MCU</strong>를 도입하여 제어(Real-time)와 연산(Non-RT)을 분리합니다.
+                            UART/DMA 비동기 통신과 하드웨어 타이머(Encoder)를 활용하여 정밀한 PID 모터 제어 시스템을 구축합니다.
+                        </p>
+                    </div>
+                    <a href="phase2_stm32.html" class="btn-link">View Firmware <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="phase-card">
+                    <div class="card-content">
+                        <div class="phase-header">
+                            <span class="phase-number">PHASE 03</span>
+                            <div class="phase-icon"><i class="fas fa-eye"></i></div>
+                        </div>
+                        <h3>Visual Perception</h3>
+                        <p>
+                            안정된 하부 제어기 위에 <strong>Computer Vision</strong>을 탑재합니다.
+                            Camera Sensor Fusion과 Deep Learning 모델을 활용하여 차선 유지(LKA) 및 장애물 회피 자율주행을 수행합니다.
+                        </p>
+                    </div>
+                    <a href="phase3_vision.html" class="btn-link">View Algorithms <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="phase-card">
+                    <div class="card-content">
+                        <div class="phase-header">
+                            <span class="phase-number">PHASE 04</span>
+                            <div class="phase-icon"><i class="fas fa-compass"></i></div>
+                        </div>
+                        <h3>Active Safety & Navigation</h3>
+                        <p>
+                            Vision 기반의 <strong>능동형 Fail-Safe</strong>를 구축했습니다.
+                            단순 정지를 넘어, 통신 두절(Heartbeat Loss) 시 Visual Marker를 탐색하고 
+                            시작 지점으로 자율 복귀(RTH)하는 <strong>생존 알고리즘</strong>을 구현했습니다.
+                        </p>
+                    </div>
+                    <a href="#" class="btn-link">View Recovery Logic <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="phase-card">
+                    <div class="card-content">
+                        <div class="phase-header">
+                            <span class="phase-number">PHASE 05</span>
+                            <div class="phase-icon"><i class="fas fa-shield-alt"></i></div>
+                        </div>
+                        <h3>Mission & IFF Logic</h3>
+                        <p>
+                            생존성이 확보된 플랫폼 위에 <strong>피아식별(IFF)</strong> 및 전술 기동 알고리즘을 탑재합니다.
+                            적군/아군 인식에 따른 회피, 추적 등 복합 임무(Mission) 수행을 목표로 하는 최종 단계입니다.
+                        </p>
+                    </div>
+                    <a href="#" class="btn-link">View Mission Logic <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+            </div>
+
+            <div class="cta-container">
+                <a href="hardware.html" class="btn-ghost">
+                    View Full Hardware Specification <i class="fas fa-microchip" style="margin-left: 8px;"></i>
+                </a>
+            </div>
+
+        </section>
+
+        <section id="research">
+            <span class="section-tag">Academic Research</span>
+            <h2 class="section-title">Algorithm & Theory</h2>
+            <p class="text-block" style="margin-bottom: 40px;">
+                프로젝트 구현을 뒷받침하는 이론적 배경과 알고리즘 연구 기록입니다.
+            </p>
+
+            <div class="grid-2">
+                <div class="mini-card">
+                    <i class="fas fa-cubes" style="font-size: 2rem; color: var(--accent-point); margin-bottom: 15px;"></i>
+                    <h4>LiDAR Perception (PointPillars)</h4>
+                    <p>3D Point Cloud 데이터를 효율적으로 처리하는 PointPillars 논문을 분석하고, Bird's Eye View 변환 및 객체 검출 원리를 연구합니다.</p>
+                    <a href="#" class="btn-link" style="font-size: 0.85rem;">Study Note <i class="fas fa-external-link-alt"></i></a>
+                </div>
+
+                <div class="mini-card">
+                    <i class="fas fa-code-branch" style="font-size: 2rem; color: var(--accent-point); margin-bottom: 15px;"></i>
+                    <h4>C++ for Embedded Systems</h4>
+                    <p>임베디드 환경에서의 메모리 관리, 스마트 포인터 활용, 멀티쓰레딩 동기화 등 Modern C++의 효율적 사용법과 자료구조를 정리합니다.</p>
+                    <a href="#" class="btn-link" style="font-size: 0.85rem;">GitHub <i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <section id="freelance">
+            <span class="section-tag">Professional Experience</span>
+            <h2 class="section-title">Freelance Work</h2>
+            <p class="text-block" style="margin-bottom: 40px;">
+                실제 비즈니스 환경에서 클라이언트의 요구사항을 기술로 해결한 경험입니다.
+            </p>
+
+            <div class="kmong-card">
+                <div class="kmong-info">
+                    <span class="kmong-label">EXPERT</span>
+                    <h3>Web Development Specialist</h3>
+                    <p>
+                        프리랜서 플랫폼 '크몽(Kmong)'에서 웹 제작 전문가로 활동했습니다.<br>
+                        클라이언트와의 직접적인 커뮤니케이션을 통해 비즈니스 니즈를 파악하고, 
+                        <strong>100% 만족도</strong>의 맞춤형 웹 솔루션을 납품했습니다.
+                    </p>
+                    <a href="https://kmong.com/gig/637739" target="_blank" class="kmong-btn">
+                        <i class="fas fa-external-link-alt"></i> View Service
+                    </a>
+                </div>
+                
+                <div class="kmong-stats">
+                    <div class="stat-item">
+                        <h4>4.9<span class="star">★</span></h4>
+                        <span>Rating</span>
+                    </div>
+                    <div class="stat-item">
+                        <h4>100%</h4>
+                        <span>Satisfaction</span>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Fast</h4>
+                        <span>Delivery</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer style="margin-top: 100px; padding-top: 50px; border-top: 1px solid rgba(255,255,255,0.05); color: #555; font-size: 0.9rem;">
+            <p>&copy; 2025 Park Hae-jin. Engineered for the Future.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // Smooth Scroll & Active Link
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const target = document.querySelector(targetId);
+                if(target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+
+        // Scroll Spy
+        window.addEventListener('scroll', () => {
+            let current = '';
+            const sections = document.querySelectorAll('section');
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 300) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            document.querySelectorAll('.nav-links a').forEach(a => {
+                a.classList.remove('active');
+                if (a.getAttribute('href').includes(current)) {
+                    a.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

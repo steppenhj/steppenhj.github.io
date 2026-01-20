@@ -1,0 +1,124 @@
+<div class="phase-header" style="text-align: left; padding-bottom: 20px; border-bottom: 1px solid #222;">
+    <span style="color: var(--accent-blue); font-weight: 800; letter-spacing: 2px; font-size: 0.9rem;">
+        EMBEDDED SOFTWARE ENGINEER
+    </span>
+    <h1 style="font-size: 3.5rem; line-height: 1.1; margin: 15px 0;">
+        Building the <span style="color: #fff;">Brain</span><br>
+        of Machines.
+    </h1>
+    <p style="font-size: 1.1rem; color: #888; max-width: 600px; line-height: 1.6;">
+        하드웨어와 소프트웨어의 경계에서 최적의 성능을 끌어냅니다.<br>
+        <strong>Linux System</strong>과 <strong>Real-time Control</strong>에 강점이 있는 엔지니어 박해진입니다.
+    </p>
+    
+    <div style="margin-top: 30px; display: flex; gap: 15px;">
+        <a href="assets/resume.pdf" download class="nav-btn" 
+           style="width: auto; background: #fff; color: #000; font-weight: 700; padding: 12px 25px; border-radius: 4px;">
+            <i class="fas fa-download"></i> Download Resume
+        </a>
+        <button onclick="loadPage('phase1')" class="nav-btn" 
+                style="width: auto; background: transparent; border: 1px solid #444; color: #ccc; padding: 12px 25px; border-radius: 4px;">
+            View Project
+        </button>
+    </div>
+</div>
+
+<div style="margin-top: 60px;">
+    <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-layer-group" style="color: var(--accent-blue);"></i> Core Tech Stack
+    </h3>
+    
+    <div class="tech-grid">
+        <div class="tech-item">
+            <i class="fas fa-code" style="color: #659ad2;"></i>
+            <span>C / C++</span>
+            <small>Firmware & System</small>
+        </div>
+        
+        <div class="tech-item">
+            <i class="fas fa-microchip" style="color: var(--accent-green);"></i>
+            <span>STM32</span>
+            <small>Cortex-M4 / HAL</small>
+        </div>
+        
+        <div class="tech-item">
+            <i class="fab fa-raspberry-pi" style="color: #d63384;"></i>
+            <span>Raspberry Pi</span>
+            <small>Linux / Python</small>
+        </div>
+
+        <div class="tech-item">
+            <i class="fab fa-linux" style="color: #fdd835;"></i>
+            <span>Embedded Linux</span>
+            <small>Kernel / Driver</small>
+        </div>
+
+        <div class="tech-item">
+            <i class="fas fa-stopwatch" style="color: #ff6b6b;"></i>
+            <span>RTOS</span>
+            <small>Task Scheduling</small>
+        </div>
+
+        <div class="tech-item">
+            <i class="fas fa-terminal" style="color: #ccc;"></i>
+            <span>Dev Tools</span>
+            <small>Git / GDB / Logic</small>
+        </div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+    
+    <div>
+        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1.1rem;">
+            <span style="color: var(--accent-blue);">01.</span> Low-level Control
+        </h4>
+        <p style="color: #888; font-size: 0.95rem; line-height: 1.6;">
+            레지스터 단위의 정밀 제어를 선호합니다. <br>
+            MCU의 데이터시트를 분석하여 <strong>Bare-metal Firmware</strong>를 작성하고, 
+            타이밍 제약조건(Hard Real-time)을 준수하는 제어 로직을 구현합니다.
+        </p>
+    </div>
+
+    <div>
+        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1.1rem;">
+            <span style="color: var(--accent-green);">02.</span> System Architecture
+        </h4>
+        <p style="color: #888; font-size: 0.95rem; line-height: 1.6;">
+            단일 프로세서의 한계를 넘어선 설계를 지향합니다.<br>
+            <strong>MPU(Linux)와 MCU(RTOS)</strong> 간의 효율적인 역할 분담과 
+            안정적인 이기종 통신 프로토콜(IPC/UART)을 설계합니다.
+        </p>
+    </div>
+
+    <div>
+        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1.1rem;">
+            <span style="color: var(--accent-purple);">03.</span> Problem Solving
+        </h4>
+        <p style="color: #888; font-size: 0.95rem; line-height: 1.6;">
+            "왜 안 되는가?"를 데이터로 증명합니다.<br>
+            오실로스코프와 로직 분석기를 활용한 하드웨어 디버깅부터, 
+            소프트웨어 스택 추적까지 <strong>근거 기반의 문제 해결</strong>을 수행합니다.
+        </p>
+    </div>
+
+</div>
+
+<div class="divider"></div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; padding: 20px; background: #111; border-radius: 8px; border: 1px dashed #333;">
+    <div>
+        <h4 style="color: #ccc; font-size: 1rem; margin-bottom: 5px;">Other Experience</h4>
+        <p style="color: #666; font-size: 0.85rem; margin: 0;">
+            Web Full-stack Development (Freelancer)
+        </p>
+    </div>
+    
+    <a href="https://kmong.com/gig/637739" target="_blank" 
+       style="color: #888; font-size: 0.85rem; text-decoration: underline; transition: 0.3s;"
+       onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">
+        View Kmong Profile <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
+    </a>
+</div>

@@ -1,0 +1,55 @@
+<div class="phase-header">
+    <span style="color: var(--accent-green); font-weight: bold; letter-spacing: 1px;">PHASE 02</span>
+    <h1>Distributed Control Architecture</h1>
+    <p class="page-subtitle">
+        제어(Control)와 연산(Computation)의 물리적 분리.<br>
+        Linux의 실시간성 한계를 극복하기 위해 <strong>STM32 MCU</strong>를 도입하여 Latency를 10ms 이하로 단축했습니다.
+    </p>
+</div>
+
+<div class="feature-card">
+    <h3><i class="fas fa-project-diagram" style="color: var(--accent-green);"></i> System Topology</h3>
+    <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 20px; text-align: center;">
+        <div style="background: #222; padding: 15px; border-radius: 8px;">
+            <h4>Brain (RPi 5)</h4>
+            <small style="color:#666">Async Server</small>
+        </div>
+        <i class="fas fa-arrow-right" style="color: #444;"></i>
+        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid var(--accent-green);">
+            <h4 style="color: var(--accent-green);">Reflex (STM32)</h4>
+            <small style="color:#666">Real-time Core</small>
+        </div>
+        <i class="fas fa-arrow-right" style="color: #444;"></i>
+        <div style="background: #222; padding: 15px; border-radius: 8px;">
+            <h4>Motors</h4>
+            <small style="color:#666">Actuator</small>
+        </div>
+    </div>
+</div>
+
+<div class="feature-card">
+    <h3><i class="fas fa-wrench" style="color: var(--accent-green);"></i> Troubleshooting: Pin Muxing Fix</h3>
+    <p style="color: var(--text-muted); margin-bottom: 15px;">
+        HAL 라이브러리 초기화 문제로 모터 PWM 신호가 출력되지 않는 현상을 발견했습니다.
+        레지스터 설정을 강제하는 함수를 작성하여 해결했습니다.
+    </p>
+    
+    <pre><code><span class="keyword">static void</span> <span class="function">Force_Hardware_Config</span>(<span class="keyword">void</span>) {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  
+  <span class="comment">// Force Connect TIM2 to PA0</span>
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+}</code></pre>
+</div>
+
+<div class="info-box">
+    <h4 style="color: var(--accent-green); margin-bottom: 10px;">Result</h4>
+    <p style="color: var(--text-muted);">
+        이 조치를 통해 PWM 주파수 1kHz가 오실로스코프상에서 안정적으로 관측되었으며,
+        응답 속도가 기존 500ms(Python only)에서 10ms(Distributed)로 획기적으로 개선되었습니다.
+    </p>
+</div>

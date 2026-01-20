@@ -1,0 +1,100 @@
+<div class="phase-header">
+    <span style="color: var(--accent-blue); font-weight: bold; letter-spacing: 2px;">PHASE 01: COMPLETED</span>
+    <h1>Monolithic Control System</h1>
+    <p class="page-subtitle">
+        Raspberry Pi 단일 프로세서 기반의 초기 프로토타입.<br>
+        Web Interface를 통한 <strong>수동 제어(Manual Control)</strong> 시스템을 구축하고, 
+        Linux 환경에서의 하드웨어 제어 특성을 분석했습니다.
+    </p>
+</div>
+
+<div class="feature-card">
+    <h3><i class="fas fa-project-diagram" style="color: var(--accent-blue);"></i> System Architecture</h3>
+    <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 20px; text-align: center; margin-top: 30px;">
+        
+        <div style="background: #222; padding: 20px; border-radius: 12px; border: 1px solid #444;">
+            <h4 style="color: #fff; margin-bottom: 5px;">User Client</h4>
+            <small style="color: var(--text-muted);">Web Browser / Joystick</small>
+        </div>
+        
+        <i class="fas fa-wifi" style="color: var(--text-muted);"></i>
+        
+        <div style="background: #222; padding: 20px; border-radius: 12px; border: 1px solid var(--accent-blue); box-shadow: 0 0 15px rgba(59,130,246,0.2);">
+            <h4 style="color: var(--accent-blue);">Raspberry Pi 5</h4>
+            <small style="color: var(--text-muted);">OS: Linux (Bookworm)<br>Role: Server + Control</small>
+        </div>
+        
+        <i class="fas fa-arrow-right" style="color: var(--text-muted);"></i>
+        
+        <div style="background: #222; padding: 20px; border-radius: 12px; border: 1px solid #444;">
+            <h4 style="color: #fff; margin-bottom: 5px;">Motor HAT</h4>
+            <small style="color: var(--text-muted);">PCA9685 (I2C PWM)</small>
+        </div>
+
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="feature-card">
+        <h3><i class="fab fa-python" style="color: #3776ab;"></i> Python Prototyping</h3>
+        <p style="color: var(--text-muted); margin-bottom: 15px;">
+            빠른 개발을 위해 <strong>Python Flask</strong>와 <strong>Adafruit CircuitPython</strong> 라이브러리를 사용했습니다. 
+            I2C 인터페이스로 Motor HAT(PCA9685)에 PWM 명령을 전송하여 DC 모터를 구동했습니다.
+        </p>
+        
+        <pre><code class="python"><span class="comment"># Python Motor Control Logic</span>
+<span class="keyword">from</span> adafruit_motor <span class="keyword">import</span> motor
+<span class="keyword">from</span> adafruit_pca9685 <span class="keyword">import</span> PCA9685
+
+<span class="comment"># I2C Bus & PWM Setup</span>
+pca = PCA9685(i2c_bus)
+pca.frequency = 50
+
+<span class="comment"># Direct Control (High Dependency on OS)</span>
+<span class="keyword">def</span> <span class="function">set_motor_speed</span>(throttle):
+    pca.channels[0].duty_cycle = throttle</code></pre>
+    </div>
+
+    <div class="feature-card">
+        <h3><i class="fas fa-gamepad" style="color: var(--accent-blue);"></i> Web-based Manual Control</h3>
+        <p style="color: var(--text-muted);">
+            별도의 조종기 없이 스마트폰이나 PC에서 접속 가능한 웹 컨트롤러를 제작했습니다. 
+            <strong>WebSockets</strong>을 사용하여 HTTP 요청 오버헤드를 줄이고, 조이스틱 입력 데이터를 실시간으로 스트리밍했습니다.
+        </p>
+        <ul style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem; padding-left: 20px;">
+            <li>Latency: ~40ms (Wi-Fi 5GHz 기준)</li>
+            <li>UI: Virtual Joystick & Gauge</li>
+        </ul>
+    </div>
+</div>
+
+<div class="info-box" style="border-left: 4px solid var(--accent-green);">
+    <h3 style="color: #fff; margin-bottom: 15px;">
+        <i class="fas fa-lightbulb" style="color: #fdd835; margin-right: 10px;"></i>
+        Engineering Insight: The Bottleneck
+    </h3>
+    <p style="color: var(--text-muted); line-height: 1.7;">
+        수동 주행 단계에서는 라즈베리파이만으로 충분했습니다. 하지만 <strong>자율주행(Phase 3)</strong>을 고려했을 때, 
+        다음과 같은 <strong>구조적 한계</strong>를 발견했습니다.
+    </p>
+
+    <div style="margin-top: 20px; background: rgba(255,0,0,0.05); padding: 20px; border-radius: 8px; border: 1px dashed #555;">
+        <h4 style="color: #ff6b6b; margin-bottom: 10px;">⚠️ Anticipated Issues (OS Jitter)</h4>
+        <ul style="color: #ccc; font-size: 0.95rem; line-height: 1.8;">
+            <li>
+                <strong>Resource Contention:</strong> 추후 영상 처리(OpenCV/Deep Learning)가 CPU를 점유할 경우, 
+                모터 제어 프로세스가 후순위로 밀려 제어 주기가 불안정해질 위험이 큼.
+            </li>
+            <li>
+                <strong>Non-Realtime OS:</strong> 리눅스는 범용 OS이므로 10ms 이하의 정밀한 타이밍 제어(Hard Real-time)를 보장하지 못함.
+            </li>
+        </ul>
+    </div>
+
+    <div style="margin-top: 20px; text-align: right;">
+        <p style="color: var(--accent-blue); font-weight: bold; font-size: 0.9rem;">
+            Solution: "제어 기능을 전용 MCU(STM32)로 이관하여 분산 처리하자." <br>
+            <i class="fas fa-arrow-down"></i> Proceed to Phase 2
+        </p>
+    </div>
+</div>
