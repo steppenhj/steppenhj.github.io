@@ -7,8 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // 페이지 로드 함수
 async function loadPage(pageName) {
     const container = document.getElementById('app-container');
-    const buttons = document.querySelectorAll('.nav-btn');
-
+    
     // 1. 페이드 아웃 효과
     container.style.opacity = '0';
 
@@ -24,7 +23,7 @@ async function loadPage(pageName) {
             container.innerHTML = html;
             container.style.opacity = '1';
             
-            // [수정 포인트] 전체 window가 아니라, '오른쪽 콘텐츠 영역'을 스크롤해야 함
+            // 오른쪽 콘텐츠 영역 스크롤 맨 위로 (중요)
             const contentArea = document.querySelector('.content-area');
             if (contentArea) {
                 contentArea.scrollTo(0, 0);
@@ -32,19 +31,16 @@ async function loadPage(pageName) {
             
             window.location.hash = pageName;
             console.log(`[System] Successfully loaded: ${pageName}`);
-            updateSidebarUI(pageName);
+            
+            // ★ 여기가 문제였던 부분: 함수 호출
+            updateSidebarUI(pageName); 
 
         }, 200);
 
-        // 5. 사이드바 버튼 활성화 상태 변경
-        buttons.forEach(btn => btn.classList.remove('active'));
-        // onclick 속성에서 pageName을 찾아서 활성화 (간단 구현)
-        const activeBtn = Array.from(buttons).find(b => b.getAttribute('onclick').includes(pageName));
-        if (activeBtn) activeBtn.classList.add('active');
-
         // 모바일이라면 사이드바 닫기
         if (window.innerWidth < 900) {
-            document.getElementById('sidebar').classList.remove('open');
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.remove('open');
         }
 
     } catch (error) {
@@ -53,14 +49,37 @@ async function loadPage(pageName) {
             <div style="text-align:center; padding: 50px; color: #666;">
                 <h2>⚠️ Content Not Found</h2>
                 <p>Please check if the file 'pages/${pageName}.html' exists.</p>
-                <p>Note: Fetch API does not work with file:// protocol. Use a local server.</p>
+                <p>Check the console for more details.</p>
             </div>
         `;
         container.style.opacity = '1';
     }
 }
 
+// ★ 누락되었던 함수 추가 (사이드바 버튼 활성화)
+function updateSidebarUI(pageName) {
+    const buttons = document.querySelectorAll('.nav-btn');
+    
+    // 1. 모든 버튼에서 active 제거
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    // 2. 현재 페이지에 해당하는 버튼 찾기
+    // onclick="loadPage('home')" 같은 문자열을 포함하는지 검사
+    const activeBtn = Array.from(buttons).find(btn => {
+        const onclickAttr = btn.getAttribute('onclick');
+        return onclickAttr && onclickAttr.includes(`'${pageName}'`);
+    });
+
+    // 3. active 클래스 추가
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+}
+
 // 모바일 사이드바 토글
 function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+        sidebar.classList.toggle('open');
+    }
 }
