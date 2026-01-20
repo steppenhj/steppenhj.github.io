@@ -1,0 +1,88 @@
+<div class="phase-header">
+    <span style="color: #fff; font-weight: bold; letter-spacing: 2px;">PROJECT OVERVIEW</span>
+    <h1>Development Roadmap</h1>
+    <p class="page-subtitle">
+        단일 프로세서 기반의 프로토타입에서<br>
+        실시간성, 자율주행, 그리고 안전(Fail-safe)까지 진화해 온 <strong>Neuro-Driver</strong>의 개발 여정입니다.
+    </p>
+</div>
+
+<div class="timeline-container">
+    
+    <div class="timeline-item">
+        <div class="timeline-marker" style="background: var(--accent-blue); box-shadow: 0 0 10px var(--accent-blue);"></div>
+        <div class="timeline-content" style="border-top: 3px solid var(--accent-blue);">
+            <div class="timeline-date">Phase 01</div>
+            <h3 style="color: #fff; margin-bottom: 10px;">Monolithic Control</h3>
+            <p style="color: #888; font-size: 0.9rem; margin-bottom: 15px;">
+                "라즈베리파이 단독 제어 기반의 수동 주행 시스템"
+            </p>
+            <div class="tech-tags" style="margin-bottom: 20px;">
+                <span style="border-color: var(--accent-blue); color: var(--accent-blue);">Raspberry Pi 5</span>
+                <span>Python</span>
+                <span>Web Socket</span>
+            </div>
+            <button class="nav-btn" onclick="loadPage('phase1')" style="background: rgba(59, 130, 246, 0.1); width: auto; display: inline-flex;">
+                View Details <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="timeline-item">
+        <div class="timeline-marker" style="background: var(--accent-green); box-shadow: 0 0 10px var(--accent-green);"></div>
+        <div class="timeline-content" style="border-top: 3px solid var(--accent-green);">
+            <div class="timeline-date">Phase 02</div>
+            <h3 style="color: #fff; margin-bottom: 10px;">Distributed Architecture</h3>
+            <p style="color: #888; font-size: 0.9rem; margin-bottom: 15px;">
+                "MCU(STM32)를 도입하여 제어 주기를 10ms 이내로 단축하고 Hard Real-time을 확보"
+            </p>
+            <div class="tech-tags" style="margin-bottom: 20px;">
+                <span style="border-color: var(--accent-green); color: var(--accent-green);">STM32</span>
+                <span>Distributed System</span>
+                <span>UART/IPC</span>
+            </div>
+            <button class="nav-btn" onclick="loadPage('phase2')" style="background: rgba(16, 185, 129, 0.1); width: auto; display: inline-flex;">
+                View Details <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="timeline-item">
+        <div class="timeline-marker" style="background: var(--accent-purple); box-shadow: 0 0 10px var(--accent-purple);"></div>
+        <div class="timeline-content" style="border-top: 3px solid var(--accent-purple);">
+            <div class="timeline-date">Phase 03</div>
+            <h3 style="color: #fff; margin-bottom: 10px;">Visual Perception</h3>
+            <p style="color: #888; font-size: 0.9rem; margin-bottom: 15px;">
+                "Camera 센서와 OpenCV/Deep Learning을 활용한 차선 인식 및 객체 탐지 구현"
+            </p>
+            <div class="tech-tags" style="margin-bottom: 20px;">
+                <span style="border-color: var(--accent-purple); color: var(--accent-purple);">Computer Vision</span>
+                <span>OpenCV</span>
+                <span>YOLOv8</span>
+            </div>
+            <button class="nav-btn" onclick="loadPage('phase3')" style="background: rgba(139, 92, 246, 0.1); width: auto; display: inline-flex;">
+                View Details <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="timeline-item">
+        <div class="timeline-marker" style="background: var(--accent-orange); box-shadow: 0 0 10px var(--accent-orange);"></div>
+        <div class="timeline-content" style="border-top: 3px solid var(--accent-orange);">
+            <div class="timeline-date">Phase 04</div>
+            <h3 style="color: #fff; margin-bottom: 10px;">Safety & Fail-Safe</h3>
+            <p style="color: #888; font-size: 0.9rem; margin-bottom: 15px;">
+                "통신 두절 등 비상 상황 시 RTH(Return To Home) 및 비상 정지 로직 가동"
+            </p>
+            <div class="tech-tags" style="margin-bottom: 20px;">
+                <span style="border-color: var(--accent-orange); color: var(--accent-orange);">Fail-Safe</span>
+                <span>Heartbeat</span>
+                <span>Odometry</span>
+            </div>
+            <button class="nav-btn" onclick="loadPage('phase4')" style="background: rgba(245, 158, 11, 0.1); width: auto; display: inline-flex;">
+                View Details <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+            </button>
+        </div>
+    </div>
+
+</div>

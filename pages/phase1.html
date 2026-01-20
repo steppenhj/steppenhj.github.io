@@ -79,7 +79,7 @@ pca.frequency = 50
     </p>
 
     <div style="margin-top: 20px; background: rgba(255,0,0,0.05); padding: 20px; border-radius: 8px; border: 1px dashed #555;">
-        <h4 style="color: #ff6b6b; margin-bottom: 10px;">⚠️ Anticipated Issues (OS Jitter)</h4>
+        <h4 style="color: #ff6b6b; margin-bottom: 10px;">예상되는 문제 (OS Jitter)</h4>
         <ul style="color: #ccc; font-size: 0.95rem; line-height: 1.8;">
             <li>
                 <strong>Resource Contention:</strong> 추후 영상 처리(OpenCV/Deep Learning)가 CPU를 점유할 경우, 
@@ -97,4 +97,13 @@ pca.frequency = 50
             <i class="fas fa-arrow-down"></i> Proceed to Phase 2
         </p>
     </div>
+</div>
+
+<div class="engineer-note">
+    <h4><i class="fas fa-pen-nib"></i> Engineer's Note</h4>
+    <p>
+        "단일 보드(RPi)만으로도 기능 구현은 충분했지만, 리눅스 환경의 한계를 체감했습니다. 
+        이 과정에서 <strong>WEB(JS) - 서버(Python) - 제어(C++)</strong>로 이어지는 
+        전체 데이터 파이프라인(IPC)을 직접 설계하며 시스템 관점을 넓혔습니다."
+    </p>
 </div>

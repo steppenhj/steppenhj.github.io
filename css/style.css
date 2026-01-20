@@ -230,3 +230,101 @@ footer { margin-top: auto; padding: 60px 20px 40px; border-top: 1px solid rgba(2
     transition: all 0.2s ease;
     padding-left: 1px;      /* 시각적 중앙 정렬 보정 */
 }
+
+
+
+
+/* 개발자 회고(Note) 스타일 */
+.engineer-note {
+    margin-top: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05); /* 투명한 배경 */
+    border-left: 4px solid var(--accent-blue); /* 포인트 컬러 */
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    position: relative;
+}
+
+/* Phase 2용 색상 변경 (초록색) */
+.engineer-note.phase2 {
+    border-left-color: var(--accent-green);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.engineer-note h4 {
+    font-style: normal;
+    font-size: 0.85rem;
+    color: #fff;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.engineer-note p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #bbb;
+    line-height: 1.6;
+}
+
+
+/* --- Roadmap Timeline Style --- */
+.timeline-container {
+    position: relative;
+    max-width: 800px;
+    margin: 40px auto;
+    padding-left: 30px; /* 왼쪽 선 공간 확보 */
+}
+
+/* 수직 선 */
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent-blue), var(--accent-green), var(--accent-purple), var(--accent-orange));
+    opacity: 0.3;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 60px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* 동그라미 마커 */
+.timeline-marker {
+    position: absolute;
+    left: -36px; /* 선 위에 위치 */
+    top: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #111;
+}
+
+.timeline-content {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 25px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.timeline-content:hover {
+    transform: translateX(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    background: #222;
+}
+
+.timeline-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+    font-weight: 700;
+}

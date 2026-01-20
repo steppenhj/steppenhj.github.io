@@ -28,22 +28,45 @@
 </div>
 
 <div class="feature-card">
-    <h3><i class="fas fa-wrench" style="color: var(--accent-green);"></i> Troubleshooting: Pin Muxing Fix</h3>
-    <p style="color: var(--text-muted); margin-bottom: 15px;">
-        HAL 라이브러리 초기화 문제로 모터 PWM 신호가 출력되지 않는 현상을 발견했습니다.
-        레지스터 설정을 강제하는 함수를 작성하여 해결했습니다.
-    </p>
-    
-    <pre><code><span class="keyword">static void</span> <span class="function">Force_Hardware_Config</span>(<span class="keyword">void</span>) {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  
-  <span class="comment">// Force Connect TIM2 to PA0</span>
-  GPIO_InitStruct.Pin = GPIO_PIN_0;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-}</code></pre>
+<div class="grid-container">
+    <div class="feature-card">
+        <h3><i class="fas fa-wrench" style="color: var(--accent-green);"></i> Issue 1: Pin Muxing</h3>
+        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">
+            HAL 라이브러리 초기화 실패로 인한 PWM 출력 불가 현상.<br>
+            GPIO 레지스터를 직접 조작하여 해결했습니다.
+        </p>
+        <div style="background: #111; padding: 10px; border-radius: 6px; border: 1px solid #333;">
+            <small style="color: #666; display: block; margin-bottom:5px;">Solution:</small>
+            <code style="color: #a5d6ff;">Force_Hardware_Config();</code>
+        </div>
+    </div>
+
+    <div class="feature-card">
+        <h3><i class="fas fa-random" style="color: #f59e0b;"></i> Issue 2: Thread Race Condition</h3>
+        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">
+            웹 서버 요청(Read)과 상태 모니터링(Write) 스레드가<br> 
+            <strong>단일 시리얼 포트에 동시 접근</strong>하여 충돌 발생.
+        </p>
+        
+        <div style="background: rgba(255, 0, 0, 0.1); border-left: 3px solid #ff4444; padding: 10px; margin-bottom: 15px;">
+            <code style="color: #ff8888; font-size: 0.8rem;">
+                [Error] SerialException: device reports readiness to read but returned no data<br>
+                Latency: > 500ms (Critical)
+            </code>
+        </div>
+
+        <div class="log-solution" style="border-top: 1px dashed #444; padding-top: 10px;">
+            <div style="margin-bottom: 5px;">
+                <span class="spec-badge" style="color: #f59e0b; border-color: #f59e0b;">Solution</span>
+                <span style="color: #ccc; font-size: 0.9rem; margin-left: 5px;">Semaphore Lock & Eventlet</span>
+            </div>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.5;">
+                공유 자원(UART) 접근 시 <strong>Semaphore</strong>로 상호 배제(Mutex)를 구현하고, 
+                <strong>Non-blocking I/O</strong>로 스레드 블로킹을 방지했습니다.
+            </p>
+        </div>
+    </div>
+</div>
 </div>
 
 <div class="info-box">
@@ -51,5 +74,14 @@
     <p style="color: var(--text-muted);">
         이 조치를 통해 PWM 주파수 1kHz가 오실로스코프상에서 안정적으로 관측되었으며,
         응답 속도가 기존 500ms(Python only)에서 10ms(Distributed)로 획기적으로 개선되었습니다.
+    </p>
+</div>
+
+<div class="engineer-note phase2">
+    <h4><i class="fas fa-pen-nib"></i> Engineer's Note</h4>
+    <p>
+        "펌웨어 레벨로 내려오면서 <strong>클럭 설정과 물리적 배선</strong>이라는 새로운 변수를 만났습니다. 
+        초기엔 시행착오가 많았지만, 덕분에 OS 의존성을 제거한 <strong>Hard Real-time 제어</strong>의 
+        강력함과 필수성을 몸소 체험한 계기가 되었습니다."
     </p>
 </div>
