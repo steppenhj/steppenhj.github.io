@@ -328,3 +328,254 @@ footer { margin-top: auto; padding: 60px 20px 40px; border-top: 1px solid rgba(2
     letter-spacing: 1px;
     font-weight: 700;
 }
+
+
+
+
+/* --- Engineering Notes Grid Style --- */
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.note-card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 25px;
+    transition: transform 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.note-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-blue);
+    background: #202020;
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.note-cat {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+    background: rgba(59, 130, 246, 0.1);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.note-date {
+    font-size: 0.75rem;
+    color: #555;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.note-card h3 {
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.note-summary {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 15px;
+    line-height: 1.6;
+    flex-grow: 1; /* 카드 높이 맞추기 */
+}
+
+.note-points {
+    font-size: 0.85rem;
+    color: #aaa;
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 6px;
+    list-style: none;
+    border-left: 2px solid #444;
+}
+
+.note-points li {
+    margin-bottom: 6px;
+}
+
+.note-points li:last-child {
+    margin-bottom: 0;
+}
+
+.note-points strong {
+    color: #ccc;
+    margin-right: 5px;
+}
+
+.note-footer {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-size: 0.8rem;
+}
+
+
+
+
+
+/* --- Modal (팝업창) 스타일 --- */
+.modal-overlay {
+    display: none; /* 평소에는 숨김 */
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9); /* 배경 어둡게 */
+    backdrop-filter: blur(5px); /* 배경 블러 효과 */
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.modal-content-container {
+    position: relative;
+    max-width: 90%;
+    max-height: 85%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-media {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    border: 1px solid #333;
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    z-index: 10001;
+}
+
+.modal-close:hover { color: var(--accent-blue); }
+
+/* 썸네일 스타일 (클릭 유도) */
+.media-thumbnail {
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid #333;
+    position: relative;
+    transition: transform 0.2s, border-color 0.2s;
+    background: #000;
+}
+
+.media-thumbnail:hover {
+    transform: scale(1.02);
+    border-color: var(--accent-blue);
+}
+
+.media-thumbnail img, .media-thumbnail video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.media-thumbnail:hover img, .media-thumbnail:hover video {
+    opacity: 1;
+}
+
+/* 재생/확대 아이콘 오버레이 */
+.thumbnail-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    color: #fff;
+    opacity: 0.7;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    pointer-events: none; /* 아이콘이 클릭 방해 안 하게 */
+}
+
+
+
+/* --- [NEW] 사이드바 토글 (Full-width Mode) --- */
+
+/* 사이드바에 트랜지션 추가 (부드럽게 움직임) */
+.sidebar {
+    transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+    overflow-x: hidden; /* 줄어들 때 내용 삐져나옴 방지 */
+    white-space: nowrap; /* 줄어들 때 텍스트 줄바꿈 방지 */
+}
+
+/* 사이드바가 닫혔을 때 스타일 */
+.sidebar.closed {
+    width: 0;
+    padding: 0;
+    opacity: 0;
+    border-right: none;
+}
+
+/* 토글 버튼 스타일 (데스크탑에서도 보이게 수정) */
+.sidebar-toggle {
+    display: flex; /* 항상 보임 */
+    position: sticky; /* 스크롤 내려도 따라옴 (또는 fixed) */
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    margin: 20px 0 0 20px; /* 위치 조정 */
+}
+
+.sidebar-toggle:hover {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+/* 모바일 대응 (기존 로직 유지하되 덮어쓰기) */
+@media (max-width: 900px) {
+    .sidebar {
+        position: fixed;
+        z-index: 999;
+        height: 100%;
+        width: 0; /* 모바일은 기본이 닫힘 */
+    }
+    .sidebar.open {
+        width: 100%; /* 열리면 꽉 참 */
+    }
+    .content-area {
+        width: 100%;
+    }
+}

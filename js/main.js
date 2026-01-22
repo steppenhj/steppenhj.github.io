@@ -77,9 +77,73 @@ function updateSidebarUI(pageName) {
 }
 
 // 모바일 사이드바 토글
+// 사이드바 토글 (데스크탑/모바일 통합)
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    if (sidebar) {
+    const isMobile = window.innerWidth < 900;
+
+    if (isMobile) {
+        // 모바일: 기본 닫힘 -> open 클래스로 열기
         sidebar.classList.toggle('open');
+    } else {
+        // 데스크탑: 기본 열림 -> closed 클래스로 닫기 (숨기기)
+        sidebar.classList.toggle('closed');
+    }
+}
+
+
+/* --- Modal 기능 (이미지/동영상 확대) --- */
+let currentModalVideo = null;
+
+function openModal(type, src) {
+    // 1. 모달 요소 생성 (없으면 만들기)
+    let modal = document.getElementById('mediaModal');
+    if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', `
+            <div id="mediaModal" class="modal-overlay" onclick="closeModal(event)">
+                <span class="modal-close" onclick="closeModal(event)">&times;</span>
+                <div class="modal-content-container" id="modalContainer">
+                    </div>
+            </div>
+        `);
+        modal = document.getElementById('mediaModal');
+    }
+
+    const container = document.getElementById('modalContainer');
+    container.innerHTML = ''; // 기존 내용 비우기
+
+    // 2. 타입에 따라 콘텐츠 주입
+    if (type === 'video') {
+        container.innerHTML = `
+            <video controls autoplay class="modal-media" style="width: 100%; max-width: 800px;">
+                <source src="${src}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        `;
+        // 비디오 요소 저장 (닫을 때 멈추기 위해)
+        currentModalVideo = container.querySelector('video');
+    } else {
+        container.innerHTML = `
+            <img src="${src}" class="modal-media" alt="Enlarged Image">
+        `;
+    }
+
+    // 3. 모달 보이기
+    modal.style.display = 'flex';
+}
+
+function closeModal(event) {
+    // 배경이나 닫기 버튼을 눌렀을 때만 닫힘 (콘텐츠 클릭 시 안 닫힘)
+    if (event.target.id === 'mediaModal' || event.target.classList.contains('modal-close')) {
+        const modal = document.getElementById('mediaModal');
+        if (modal) {
+            modal.style.display = 'none';
+            // 비디오 멈추기
+            if (currentModalVideo) {
+                currentModalVideo.pause();
+                currentModalVideo.currentTime = 0;
+                currentModalVideo = null;
+            }
+        }
     }
 }

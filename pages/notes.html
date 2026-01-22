@@ -1,0 +1,139 @@
+<div class="phase-header">
+    <span style="color: #ccc; font-weight: bold; letter-spacing: 2px;">TECHNICAL LOG</span>
+    <h1>Engineering Notes</h1>
+    <p class="page-subtitle">
+        소스 코드(Source Code)에 기반한 기술적 의사결정과<br>
+        하드웨어/소프트웨어 통합 과정에서의 문제 해결 기록입니다.
+    </p>
+</div>
+
+<div style="margin-bottom: 40px; display: flex; gap: 15px; flex-wrap: wrap;">
+    <div style="background: #222; padding: 8px 15px; border-radius: 20px; border: 1px solid #444; color: #888; font-size: 0.85rem;">
+        <i class="fab fa-python"></i> Python/Async
+    </div>
+    <div style="background: #222; padding: 8px 15px; border-radius: 20px; border: 1px solid #444; color: #888; font-size: 0.85rem;">
+        <i class="fas fa-microchip"></i> STM32 Firmware
+    </div>
+    <div style="background: #222; padding: 8px 15px; border-radius: 20px; border: 1px solid #444; color: #888; font-size: 0.85rem;">
+        <i class="fas fa-bug"></i> Debugging
+    </div>
+</div>
+
+<div class="notes-grid">
+
+    <div class="note-card">
+        <div class="note-header">
+            <span class="note-cat" style="color: var(--accent-blue);">Server Architecture</span>
+            <span class="note-date">Log #01</span>
+        </div>
+        <h3>Async Eventlet & Semaphore Locking</h3>
+        <p class="note-summary">
+            Flask-SocketIO의 비동기 환경에서 단일 시리얼 포트(`/dev/ttyACM0`)에 대한 
+            Race Condition을 방지하기 위해 락(Lock) 메커니즘을 적용했습니다.
+        </p>
+        
+        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin-top: 10px;">
+            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #aaa; line-height: 1.8;">
+                <li><strong>Library:</strong> <code>eventlet.semaphore.Semaphore(1)</code></li>
+                <li><strong>Implementation:</strong>
+                    <br><code>send_to_stm32()</code> 함수 진입 시 <strong>Context Manager(with lock)</strong>을 사용하여 
+                    Thread-safe한 시리얼 쓰기(Write) 보장.
+                </li>
+                <li><strong>Outcome:</strong> 동시 접속 제어 시 발생하던 시리얼 리소스 충돌 및 패킷 깨짐 현상 완벽 해결.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="note-card">
+        <div class="note-header">
+            <span class="note-cat" style="color: var(--accent-orange);">Safety Logic</span>
+            <span class="note-date">Log #02</span>
+        </div>
+        <h3>S/W Watchdog & Timeout</h3>
+        <p class="note-summary">
+            통신 두절 시 차량이 폭주하는 것을 막기 위해 펌웨어 레벨에서 
+            <strong>Time-based Watchdog</strong> 로직을 구현했습니다.
+        </p>
+
+        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin-top: 10px;">
+            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #aaa; line-height: 1.8;">
+                <li><strong>Logic:</strong>
+                    <br><code>if (HAL_GetTick() - last_command_time > 500)</code>
+                </li>
+                <li><strong>Action:</strong>
+                    <br>TIM2 채널의 PWM Compare 값을 0으로 강제 설정하여 모터 즉시 정지.
+                </li>
+                <li><strong>Verification:</strong> RPi 전원 차단 테스트 시 0.5초 내 구동축 Lock 확인.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="note-card">
+        <div class="note-header">
+            <span class="note-cat" style="color: #ff6b6b;">Troubleshooting</span>
+            <span class="note-date">Log #03</span>
+        </div>
+        <h3>Pin Muxing & Hardware Isolation</h3>
+        <p class="note-summary">
+            초기 개발 시 PWM 신호가 출력되지 않는 문제 발생. 
+            단위 테스트(Isolation)를 통해 HAL 생성 코드의 결함을 발견하고 수정했습니다.
+        </p>
+
+        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin-top: 10px;">
+            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #aaa; line-height: 1.8;">
+                <li><strong>Analysis:</strong> 레지스터 상 Timer Counter는 동작하나 GPIO Output이 0V 유지.</li>
+                <li><strong>Root Cause:</strong> <code>GPIO_AF</code>(Alternate Function) 설정 누락.</li>
+                <li><strong>Solution:</strong> 
+                    <br><code>Force_Hardware_Config()</code> 함수를 작성하여 
+                    <code>GPIO_AF1_TIM2</code> 매핑을 명시적으로 재설정.
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="note-card">
+        <div class="note-header">
+            <span class="note-cat" style="color: var(--accent-green);">Communication</span>
+            <span class="note-date">Log #04</span>
+        </div>
+        <h3>UART Circular DMA & Ring Buffer</h3>
+        <p class="note-summary">
+            CPU가 1바이트씩 수신하는 Polling 방식의 오버헤드를 제거하기 위해 
+            <strong>DMA(Direct Memory Access)</strong>를 도입했습니다.
+        </p>
+
+        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin-top: 10px;">
+            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #aaa; line-height: 1.8;">
+                <li><strong>Architecture:</strong> UART Rx &rarr; DMA Circular Mode &rarr; Memory Buffer</li>
+                <li><strong>Benefit:</strong> 
+                    <br>CPU 개입 없이 백그라운드에서 데이터 수신. 
+                    <code>Half/Full Complete Interrupt</code>를 통해 주기적으로 데이터 파싱.
+                </li>
+                <li><strong>Result:</strong> 고속 주행 중에도 제어 루프 주기(10ms) 안정성 확보.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="note-card">
+        <div class="note-header">
+            <span class="note-cat" style="color: var(--accent-purple);">Sensor Fusion</span>
+            <span class="note-date">Log #05</span>
+        </div>
+        <h3>Hardware Quadrature Decoding</h3>
+        <p class="note-summary">
+            S/W 인터럽트 방식 대신 STM32의 타이머 하드웨어 기능을 활용하여 
+            CPU 부하 없이 엔코더 펄스를 카운팅합니다.
+        </p>
+
+        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin-top: 10px;">
+            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #aaa; line-height: 1.8;">
+                <li><strong>Config:</strong> <code>TIM1</code> in <code>TIM_ENCODERMODE_TI12</code> (x4 resolution)</li>
+                <li><strong>Algorithm:</strong>
+                    <br><code>delta = (int16_t)(cnt - prev_cnt)</code>
+                    <br>Overflow(65535)를 2의 보수법으로 자연스럽게 처리하여 속도 계산.
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>

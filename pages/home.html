@@ -1,14 +1,16 @@
 <div class="phase-header" style="text-align: left; padding-bottom: 20px; border-bottom: 1px solid #222;">
     <span style="color: var(--accent-blue); font-weight: 800; letter-spacing: 2px; font-size: 0.9rem;">
-        EMBEDDED SOFTWARE ENGINEER
+        PORTFOLIO
     </span>
-    <h1 style="font-size: 3.5rem; line-height: 1.1; margin: 15px 0;">
-        Building the <span style="color: #fff;">Brain</span><br>
-        of Machines.
+    <h1 style="font-size: 3.5rem; line-height: 1.1; margin: 15px 0; color: #fff;">
+        Embedded Software<br>
+        Engineer.
     </h1>
+
     <p style="font-size: 1.1rem; color: #888; max-width: 600px; line-height: 1.6;">
-        하드웨어와 소프트웨어의 경계에서 최적의 성능을 끌어냅니다.<br>
-        <strong>Linux System</strong>과 <strong>Real-time Control</strong>에 강점이 있는 엔지니어 박해진입니다.
+        데이터에 기반한 의사결정과 정밀한 제어를 지향합니다.<br>
+        <strong>Linux System</strong>과 <strong>Real-time Control</strong> 환경에서<br>
+        신뢰할 수 있는 시스템을 만드는 엔지니어 박해진입니다.
     </p>
     
     <div style="margin-top: 30px; display: flex; gap: 15px;">
@@ -16,109 +18,144 @@
            style="width: auto; background: #fff; color: #000; font-weight: 700; padding: 12px 25px; border-radius: 4px;">
             <i class="fas fa-download"></i> Download Resume
         </a>
-        <button onclick="loadPage('phase1')" class="nav-btn" 
+        <button onclick="loadPage('roadmap')" class="nav-btn" 
                 style="width: auto; background: transparent; border: 1px solid #444; color: #ccc; padding: 12px 25px; border-radius: 4px;">
-            View Project
+            View Project Roadmap
         </button>
     </div>
 </div>
 
 <div style="margin-top: 60px;">
-    <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-        <i class="fas fa-layer-group" style="color: var(--accent-blue);"></i> Core Tech Stack
+    <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 30px; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-history" style="color: var(--accent-blue);"></i> My Engineering Journey
     </h3>
-    
-    <div class="tech-grid">
-        <div class="tech-item">
-            <i class="fas fa-code" style="color: #659ad2;"></i>
-            <span>C / C++</span>
-            <small>Firmware & System</small>
-        </div>
+
+    <style>
+        .bio-timeline {
+            position: relative;
+            padding-left: 30px;
+            border-left: 2px solid #333;
+        }
+        .bio-item {
+            position: relative;
+            margin-bottom: 40px;
+        }
+        .bio-item:last-child { margin-bottom: 0; }
         
-        <div class="tech-item">
-            <i class="fas fa-microchip" style="color: var(--accent-green);"></i>
-            <span>STM32</span>
-            <small>Cortex-M4 / HAL</small>
-        </div>
+        .bio-dot {
+            position: absolute;
+            left: -36px;
+            top: 5px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #111;
+            border: 2px solid var(--accent-blue);
+            transition: transform 0.2s;
+        }
+        .bio-item:hover .bio-dot {
+            transform: scale(1.3);
+            background: var(--accent-blue);
+        }
         
-        <div class="tech-item">
-            <i class="fab fa-raspberry-pi" style="color: #d63384;"></i>
-            <span>Raspberry Pi</span>
-            <small>Linux / Python</small>
+        .bio-year {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-blue);
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .bio-content {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            transition: 0.2s;
+        }
+        .bio-content:hover {
+            background: #1a1a1a;
+            border-color: #555;
+        }
+        .bio-title {
+            color: #fff; font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;
+        }
+        .bio-desc {
+            color: #999; font-size: 0.95rem; line-height: 1.6;
+        }
+        .bio-tag {
+            font-size: 0.75rem; background: rgba(255,255,255,0.1); 
+            padding: 2px 8px; border-radius: 4px; color: #ccc; margin-right: 5px;
+        }
+    </style>
+
+    <div class="bio-timeline">
+        
+        <div class="bio-item">
+            <div class="bio-dot" style="border-color: var(--accent-blue);"></div>
+            <span class="bio-year" style="color: var(--accent-blue);">2026. Present</span>
+            <div class="bio-content">
+                <h4 class="bio-title">Focusing on Embedded Systems</h4>
+                <p class="bio-desc">
+                    <strong>임베디드 SW 개발자</strong>를 목표로 <br>
+                    자율주행 RC카 프로젝트 <strong>'Neuro-Driver'</strong>를 고도화하고 있습니다.
+                </p>
+                <div style="margin-top: 10px;">
+                    <span class="bio-tag">STM32</span>
+                    <span class="bio-tag">Linux</span>
+                    <span class="bio-tag">RTOS</span>
+                </div>
+            </div>
         </div>
 
-        <div class="tech-item">
-            <i class="fab fa-linux" style="color: #fdd835;"></i>
-            <span>Embedded Linux</span>
-            <small>Kernel / Driver</small>
+        <div class="bio-item">
+            <div class="bio-dot" style="border-color: var(--accent-green);"></div>
+            <span class="bio-year" style="color: var(--accent-green);">2025</span>
+            <div class="bio-content">
+                <h4 class="bio-title">Expanding to Hardware & Web</h4>
+                <p class="bio-desc">
+                    크몽(Kmong) <strong>웹 개발자</strong>로 활동하며 클라이언트-서버 통신 구조를 마스터했습니다.(수익 500만 원 이상)<br>
+                    하반기부터 <strong>하드웨어 제어</strong>에 매력을 느껴 임베디드 공부를 시작했습니다.
+                </p>
+                <div style="margin-top: 15px;">
+                    <a href="https://kmong.com/gig/637739" target="_blank" 
+                       style="font-size: 0.85rem; color: #fff; text-decoration: underline;">
+                       <i class="fas fa-external-link-alt"></i> View Kmong Profile
+                    </a>
+                </div>
+            </div>
         </div>
 
-        <div class="tech-item">
-            <i class="fas fa-stopwatch" style="color: #ff6b6b;"></i>
-            <span>RTOS</span>
-            <small>Task Scheduling</small>
+        <div class="bio-item">
+            <div class="bio-dot" style="border-color: var(--accent-purple);"></div>
+            <span class="bio-year" style="color: var(--accent-purple);">2024</span>
+            <div class="bio-content">
+                <h4 class="bio-title">Academic Foundation</h4>
+                <p class="bio-desc">
+                    <strong>컴퓨터학부 인공지능컴퓨팅</strong> 복수전공을 시작했습니다.<br>
+                    CS 기초(OS, 네트워크, 자료구조)와 AI 이론을 체계적으로 학습하며 엔지니어링 베이스를 다졌습니다.
+                </p>
+                <div style="margin-top: 10px;">
+                    <span class="bio-tag">Computer Science</span>
+                    <span class="bio-tag">AI / Deep Learning</span>
+                </div>
+            </div>
         </div>
 
-        <div class="tech-item">
-            <i class="fas fa-terminal" style="color: #ccc;"></i>
-            <span>Dev Tools</span>
-            <small>Git / GDB / Logic</small>
+        <div class="bio-item">
+            <div class="bio-dot" style="border-color: var(--accent-orange);"></div>
+            <span class="bio-year" style="color: var(--accent-orange);">2022 - 2023</span>
+            <div class="bio-content">
+                <h4 class="bio-title">ROK Marine Corps (해병대)</h4>
+                <p class="bio-desc">
+                    군 복무를 통해 강인한 체력과 <strong>"안 되면 될 때까지"</strong>라는 끈기를 길렀습니다.<br>
+                    조직 생활과 협업의 중요성을 몸소 체험한 소중한 시간이었습니다.
+                </p>
+                <div style="margin-top: 10px;">
+                    <span class="bio-tag">Teamwork</span>
+                </div>
+            </div>
         </div>
+
     </div>
-</div>
-
-<div class="divider"></div>
-
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
-    
-    <div>
-        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1.1rem;">
-            <span style="color: var(--accent-blue);">01.</span> Low-level Control
-        </h4>
-        <p style="color: #888; font-size: 0.95rem; line-height: 1.6;">
-            레지스터 단위의 정밀 제어를 선호합니다. <br>
-            MCU의 데이터시트를 분석하여 <strong>Bare-metal Firmware</strong>를 작성하고, 
-            타이밍 제약조건(Hard Real-time)을 준수하는 제어 로직을 구현합니다.
-        </p>
-    </div>
-
-    <div>
-        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1.1rem;">
-            <span style="color: var(--accent-green);">02.</span> System Architecture
-        </h4>
-        <p style="color: #888; font-size: 0.95rem; line-height: 1.6;">
-            단일 프로세서의 한계를 넘어선 설계를 지향합니다.<br>
-            <strong>MPU(Linux)와 MCU(RTOS)</strong> 간의 효율적인 역할 분담과 
-            안정적인 이기종 통신 프로토콜(IPC/UART)을 설계합니다.
-        </p>
-    </div>
-
-    <div>
-        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1.1rem;">
-            <span style="color: var(--accent-purple);">03.</span> Problem Solving
-        </h4>
-        <p style="color: #888; font-size: 0.95rem; line-height: 1.6;">
-            "왜 안 되는가?"를 데이터로 증명합니다.<br>
-            오실로스코프와 로직 분석기를 활용한 하드웨어 디버깅부터, 
-            소프트웨어 스택 추적까지 <strong>근거 기반의 문제 해결</strong>을 수행합니다.
-        </p>
-    </div>
-
-</div>
-
-<div class="divider"></div>
-
-<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; padding: 20px; background: #111; border-radius: 8px; border: 1px dashed #333;">
-    <div>
-        <h4 style="color: #ccc; font-size: 1rem; margin-bottom: 5px;">Other Experience</h4>
-        <p style="color: #666; font-size: 0.85rem; margin: 0;">
-            Web Full-stack Development (Freelancer)
-        </p>
-    </div>
-    
-    <a href="https://kmong.com/gig/637739" target="_blank" 
-       style="color: #888; font-size: 0.85rem; text-decoration: underline; transition: 0.3s;"
-       onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">
-        View Kmong Profile <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
-    </a>
 </div>

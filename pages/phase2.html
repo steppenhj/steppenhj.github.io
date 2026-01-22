@@ -1,5 +1,5 @@
 <div class="phase-header">
-    <span style="color: var(--accent-green); font-weight: bold; letter-spacing: 1px;">PHASE 02</span>
+    <span style="color: var(--accent-green); font-weight: bold; letter-spacing: 1px;">PHASE 02: STM32 도입</span>
     <h1>Distributed Control Architecture</h1>
     <p class="page-subtitle">
         제어(Control)와 연산(Computation)의 물리적 분리.<br>
@@ -28,6 +28,33 @@
 </div>
 
 <div class="feature-card">
+    <h3><i class="fas fa-microchip" style="color: var(--accent-green);"></i> Physical Integration</h3>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+        Raspberry Pi(상위 제어)와 STM32(하위 제어)가 물리적으로 통합된 모습입니다.<br>
+        UART 배선과 전원 분리 설계가 적용되었습니다. <span style="font-size: 0.8rem; color: #666;">(배선 정리 전)</span>
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        
+        <div class="media-thumbnail" onclick="openModal('image', 'assets/phase2_top.jpg')" style="height: 250px;">
+            <img src="assets/phase2_top.jpg" alt="Top View Architecture">
+            <div class="thumbnail-overlay"><i class="fas fa-search-plus"></i></div>
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.7); color: #fff; padding: 8px; font-size: 0.8rem; text-align: center;">
+                Dual-Processor Layout
+            </div>
+        </div>
+
+        <div class="media-thumbnail" onclick="openModal('image', 'assets/phase2_side.jpg')" style="height: 250px;">
+            <img src="assets/phase2_side.jpg" alt="Dev Environment">
+            <div class="thumbnail-overlay"><i class="fas fa-search-plus"></i></div>
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.7); color: #fff; padding: 8px; font-size: 0.8rem; text-align: center;">
+                Debugging Environment
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <div class="grid-container">
     <div class="feature-card">
         <h3><i class="fas fa-wrench" style="color: var(--accent-green);"></i> Issue 1: Pin Muxing</h3>
@@ -67,18 +94,50 @@
         </div>
     </div>
 </div>
+
+<div class="feature-card">
+  <h3><i class="fas fa-wave-square" style="color: var(--accent-purple);"></i> Issue 3: Encoder Bring-up</h3>
+  <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">
+    수동 주행은 정상인데 엔코더(ENC)가 0으로 고정되는 문제를 “펌웨어 기반 계측”으로 해결.
+  </p>
+
+  <div style="background: rgba(255, 0, 0, 0.08); border-left: 3px solid #ff6b6b; padding: 10px; margin-bottom: 12px;">
+    <code style="color: #ffb4b4; font-size: 0.8rem;">
+      Symptom: ENC always 0 → raw counter not moving
+    </code>
+  </div>
+
+  <div class="log-solution" style="border-top: 1px dashed #444; padding-top: 10px;">
+    <div style="margin-bottom: 5px;">
+      <span class="spec-badge" style="color: var(--accent-purple); border-color: var(--accent-purple);">Solution</span>
+      <span style="color: #ccc; font-size: 0.9rem; margin-left: 5px;">TIM1 Clock Enable + Counter Reset</span>
+    </div>
+    <p style="color: #888; font-size: 0.85rem; line-height: 1.5;">
+      PC에서 UART 로그로 “ENC:0” 고정 확인 → PA8/PA9를 GPIO 입력으로 임시 전환해 A/B 토글 검증 →
+      <strong>TIM1 클럭 enable</strong> 및 <strong>카운터 초기화</strong>로 카운트 정상화.
+    </p>
+  </div>
 </div>
 
 <div class="info-box">
-    <h4 style="color: var(--accent-green); margin-bottom: 10px;">Result</h4>
-    <p style="color: var(--text-muted);">
-        이 조치를 통해 PWM 주파수 1kHz가 오실로스코프상에서 안정적으로 관측되었으며,
-        응답 속도가 기존 500ms(Python only)에서 10ms(Distributed)로 획기적으로 개선되었습니다.
+    <h4 style="color: var(--accent-green); margin-bottom: 10px;">Result & Engineering Insight</h4>
+    <p style="color: var(--text-muted); line-height: 1.6;">
+        Phase 1(Linux C++)과 비교했을 때 <strong>평균 Latency는 약 10ms 내외로 비슷</strong>하지만, 
+        가장 큰 성과는 <strong>"예측 가능한 제어(Deterministic Control)"</strong>를 확보했다는 점입니다.
     </p>
+    <ul style="margin-top: 15px; padding-left: 20px; color: #aaa; font-size: 0.9rem; line-height: 1.8;">
+        <li>
+            <strong>Measurement:</strong> 시스템 로그(Timestamp) 분석 결과, 스레드 충돌 해결 후 안정적인 통신 확인.
+        </li>
+        <li>
+            <strong>Benefit:</strong> 모터 제어 부하를 MCU로 이관함에 따라, 
+            향후 <strong>Phase 3(자율주행 AI)</strong> 도입 시 라즈베리파이의 연산 자원을 온전히 영상 처리에 집중할 수 있게 되었습니다.
+        </li>
+    </ul>
 </div>
 
 <div class="engineer-note phase2">
-    <h4><i class="fas fa-pen-nib"></i> Engineer's Note</h4>
+    <h4><i class="fas fa-pen-nib"></i> 박해진's Note</h4>
     <p>
         "펌웨어 레벨로 내려오면서 <strong>클럭 설정과 물리적 배선</strong>이라는 새로운 변수를 만났습니다. 
         초기엔 시행착오가 많았지만, 덕분에 OS 의존성을 제거한 <strong>Hard Real-time 제어</strong>의 

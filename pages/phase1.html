@@ -1,109 +1,246 @@
 <div class="phase-header">
     <span style="color: var(--accent-blue); font-weight: bold; letter-spacing: 2px;">PHASE 01: COMPLETED</span>
-    <h1>Monolithic Control System</h1>
+    <h1>Hybrid Control Architecture</h1>
     <p class="page-subtitle">
-        Raspberry Pi 단일 프로세서 기반의 초기 프로토타입.<br>
-        Web Interface를 통한 <strong>수동 제어(Manual Control)</strong> 시스템을 구축하고, 
-        Linux 환경에서의 하드웨어 제어 특성을 분석했습니다.
+        <strong>WebSocket(External)</strong>과 <strong>UDP(Local IPC)</strong>를 결합한 이중 프로세스 제어 시스템.<br>
+        Python(Gateway)과 C++(Core Engine)의 역할 분리를 통해 편의성과 제어 성능을 확보했습니다.
     </p>
+    
+    <div style="margin-top: 20px;">
+        <a href="https://github.com/steppenhj/Neuro-Drive-CPP/tree/main/phase_1_code" target="_blank" 
+           style="background: #333; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; border: 1px solid #555; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;"
+           onmouseover="this.style.background='#444'" onmouseout="this.style.background='#333'">
+            <i class="fab fa-github"></i> View Source Code
+        </a>
+    </div>
+</div>
+
+<div class="feature-card" style="border-top: 3px solid var(--accent-blue); background: rgba(0,0,0,0.3);">
+    <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #fff;">
+        <i class="fas fa-list-ul" style="color: var(--accent-blue); margin-right: 8px;"></i> System Specs & Safety
+    </h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        
+        <div>
+            <span style="color: #888; font-size: 0.8rem; font-weight: bold;">DATA FLOW PATH</span>
+            <div style="color: #ccc; font-size: 0.9rem; margin-top: 5px; line-height: 1.4;">
+                <span style="color: #fff;">Joystick</span> &rarr; 
+                WebSocket &rarr; 
+                <span style="color: #3776ab;">Python</span> &rarr; 
+                UDP(float32×2) &rarr; 
+                <span style="color: #659ad2;">C++</span> &rarr; 
+                <span style="color: var(--accent-green);">H/W</span>
+            </div>
+        </div>
+
+        <div>
+            <span style="color: #888; font-size: 0.8rem; font-weight: bold;">TIMING SPECS</span>
+            <ul style="margin: 5px 0 0 0; padding-left: 0; list-style: none; font-size: 0.9rem; color: #ccc;">
+                <li>• <strong>Command Rate:</strong> 10Hz (100ms interval)</li>
+                <li>• <strong>Latency Display:</strong> WebSocket RTT (Ping-Pong)</li>
+            </ul>
+        </div>
+
+        <div style="grid-column: 1 / -1; border-top: 1px dashed #444; padding-top: 10px;">
+            <span style="color: var(--accent-orange); font-size: 0.8rem; font-weight: bold;">TRIPLE SAFETY LAYERS</span>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 5px; font-size: 0.85rem;">
+                <span style="background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; color: #aaa;">
+                    <strong>JS:</strong> Touch End 시 '0' 강제 전송
+                </span>
+                <span style="background: rgba(55, 118, 171, 0.1); padding: 4px 8px; border-radius: 4px; color: #3776ab;">
+                    <strong>Py:</strong> Engine OFF시 명령 차단
+                </span>
+                <span style="background: rgba(101, 154, 210, 0.1); padding: 4px 8px; border-radius: 4px; color: #659ad2;">
+                    <strong>C++:</strong> 500ms 수신 타임아웃 시 즉시 정지
+                </span>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="feature-card">
-    <h3><i class="fas fa-project-diagram" style="color: var(--accent-blue);"></i> System Architecture</h3>
-    <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 20px; text-align: center; margin-top: 30px;">
+    <h3 style="margin-bottom: 20px;"><i class="fas fa-video" style="color: var(--accent-blue);"></i> System Demonstration</h3>
+    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+                웹 컨트롤러를 이용한 실제 주행 테스트 영상입니다.<br>
+                <span style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6;">(영상 클릭 시 확대)</span>
+            </p>
+        </div>
+        <div class="media-thumbnail" onclick="openModal('video', 'assets/phase1_demo.mp4')" style="width: 200px; height: 120px;">
+            <video muted loop autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;">
+                <source src="assets/phase1_demo.mp4" type="video/mp4">
+            </video>
+            <div class="thumbnail-overlay"><i class="fas fa-play-circle"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="feature-card">
+    <h3><i class="fas fa-project-diagram" style="color: var(--accent-blue);"></i> Software Topology (IPC)</h3>
+    
+    <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 15px; text-align: center; margin-top: 30px;">
         
-        <div style="background: #222; padding: 20px; border-radius: 12px; border: 1px solid #444;">
-            <h4 style="color: #fff; margin-bottom: 5px;">User Client</h4>
-            <small style="color: var(--text-muted);">Web Browser / Joystick</small>
+        <div style="background: #222; padding: 15px; border-radius: 8px; min-width: 120px; flex: 1;">
+            <h4 style="color: #fff; font-size: 0.9rem;">User Client</h4>
+            <small style="color: var(--text-muted);">WebSocket</small>
         </div>
         
-        <i class="fas fa-wifi" style="color: var(--text-muted);"></i>
+        <i class="fas fa-arrow-right" style="color: #666; font-size: 0.8rem;"></i>
         
-        <div style="background: #222; padding: 20px; border-radius: 12px; border: 1px solid var(--accent-blue); box-shadow: 0 0 15px rgba(59,130,246,0.2);">
-            <h4 style="color: var(--accent-blue);">Raspberry Pi 5</h4>
-            <small style="color: var(--text-muted);">OS: Linux (Bookworm)<br>Role: Server + Control</small>
+        <div style="background: rgba(55, 118, 171, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #3776ab; min-width: 140px; flex: 1;">
+            <h4 style="color: #3776ab; font-size: 0.9rem;"><i class="fab fa-python"></i> Flask App</h4>
+            <small style="color: #ccc;">Gateway</small>
         </div>
         
-        <i class="fas fa-arrow-right" style="color: var(--text-muted);"></i>
+        <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
+            <span style="font-size: 0.65rem; color: var(--accent-blue); font-weight: bold;">UDP</span>
+            <i class="fas fa-exchange-alt" style="color: var(--accent-blue);"></i>
+            <span style="font-size: 0.65rem; color: #666;">Localhost</span>
+        </div>
         
-        <div style="background: #222; padding: 20px; border-radius: 12px; border: 1px solid #444;">
-            <h4 style="color: #fff; margin-bottom: 5px;">Motor HAT</h4>
-            <small style="color: var(--text-muted);">PCA9685 (I2C PWM)</small>
+        <div style="background: rgba(0, 89, 156, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #00599c; min-width: 140px; flex: 1;">
+            <h4 style="color: #659ad2; font-size: 0.9rem;"><i class="fas fa-cogs"></i> C++ Engine</h4>
+            <small style="color: #ccc;">Core / Safety</small>
+        </div>
+
+        <i class="fas fa-arrow-right" style="color: #666; font-size: 0.8rem;"></i>
+
+        <div style="background: #222; padding: 15px; border-radius: 8px; min-width: 100px; flex: 1;">
+            <h4 style="color: #fff; font-size: 0.9rem;">Motors</h4>
+            <small style="color: var(--text-muted);">H/W</small>
         </div>
 
     </div>
 </div>
 
-<div class="grid-container">
-    <div class="feature-card">
-        <h3><i class="fab fa-python" style="color: #3776ab;"></i> Python Prototyping</h3>
-        <p style="color: var(--text-muted); margin-bottom: 15px;">
-            빠른 개발을 위해 <strong>Python Flask</strong>와 <strong>Adafruit CircuitPython</strong> 라이브러리를 사용했습니다. 
-            I2C 인터페이스로 Motor HAT(PCA9685)에 PWM 명령을 전송하여 DC 모터를 구동했습니다.
+<div class="grid-container" style="margin-top: 0;">
+    <div class="feature-card" style="border-left: 3px solid var(--accent-blue);">
+        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1rem;">
+            <i class="fas fa-globe" style="color: var(--accent-blue); margin-right: 8px;"></i>
+            Why WebSocket?
+        </h4>
+        <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; margin-bottom: 10px;">
+            <strong>Context:</strong> 웹 브라우저(Client) <i class="fas fa-arrows-alt-h" style="font-size: 0.7rem;"></i> 파이썬 서버
         </p>
-        
-        <pre><code class="python"><span class="comment"># Python Motor Control Logic</span>
-<span class="keyword">from</span> adafruit_motor <span class="keyword">import</span> motor
-<span class="keyword">from</span> adafruit_pca9685 <span class="keyword">import</span> PCA9685
-
-<span class="comment"># I2C Bus & PWM Setup</span>
-pca = PCA9685(i2c_bus)
-pca.frequency = 50
-
-<span class="comment"># Direct Control (High Dependency on OS)</span>
-<span class="keyword">def</span> <span class="function">set_motor_speed</span>(throttle):
-    pca.channels[0].duty_cycle = throttle</code></pre>
+        <ul style="color: #aaa; font-size: 0.85rem; padding-left: 20px; line-height: 1.6;">
+            <li>
+                <strong>Reason:</strong> 브라우저 보안 제약으로 Raw UDP 사용이 불가합니다. HTTP 오버헤드를 줄이고 연결을 유지(Keep-alive)하기 위해 WebSocket을 선택했습니다.
+            </li>
+            <li>
+                <strong>Note:</strong> UI의 Latency는 <strong>Network Round-Trip Time (RTT)</strong>을 의미합니다.
+            </li>
+        </ul>
     </div>
 
-    <div class="feature-card">
-        <h3><i class="fas fa-gamepad" style="color: var(--accent-blue);"></i> Web-based Manual Control</h3>
-        <p style="color: var(--text-muted);">
-            별도의 조종기 없이 스마트폰이나 PC에서 접속 가능한 웹 컨트롤러를 제작했습니다. 
-            <strong>WebSockets</strong>을 사용하여 HTTP 요청 오버헤드를 줄이고, 조이스틱 입력 데이터를 실시간으로 스트리밍했습니다.
+    <div class="feature-card" style="border-left: 3px solid #659ad2;">
+        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1rem;">
+            <i class="fas fa-network-wired" style="color: #659ad2; margin-right: 8px;"></i>
+            Why UDP?
+        </h4>
+        <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; margin-bottom: 10px;">
+            <strong>Context:</strong> 파이썬 게이트웨이 <i class="fas fa-arrows-alt-h" style="font-size: 0.7rem;"></i> C++ 엔진
         </p>
-        <ul style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem; padding-left: 20px;">
-            <li>Latency: ~40ms (Wi-Fi 5GHz 기준)</li>
-            <li>UI: Virtual Joystick & Gauge</li>
+        <ul style="color: #aaa; font-size: 0.85rem; padding-left: 20px; line-height: 1.6;">
+            <li>
+                <strong>Reason:</strong> 제어 데이터는 "과거의 확실함(TCP)"보다 <strong>"손실되더라도 현재의 데이터(UDP)"</strong>가 중요합니다. Head-of-Line Blocking을 방지했습니다.
+            </li>
         </ul>
+    </div>
+</div>
+
+<div class="grid-container" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
+    
+    <div class="feature-card">
+        <h3><i class="fab fa-python" style="color: #3776ab;"></i> Python: Middleware Logic</h3>
+        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.85rem;">
+            C++ 엔진 프로세스의 수명 주기(Start/Stop/Kill)를 관리하며, 엔진 상태에 따라 명령 전송을 제어합니다.
+        </p>
+        <div style="padding: 10px; border-bottom: 1px solid #333; font-size: 0.8rem; color: #888;">app.py (Safety Logic)</div>
+        <pre style="margin: 0; border: none; overflow-x: auto;"><code class="python"><span class="comment"># Engine Safety Check</span>
+<span class="keyword">def</span> <span class="function">handle_command</span>(data):
+    <span class="comment"># 엔진이 꺼져있으면 명령 무시 (Safety Layer 2)</span>
+    <span class="keyword">if</span> cpp_process <span class="keyword">is None</span>: 
+        <span class="keyword">return</span> 
+    send_udp_command(data.throttle, data.steering)</code></pre>
+    </div>
+
+    <div class="feature-card" style="border: 1px solid var(--accent-blue);">
+        <h3><i class="fas fa-code" style="color: #659ad2;"></i> C++: Hardware Watchdog</h3>
+        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.85rem;">
+            UDP 소켓 옵션을 활용하여 통신 두절을 감지하고, 비상시 즉시 액추에이터를 정지합니다.
+        </p>
+        <div style="padding: 10px; border-bottom: 1px solid #333; font-size: 0.8rem; color: #888;">drive_server.cpp (Fail-safe)</div>
+        <pre style="margin: 0; border: none; overflow-x: auto;"><code class="cpp"><span class="comment">// Safety Layer 3: 500ms Timeout Watchdog</span>
+struct timeval tv = {0, 500000}; 
+setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, ...);
+
+<span class="keyword">while</span> (<span class="keyword">true</span>) {
+    <span class="keyword">int</span> n = recvfrom(sock, &data, ...);
+    <span class="comment">// 타임아웃 발생 시 즉시 정지</span>
+    <span class="keyword">if</span> (n < 0) motors.stopAll(); 
+    <span class="keyword">else</span> motors.setSpeed(data.th);
+}</code></pre>
+    </div>
+</div>
+
+<div class="feature-card">
+    <h3><i class="fas fa-microchip" style="color: var(--accent-blue);"></i> Physical Setup</h3>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
+                초기 프로토타입 하드웨어 구성입니다. (이미지 클릭 시 확대)
+            </p>
+            <ul style="color: #aaa; font-size: 0.85rem; padding-left: 20px; line-height: 1.6;">
+                <li><strong>Main:</strong> Raspberry Pi 5 (8GB)</li>
+                <li><strong>Driver:</strong> Waveshare Motor HAT (PCA9685 via I2C)</li>
+                <li><strong>Steering:</strong> Servo on GPIO 18 (Soft-PWM via libgpiod)</li>
+                <li><strong>Power:</strong> Logic(5V) / Drive(7.4V) Separated</li>
+            </ul>
+        </div>
+        <div class="media-thumbnail" onclick="openModal('image', 'assets/phase1_iso.jpg')" style="width: 200px; height: 150px;">
+            <img src="assets/phase1_iso.jpg" alt="Phase 1 Hardware">
+            <div class="thumbnail-overlay"><i class="fas fa-search-plus"></i></div>
+        </div>
     </div>
 </div>
 
 <div class="info-box" style="border-left: 4px solid var(--accent-green);">
     <h3 style="color: #fff; margin-bottom: 15px;">
         <i class="fas fa-lightbulb" style="color: #fdd835; margin-right: 10px;"></i>
-        Engineering Insight: The Bottleneck
+        Engineering Insight: OS Limitation
     </h3>
     <p style="color: var(--text-muted); line-height: 1.7;">
-        수동 주행 단계에서는 라즈베리파이만으로 충분했습니다. 하지만 <strong>자율주행(Phase 3)</strong>을 고려했을 때, 
-        다음과 같은 <strong>구조적 한계</strong>를 발견했습니다.
+        Python 대신 C++로 하드웨어 제어기를 작성하여 연산 효율을 높였지만, 
+        <strong>범용 OS(General Purpose OS)인 리눅스의 스케줄링 한계</strong>는 여전히 존재했습니다.
     </p>
 
     <div style="margin-top: 20px; background: rgba(255,0,0,0.05); padding: 20px; border-radius: 8px; border: 1px dashed #555;">
-        <h4 style="color: #ff6b6b; margin-bottom: 10px;">예상되는 문제 (OS Jitter)</h4>
+        <h4 style="color: #ff6b6b; margin-bottom: 10px;">⚠️ Kernel Preemption Jitter</h4>
         <ul style="color: #ccc; font-size: 0.95rem; line-height: 1.8;">
             <li>
-                <strong>Resource Contention:</strong> 추후 영상 처리(OpenCV/Deep Learning)가 CPU를 점유할 경우, 
-                모터 제어 프로세스가 후순위로 밀려 제어 주기가 불안정해질 위험이 큼.
+                <strong>Issue:</strong> C++ 프로세스가 빨라도, 리눅스 커널이 백그라운드 작업(Wi-Fi 등)을 위해 
+                CPU를 선점하면 수십 ms의 지연이 발생합니다.
             </li>
             <li>
-                <strong>Non-Realtime OS:</strong> 리눅스는 범용 OS이므로 10ms 이하의 정밀한 타이밍 제어(Hard Real-time)를 보장하지 못함.
+                <strong>Result:</strong> "완벽한 정시성(Hard Real-time)을 위해서는 <strong>MCU(STM32)</strong>가 필수적이다."
             </li>
         </ul>
     </div>
 
     <div style="margin-top: 20px; text-align: right;">
         <p style="color: var(--accent-blue); font-weight: bold; font-size: 0.9rem;">
-            Solution: "제어 기능을 전용 MCU(STM32)로 이관하여 분산 처리하자." <br>
+            Solution: Offload Control to STM32 <br>
             <i class="fas fa-arrow-down"></i> Proceed to Phase 2
         </p>
     </div>
 </div>
 
 <div class="engineer-note">
-    <h4><i class="fas fa-pen-nib"></i> Engineer's Note</h4>
+    <h4><i class="fas fa-pen-nib"></i> 박해진's Note</h4>
     <p>
-        "단일 보드(RPi)만으로도 기능 구현은 충분했지만, 리눅스 환경의 한계를 체감했습니다. 
-        이 과정에서 <strong>WEB(JS) - 서버(Python) - 제어(C++)</strong>로 이어지는 
-        전체 데이터 파이프라인(IPC)을 직접 설계하며 시스템 관점을 넓혔습니다."
+        "초기에는 Python 라이브러리만 사용했으나 성능 이슈를 우려하여 <strong>C++로 모터 드라이버를 재작성</strong>했습니다. 
+        이 과정에서 <strong>UDP 소켓을 활용한 로컬 IPC</strong> 패턴을 설계하였고, 
+        이는 추후 분산 시스템(Phase 2)을 이해하는 중요한 기반이 되었습니다."
     </p>
 </div>
