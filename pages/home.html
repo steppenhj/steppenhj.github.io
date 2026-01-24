@@ -2,11 +2,20 @@
     <span style="color: var(--accent-blue); font-weight: 800; letter-spacing: 2px; font-size: 0.9rem;">
         PORTFOLIO
     </span>
-    <h1 style="font-size: 3.5rem; line-height: 1.1; margin: 15px 0; color: #fff;">
+    <h1 style="font-size: 3.5rem; line-height: 1.1; margin: 15px 0 10px 0; color: #fff;">
         Embedded Software<br>
         Engineer.
     </h1>
 
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #bbb; margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+        <span style="color: var(--accent-blue); font-weight: bold;">RPi5 + STM32 Distributed Control</span>
+        <span style="color: #333;">//</span>
+        <span>UART DMA</span>
+        <span style="color: #333;">//</span>
+        <span>Timer PWM & Encoder</span>
+        <span style="color: #333;">//</span>
+        <span style="color: var(--accent-orange);">Fail-safe Logic</span>
+    </div>
     <p style="font-size: 1.1rem; color: #888; max-width: 600px; line-height: 1.6;">
         데이터에 기반한 의사결정과 정밀한 제어를 지향합니다.<br>
         <strong>Linux System</strong>과 <strong>Real-time Control</strong> 환경에서<br>
@@ -25,72 +34,155 @@
     </div>
 </div>
 
-<div style="margin-top: 60px;">
+<style>
+    .stack-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+        padding: 40px 0;
+        border-top: 1px solid #222;
+    }
+    
+    @media (max-width: 768px) {
+        .stack-grid { grid-template-columns: 1fr; gap: 30px; }
+    }
+
+    .stack-category-title {
+        color: #659ad2;
+        font-size: 0.9rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .badge-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .tech-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #161616;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 10px 16px;
+        color: #ccc;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+    
+    /* 타임라인 스타일 포함 */
+    .bio-timeline {
+        position: relative;
+        padding-left: 30px;
+        border-left: 2px solid #333;
+    }
+    .bio-item {
+        position: relative;
+        margin-bottom: 40px;
+    }
+    .bio-item:last-child { margin-bottom: 0; }
+    
+    .bio-dot {
+        position: absolute;
+        left: -36px;
+        top: 5px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #111;
+        border: 2px solid var(--accent-blue);
+        transition: transform 0.2s;
+    }
+    .bio-item:hover .bio-dot {
+        transform: scale(1.3);
+        background: var(--accent-blue);
+    }
+    
+    .bio-year {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85rem;
+        color: var(--accent-blue);
+        font-weight: 700;
+        margin-bottom: 5px;
+        display: block;
+    }
+    .bio-content {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 20px;
+        transition: 0.2s;
+    }
+    .bio-content:hover {
+        background: #1a1a1a;
+        border-color: #555;
+    }
+    .bio-title {
+        color: #fff; font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;
+    }
+    .bio-desc {
+        color: #999; font-size: 0.95rem; line-height: 1.6;
+    }
+    .bio-tag {
+        font-size: 0.75rem; background: rgba(255,255,255,0.1); 
+        padding: 2px 8px; border-radius: 4px; color: #ccc; margin-right: 5px;
+    }
+</style>
+
+<div class="stack-grid">
+
+
+    <div>
+        <span class="stack-category-title" style="color: var(--accent-green);">EMBEDDED CORE</span>
+        <div class="badge-container">
+            <div class="tech-badge"><i class="fas fa-microchip" style="color: var(--accent-green);"></i> STM32 HAL</div>
+            <div class="tech-badge"><i class="fab fa-raspberry-pi" style="color: #d63384;"></i> Raspberry Pi 5</div>
+            <div class="tech-badge"><i class="fas fa-plug" style="color: #aaa;"></i> UART / I2C</div>
+        </div>
+    </div>
+
+        <div>
+        <span class="stack-category-title" style="color: var(--accent-orange);">TOOLS & OS</span>
+        <div class="badge-container">
+            <div class="tech-badge"><i class="fab fa-linux" style="color: #fff;"></i> Linux</div>
+            <div class="tech-badge"><i class="fab fa-docker" style="color: #2496ed;"></i> Docker</div>
+            <div class="tech-badge"><i class="fab fa-git-alt" style="color: #f05032;"></i> Git</div>
+        </div>
+    </div>
+
+        <div>
+        <span class="stack-category-title" style="color: var(--accent-blue);">LANGUAGES</span>
+        <div class="badge-container">
+            <div class="tech-badge"><i class="fas fa-code" style="color: #659ad2;"></i> C++</div>
+            <div class="tech-badge"><i class="fab fa-python" style="color: #ffd43b;"></i> Python</div>
+            <div class="tech-badge"><i class="fas fa-terminal" style="color: #ccc;"></i> Shell</div>
+        </div>
+    </div>
+
+    <div>
+        <span class="stack-category-title" style="color: var(--accent-purple);">AI & VISION</span>
+        <div class="badge-container">
+            <div class="tech-badge"><i class="fas fa-eye" style="color: var(--accent-purple);"></i> OpenCV</div>
+            <div class="tech-badge"><i class="fas fa-brain" style="color: #f472b6;"></i> YOLOv8</div>
+        </div>
+    </div>
+
+
+</div>
+
+<div style="margin-top: 20px;">
     <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 30px; display: flex; align-items: center; gap: 10px;">
         <i class="fas fa-history" style="color: var(--accent-blue);"></i> My Engineering Journey
     </h3>
 
-    <style>
-        .bio-timeline {
-            position: relative;
-            padding-left: 30px;
-            border-left: 2px solid #333;
-        }
-        .bio-item {
-            position: relative;
-            margin-bottom: 40px;
-        }
-        .bio-item:last-child { margin-bottom: 0; }
-        
-        .bio-dot {
-            position: absolute;
-            left: -36px;
-            top: 5px;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #111;
-            border: 2px solid var(--accent-blue);
-            transition: transform 0.2s;
-        }
-        .bio-item:hover .bio-dot {
-            transform: scale(1.3);
-            background: var(--accent-blue);
-        }
-        
-        .bio-year {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: var(--accent-blue);
-            font-weight: 700;
-            margin-bottom: 5px;
-            display: block;
-        }
-        .bio-content {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 20px;
-            transition: 0.2s;
-        }
-        .bio-content:hover {
-            background: #1a1a1a;
-            border-color: #555;
-        }
-        .bio-title {
-            color: #fff; font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;
-        }
-        .bio-desc {
-            color: #999; font-size: 0.95rem; line-height: 1.6;
-        }
-        .bio-tag {
-            font-size: 0.75rem; background: rgba(255,255,255,0.1); 
-            padding: 2px 8px; border-radius: 4px; color: #ccc; margin-right: 5px;
-        }
-    </style>
-
     <div class="bio-timeline">
-        
         <div class="bio-item">
             <div class="bio-dot" style="border-color: var(--accent-blue);"></div>
             <span class="bio-year" style="color: var(--accent-blue);">2026. Present</span>
@@ -101,9 +193,7 @@
                     자율주행 RC카 프로젝트 <strong>'Neuro-Driver'</strong>를 고도화하고 있습니다.
                 </p>
                 <div style="margin-top: 10px;">
-                    <span class="bio-tag">STM32</span>
-                    <span class="bio-tag">Linux</span>
-                    <span class="bio-tag">RTOS</span>
+                    <span class="bio-tag">STM32</span><span class="bio-tag">Linux</span><span class="bio-tag">RTOS</span>
                 </div>
             </div>
         </div>
@@ -118,8 +208,7 @@
                     하반기부터 <strong>하드웨어 제어</strong>에 매력을 느껴 임베디드 공부를 시작했습니다.
                 </p>
                 <div style="margin-top: 15px;">
-                    <a href="https://kmong.com/gig/637739" target="_blank" 
-                       style="font-size: 0.85rem; color: #fff; text-decoration: underline;">
+                    <a href="https://kmong.com/gig/637739" target="_blank" style="font-size: 0.85rem; color: #fff; text-decoration: underline;">
                        <i class="fas fa-external-link-alt"></i> View Kmong Profile
                     </a>
                 </div>
@@ -136,8 +225,7 @@
                     CS 기초(OS, 네트워크, 자료구조)와 AI 이론을 체계적으로 학습하며 엔지니어링 베이스를 다졌습니다.
                 </p>
                 <div style="margin-top: 10px;">
-                    <span class="bio-tag">Computer Science</span>
-                    <span class="bio-tag">AI / Deep Learning</span>
+                    <span class="bio-tag">Computer Science</span><span class="bio-tag">AI / Deep Learning</span>
                 </div>
             </div>
         </div>
@@ -151,11 +239,8 @@
                     군 복무를 통해 강인한 체력과 <strong>"안 되면 될 때까지"</strong>라는 끈기를 길렀습니다.<br>
                     조직 생활과 협업의 중요성을 몸소 체험한 소중한 시간이었습니다.
                 </p>
-                <div style="margin-top: 10px;">
-                    <span class="bio-tag">Teamwork</span>
-                </div>
+                <div style="margin-top: 10px;"><span class="bio-tag">Teamwork</span></div>
             </div>
         </div>
-
     </div>
 </div>

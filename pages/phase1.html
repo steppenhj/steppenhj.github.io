@@ -1,10 +1,12 @@
 <div class="phase-header">
     <span style="color: var(--accent-blue); font-weight: bold; letter-spacing: 2px;">PHASE 01: COMPLETED</span>
     <h1>Hybrid Control Architecture</h1>
-    <p class="page-subtitle">
-        <strong>WebSocket(External)</strong>과 <strong>UDP(Local IPC)</strong>를 결합한 이중 프로세스 제어 시스템.<br>
-        Python(Gateway)과 C++(Core Engine)의 역할 분리를 통해 편의성과 제어 성능을 확보했습니다.
-    </p>
+        <p class="page-subtitle">
+        이 Phase는 <strong>리눅스 기반 원격 제어 파이프라인</strong>을 빠르게 구성해
+        <strong>안전(Stop/Timeout)</strong>과 <strong>통신 인터페이스</strong>를 검증한 <strong>Baseline 단계</strong>입니다.<br>
+        여기서 도출된 결과(예측 가능성/Fail-safe)는 <strong>Phase 2(STM32 분리)</strong>로 이어집니다.
+        </p>
+
     
     <div style="margin-top: 20px;">
         <a href="https://github.com/steppenhj/Neuro-Drive-CPP/tree/main/phase_1_code" target="_blank" 
@@ -34,15 +36,18 @@
         </div>
 
         <div>
-            <span style="color: #888; font-size: 0.8rem; font-weight: bold;">TIMING SPECS</span>
+            <span style="color: #888; font-size: 0.8rem; font-weight: bold;">OPERATION PARAMETERS (Baseline)</span>
             <ul style="margin: 5px 0 0 0; padding-left: 0; list-style: none; font-size: 0.9rem; color: #ccc;">
                 <li>• <strong>Command Rate:</strong> 10Hz (100ms interval)</li>
                 <li>• <strong>Latency Display:</strong> WebSocket RTT (Ping-Pong)</li>
+                <li style="color:#777; font-size:0.85rem;">• Note: Phase 1 프로토타입 구성 기준</li>
             </ul>
         </div>
 
         <div style="grid-column: 1 / -1; border-top: 1px dashed #444; padding-top: 10px;">
-            <span style="color: var(--accent-orange); font-size: 0.8rem; font-weight: bold;">TRIPLE SAFETY LAYERS</span>
+            <span style="color: var(--accent-orange); font-size: 0.8rem; font-weight: bold;">
+            FAIL-SAFE MECHANISMS (Multi-layer)
+            </span>
             <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 5px; font-size: 0.85rem;">
                 <span style="background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; color: #aaa;">
                     <strong>JS:</strong> Touch End 시 '0' 강제 전송
@@ -197,6 +202,10 @@ setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, ...);
                 <li><strong>Steering:</strong> Servo on GPIO 18 (Soft-PWM via libgpiod)</li>
                 <li><strong>Power:</strong> Logic(5V) / Drive(7.4V) Separated</li>
             </ul>
+            <p style="color:#666; font-size:0.8rem; margin-top:-8px;">
+  * 현재 시스템 구성은 Phase 2 이후 개선된 하드웨어/배선 기준이며, 이미지는 Phase 1 당시 기록입니다.
+</p>
+
         </div>
         <div class="media-thumbnail" onclick="openModal('image', 'assets/phase1_iso.jpg')" style="width: 200px; height: 150px;">
             <img src="assets/phase1_iso.jpg" alt="Phase 1 Hardware">
@@ -235,6 +244,30 @@ setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, ...);
         </p>
     </div>
 </div>
+
+<div class="feature-card" style="border-left: 3px solid var(--accent-orange); background: rgba(0,0,0,0.25);">
+  <h3 style="margin-bottom: 12px;">
+    <i class="fas fa-bullseye" style="color: var(--accent-orange);"></i>
+    Baseline Findings → Requirements
+  </h3>
+
+  <ul style="color:#aaa; font-size:0.9rem; line-height:1.8; padding-left:18px; margin:0;">
+    <li><strong>Issue:</strong> Linux 환경에서 제어 루프가 부하/스케줄링 영향으로 지연 변동(jitter)이 발생</li>
+    <li><strong>Risk:</strong> 폐루프 제어의 예측 가능성 저하 → 불안정/안전 리스크</li>
+    <li><strong>Requirement:</strong> 액추에이션은 <strong>Hard real-time 도메인(MCU)</strong>으로 분리 필요</li>
+    <li><strong>Carried Over:</strong> 통신 두절 시 <strong>Timeout Watchdog</strong> 및 단계적 안전정지 원칙 유지</li>
+  </ul>
+
+  <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+    <button class="nav-btn" onclick="loadPage('phase2')" style="width:auto; background: rgba(16,185,129,0.12);">
+      Phase 2: STM32로 해결 <i class="fas fa-arrow-right" style="margin-left:8px;"></i>
+    </button>
+    <button class="nav-btn" onclick="loadPage('phase4')" style="width:auto; background: rgba(245,158,11,0.12);">
+      Phase 4: Safety 프로토콜 <i class="fas fa-arrow-right" style="margin-left:8px;"></i>
+    </button>
+  </div>
+</div>
+
 
 <div class="engineer-note">
     <h4><i class="fas fa-pen-nib"></i> 박해진's Note</h4>
