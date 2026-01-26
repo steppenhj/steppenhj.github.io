@@ -61,9 +61,15 @@ a { text-decoration: none; color: inherit; }
 .menu-group { margin-bottom: 30px; }
 .group-label { font-size: 0.7rem; color: #555; font-weight: 700; margin-bottom: 10px; display: block; letter-spacing: 1px; }
 
+.btn-text {
+    display: flex;          /* 내부 요소를 플렉스 박스로 설정 */
+    flex-direction: column; /* 요소를 세로(위아래)로 배치 */
+    align-items: flex-start;/* 왼쪽 정렬 */
+    line-height: 1.2;       /* 줄 간격 조절 (너무 벌어지지 않게) */
+}
 .nav-btn {
     width: 100%; text-align: left; background: none; border: none; cursor: pointer;
-    padding: 12px 15px; border-radius: 8px; margin-bottom: 5px;
+    padding: 12px 15px; border-radius: 8px; margin-bottom:3px;
     color: var(--text-muted); display: flex; align-items: center; gap: 12px;
     transition: 0.2s;
 }

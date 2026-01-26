@@ -1,0 +1,80 @@
+<div class="phase-header">
+    <span style="color: #db2777; font-weight: bold; letter-spacing: 2px;">PHASE 06: FIRMWARE UPDATE</span>
+    <h1>OTA & Bootloader</h1>
+    <p class="page-subtitle">
+        유지보수 효율성을 극대화하기 위해, JTAG/ST-Link 없이도<br>
+        라즈베리파이를 통해 STM32의 펌웨어를 원격으로 업데이트하는 <strong>OTA(Over-The-Air)</strong> 시스템을 구축했습니다.
+    </p>
+</div>
+
+<div class="feature-card">
+    <h3><i class="fas fa-satellite-dish" style="color: #db2777;"></i> System Architecture</h3>
+    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-top: 20px;">
+        <div style="flex: 1; min-width: 300px;">
+            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
+                차량(RC카)이 주행 불가능한 위치에 있거나 케이스를 분해하기 어려운 상황에서도 
+                소프트웨어 패치(Bug fix)가 가능해야 합니다. 이를 위해 <strong>Custom Bootloader</strong>를 개발했습니다.
+            </p>
+        </div>
+        
+        <div style="flex: 1; background: #222; padding: 20px; border-radius: 8px; border: 1px solid #444; font-size: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #888;">0x0800 0000</span>
+                <span style="color: #db2777; font-weight: bold;">Bootloader (16KB)</span>
+            </div>
+            <div style="height: 10px; background: #db2777; border-radius: 2px; margin-bottom: 20px;"></div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #888;">0x0800 4000</span>
+                <span style="color: var(--accent-green); font-weight: bold;">Application (User Code)</span>
+            </div>
+            <div style="height: 40px; background: linear-gradient(to bottom, var(--accent-green), #222); border-radius: 2px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-container">
+    <div class="feature-card">
+        <h3><i class="fas fa-sync-alt" style="color: #db2777;"></i> Update Sequence</h3>
+        <ol style="color: #ccc; font-size: 0.9rem; line-height: 1.8; padding-left: 20px;">
+            <li><strong style="color: #fff;">Trigger:</strong> RPi가 UART로 "UPDATE_REQ" 커맨드 전송</li>
+            <li><strong style="color: #fff;">Reset:</strong> STM32가 이를 감지하고 Soft Reset 수행</li>
+            <li><strong style="color: #fff;">Bootloader Mode:</strong> 부트로더가 실행되어 대기 상태 진입</li>
+            <li><strong style="color: #fff;">Flash Erase:</strong> App 영역(Sector 1~)을 삭제</li>
+            <li><strong style="color: #fff;">Data Stream:</strong> RPi로부터 바이너리(.bin) 수신 및 기록</li>
+            <li><strong style="color: #fff;">Verify & Jump:</strong> CRC 검증 후 App 주소로 점프</li>
+        </ol>
+    </div>
+
+    <div class="feature-card" style="padding: 0; overflow: hidden; background: #0d0d0d;">
+        <div style="padding: 15px; border-bottom: 1px solid #333; font-size: 0.8rem; color: #888;">
+            bootloader_main.c
+        </div>
+        <pre style="margin: 0; border: none;"><code class="cpp"><span class="comment">// Jump to Application Function</span>
+<span class="keyword">void</span> <span class="function">JumpToApp</span>(<span class="keyword">void</span>) {
+    uint32_t JumpAddress = *(__IO uint32_t*) (APP_ADDRESS + 4);
+    
+    <span class="comment">// 1. Disable all interrupts</span>
+    __disable_irq();
+    
+    <span class="comment">// 2. Set Vector Table Offset</span>
+    SCB->VTOR = APP_ADDRESS;
+    
+    <span class="comment">// 3. Jump to Reset Handler</span>
+    Jump_To_Application = (pFunction) JumpAddress;
+    Jump_To_Application();
+}</code></pre>
+    </div>
+</div>
+
+<div class="info-box" style="border-left: 4px solid #db2777;">
+    <h3 style="color: #fff; margin-bottom: 15px;">
+        <i class="fas fa-lightbulb" style="color: #fdd835; margin-right: 10px;"></i>
+        Why IAP (In-Application Programming)?
+    </h3>
+    <p style="color: var(--text-muted); line-height: 1.7;">
+        제조 현장이나 실제 운용 환경에서는 물리적 연결(JTAG)이 어렵습니다. 
+        통신 인터페이스(UART, CAN, WiFi)를 통해 펌웨어를 자체적으로 업데이트하는 기술은 
+        <strong>전장(Automotive) 및 IoT 분야의 핵심 요구사항</strong>입니다.
+    </p>
+</div>
