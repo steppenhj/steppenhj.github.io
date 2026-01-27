@@ -2,138 +2,99 @@
     <span style="color: #ccc; font-weight: bold; letter-spacing: 2px;">TECHNICAL LOG</span>
     <h1>Engineering Notes</h1>
     <p class="page-subtitle">
-        소스 코드(Source Code)에 기반한 기술적 의사결정과<br>
-        하드웨어/소프트웨어 통합 과정에서의 문제 해결 기록입니다.
+        "삽질"의 기록.<br>
+        문제의 원인을 찾고 해결하기까지의 치열한 고민들을 남깁니다.
     </p>
 </div>
 
 <div style="margin-bottom: 40px; display: flex; gap: 15px; flex-wrap: wrap;">
     <div style="background: #222; padding: 8px 15px; border-radius: 20px; border: 1px solid #444; color: #888; font-size: 0.85rem;">
-        <i class="fab fa-python"></i> Python/Async
+        <i class="fas fa-bolt"></i> Hardware Power
     </div>
     <div style="background: #222; padding: 8px 15px; border-radius: 20px; border: 1px solid #444; color: #888; font-size: 0.85rem;">
-        <i class="fas fa-microchip"></i> STM32 Firmware
-    </div>
-    <div style="background: #222; padding: 8px 15px; border-radius: 20px; border: 1px solid #444; color: #888; font-size: 0.85rem;">
-        <i class="fas fa-bug"></i> Debugging
+        <i class="fas fa-lock"></i> Concurrency Control
     </div>
 </div>
 
 <div class="notes-grid">
-
-    <div class="note-card">
+    <div class="note-card" onclick="openNoteModal('note-race-condition')">
         <div class="note-header">
-            <span class="note-cat" style="color: var(--accent-blue);">Server Architecture</span>
+            <span class="note-cat" style="color: var(--accent-orange);">Server Critical</span>
             <span class="note-date">Log #01</span>
         </div>
-        <h3>Async Eventlet & Semaphore Locking</h3>
-        <p class="note-summary">
-            Flask-SocketIO의 비동기 환경에서 단일 시리얼 포트(`/dev/ttyACM0`)에 대한 
-            Race Condition을 방지하기 위해 락(Lock) 메커니즘을 적용했습니다.
+        <h3>Race Condition & Mutex</h3>
+        <p class="note-summary" style="color: #ccc; font-weight: bold;">
+            "비동기 서버가 자꾸 죽는다."<br>
+            <span style="color: #888; font-weight: normal; font-size: 0.9rem;">
+                원인은 단일 자원(Serial Port)에 대한 동시 접근. Semaphore 락으로 해결하기까지의 기록.
+            </span>
         </p>
-        
-        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin-top: 10px;">
-            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #aaa; line-height: 1.8;">
-                <li><strong>Library:</strong> <code>eventlet.semaphore.Semaphore(1)</code></li>
-                <li><strong>Implementation:</strong>
-                    <br><code>send_to_stm32()</code> 함수 진입 시 <strong>Context Manager(with lock)</strong>을 사용하여 
-                    Thread-safe한 시리얼 쓰기(Write) 보장.
-                </li>
-                <li><strong>Outcome:</strong> 동시 접속 제어 시 발생하던 시리얼 리소스 충돌 및 패킷 깨짐 현상 완벽 해결.</li>
-            </ul>
+        <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #333; color: var(--accent-blue); font-size: 0.85rem; font-weight: bold;">
+            Read Detail <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>
         </div>
     </div>
 
-    <div class="note-card">
+    <div class="note-card" onclick="openNoteModal('note-power-trap')">
         <div class="note-header">
-            <span class="note-cat" style="color: var(--accent-orange);">Safety Logic</span>
+            <span class="note-cat" style="color: #ff6b6b;">H/W Trouble</span>
             <span class="note-date">Log #02</span>
         </div>
-        <h3>S/W Watchdog & Timeout</h3>
-        <p class="note-summary">
-            통신 두절 시 차량이 폭주하는 것을 막기 위해 펌웨어 레벨에서 
-            <strong>Time-based Watchdog</strong> 로직을 구현했습니다.
+        <h3>The 5V Power Trap</h3>
+        <p class="note-summary" style="color: #ccc; font-weight: bold;">
+            "보조배터리로 1주일을 날렸다."<br>
+            <span style="color: #888; font-weight: normal; font-size: 0.9rem;">
+                UBEC와 점퍼선의 배신. 라즈베리파이 전원 문제를 해결한 건 결국 '직결'이었다.
+            </span>
         </p>
-
-        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin-top: 10px;">
-            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #aaa; line-height: 1.8;">
-                <li><strong>Logic:</strong>
-                    <br><code>if (HAL_GetTick() - last_command_time > 500)</code>
-                </li>
-                <li><strong>Action:</strong>
-                    <br>TIM2 채널의 PWM Compare 값을 0으로 강제 설정하여 모터 즉시 정지.
-                </li>
-                <li><strong>Verification:</strong> RPi 전원 차단 테스트 시 0.5초 내 구동축 Lock 확인.</li>
-            </ul>
+        <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #333; color: var(--accent-blue); font-size: 0.85rem; font-weight: bold;">
+            Read Detail <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>
         </div>
     </div>
-
-    <div class="note-card">
-        <div class="note-header">
-            <span class="note-cat" style="color: #ff6b6b;">Troubleshooting</span>
-            <span class="note-date">Log #03</span>
-        </div>
-        <h3>Pin Muxing & Hardware Isolation</h3>
-        <p class="note-summary">
-            초기 개발 시 PWM 신호가 출력되지 않는 문제 발생. 
-            단위 테스트(Isolation)를 통해 HAL 생성 코드의 결함을 발견하고 수정했습니다.
-        </p>
-
-        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin-top: 10px;">
-            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #aaa; line-height: 1.8;">
-                <li><strong>Analysis:</strong> 레지스터 상 Timer Counter는 동작하나 GPIO Output이 0V 유지.</li>
-                <li><strong>Root Cause:</strong> <code>GPIO_AF</code>(Alternate Function) 설정 누락.</li>
-                <li><strong>Solution:</strong> 
-                    <br><code>Force_Hardware_Config()</code> 함수를 작성하여 
-                    <code>GPIO_AF1_TIM2</code> 매핑을 명시적으로 재설정.
-                </li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="note-card">
-        <div class="note-header">
-            <span class="note-cat" style="color: var(--accent-green);">Communication</span>
-            <span class="note-date">Log #04</span>
-        </div>
-        <h3>UART Circular DMA & Ring Buffer</h3>
-        <p class="note-summary">
-            CPU가 1바이트씩 수신하는 Polling 방식의 오버헤드를 제거하기 위해 
-            <strong>DMA(Direct Memory Access)</strong>를 도입했습니다.
-        </p>
-
-        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin-top: 10px;">
-            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #aaa; line-height: 1.8;">
-                <li><strong>Architecture:</strong> UART Rx &rarr; DMA Circular Mode &rarr; Memory Buffer</li>
-                <li><strong>Benefit:</strong> 
-                    <br>CPU 개입 없이 백그라운드에서 데이터 수신. 
-                    <code>Half/Full Complete Interrupt</code>를 통해 주기적으로 데이터 파싱.
-                </li>
-                <li><strong>Result:</strong> 고속 주행 중에도 제어 루프 주기(10ms) 안정성 확보.</li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="note-card">
-        <div class="note-header">
-            <span class="note-cat" style="color: var(--accent-purple);">Sensor Fusion</span>
-            <span class="note-date">Log #05</span>
-        </div>
-        <h3>Hardware Quadrature Decoding</h3>
-        <p class="note-summary">
-            S/W 인터럽트 방식 대신 STM32의 타이머 하드웨어 기능을 활용하여 
-            CPU 부하 없이 엔코더 펄스를 카운팅합니다.
-        </p>
-
-        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; margin-top: 10px;">
-            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #aaa; line-height: 1.8;">
-                <li><strong>Config:</strong> <code>TIM1</code> in <code>TIM_ENCODERMODE_TI12</code> (x4 resolution)</li>
-                <li><strong>Algorithm:</strong>
-                    <br><code>delta = (int16_t)(cnt - prev_cnt)</code>
-                    <br>Overflow(65535)를 2의 보수법으로 자연스럽게 처리하여 속도 계산.
-                </li>
-            </ul>
-        </div>
-    </div>
-
 </div>
+
+<div id="textModal" class="modal-overlay" onclick="closeNoteModal(event)" 
+     style="display: none; justify-content: center; align-items: center;">
+    
+    <div class="modal-content-container" 
+         style="display: flex; flex-direction: column; width: 90%; max-width: 700px; max-height: 85vh; background: #1a1a1a; border: 1px solid #444; border-radius: 12px; box-shadow: 0 10px 50px rgba(0,0,0,0.9); position: relative; overflow: hidden;">
+        
+        <div style="padding: 35px 35px 20px 35px; border-bottom: 1px solid #333; background: #1a1a1a; flex-shrink: 0;">
+            <span class="modal-close" onclick="closeNoteModal(event)" style="position: absolute; top: 15px; right: 20px; color: #888; cursor: pointer; font-size: 2rem;">&times;</span>
+            <h2 id="modalTitle" style="color: #fff; margin-bottom: 8px; font-size: 1.5rem; line-height: 1.3; padding-right: 20px;"></h2>
+            <div id="modalDate" style="color: var(--accent-blue); font-family: 'JetBrains Mono'; font-size: 0.85rem;"></div>
+        </div>
+
+        <div id="modalBody" style="padding: 30px 35px 40px 35px; overflow-y: auto; color: #ccc; line-height: 1.7; font-size: 0.95rem;">
+            </div>
+
+    </div>
+</div>
+
+<template id="note-race-condition">
+    <div data-title="Async Eventlet & Semaphore Locking" data-date="Server Architecture | Log #01">
+        <h4 style="color:var(--accent-orange); margin-bottom:10px;">1. 문제 상황 (Problem)</h4>
+        <p>Flask-SocketIO 기반 서버에서 모터 제어 명령 시 간헐적 패킷 손실 및 멈춤 현상 발생. 로그 분석 결과, 웹 요청 스레드와 상태 모니터링 스레드가 <strong>단일 시리얼 포트(/dev/ttyACM0)에 동시 접근</strong>하여 충돌함.</p>
+        
+        <h4 style="color:var(--accent-orange); margin-top:30px; margin-bottom:10px;">2. 해결 (Solution)</h4>
+        <p><code>eventlet.semaphore</code>를 도입하여 상호 배제(Mutex) 구현.</p>
+        <div style="background:#000; padding:15px; border-radius:6px; margin:15px 0; font-family:'JetBrains Mono', monospace; font-size:0.85rem; border:1px solid #333;">
+            with serial_lock:<br>&nbsp;&nbsp;ser.write(packet)
+        </div>
+
+        <h4 style="color:var(--accent-orange); margin-top:30px; margin-bottom:10px;">3. 결과 (Result)</h4>
+        <p>Race Condition 완전 제거 및 통신 안정성 확보.</p>
+    </div>
+</template>
+
+<template id="note-power-trap">
+    <div data-title="The 5V Power Trap: 점퍼선의 배신" data-date="Hardware Troubleshooting | Log #02">
+        <h4 style="color:#ff6b6b; margin-bottom:10px;">1. 문제 상황 (Problem)</h4>
+        <p>라즈베리파이 5의 높은 전력 소모로 인해 일반 보조배터리 및 UBEC 사용 시에도 <strong>Low Voltage Warning</strong>과 함께 셧다운 발생.</p>
+        
+        <h4 style="color:#ff6b6b; margin-top:30px; margin-bottom:10px;">2. 원인 분석</h4>
+        <p>브레드보드용 <strong>점퍼선의 얇은 두께로 인한 전압 강하(Voltage Drop)</strong>가 주원인. 5V를 공급해도 끝단에서는 4.7V 미만으로 떨어짐.</p>
+        
+        <h4 style="color:#ff6b6b; margin-top:30px; margin-bottom:10px;">3. 해결 (Solution)</h4>
+        <p>점퍼선을 제거하고 굵은 전선으로 <strong>GPIO 5V/GND 핀에 직접 납땜/직결</strong>하여 해결.</p>
+    </div>
+</template>
