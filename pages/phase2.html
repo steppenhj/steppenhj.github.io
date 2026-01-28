@@ -3,7 +3,7 @@
     <h1>Distributed Control Architecture</h1>
     <p class="page-subtitle">
         제어(Control)와 연산(Computation)의 물리적 분리.<br>
-        Linux의 실시간성 한계를 극복하기 위해 <strong>STM32 MCU</strong>를 도입하여 Latency를 10ms 이하로 단축했습니다.
+        Linux의 실시간성 한계를 극복하기 위해 <strong>STM32 MCU</strong>를 도입했습니다.
     </p>
 </div>
 
@@ -99,92 +99,153 @@
     </div>
 </div>
 
-<div class="grid-container">
-    <div class="feature-card">
-        <h3><i class="fas fa-wrench" style="color: var(--accent-green);"></i> Issue 1: Pin Muxing</h3>
-        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">
-            HAL 라이브러리 초기화 실패로 인한 PWM 출력 불가 현상.<br>
-            GPIO 레지스터를 직접 조작하여 해결했습니다.
+<div class="grid-container" style="margin-top: 40px;">
+    
+    <div class="feature-card" style="border-left: 3px solid var(--accent-green);">
+        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1.1rem;">
+            <i class="fas fa-balance-scale" style="color: var(--accent-green); margin-right: 8px;"></i>
+            Why Split the System?
+        </h4>
+        <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 15px;">
+            <strong>Context:</strong> 단일 프로세서(RPi)의 OS 스케줄링 간섭으로 인한 제어 불안정.
         </p>
-        <div style="background: #111; padding: 10px; border-radius: 6px; border: 1px solid #333;">
-            <small style="color: #666; display: block; margin-bottom:5px;">Solution:</small>
-            <code style="color: #a5d6ff;">Force_Hardware_Config();</code>
-        </div>
+        <ul style="color: #aaa; font-size: 0.85rem; padding-left: 20px; line-height: 1.7;">
+            <li>
+                <strong>Architecture:</strong> <strong>"Brain(RPi) - Reflex(STM32)"</strong> 구조.
+            </li>
+            <li>
+                <strong>Role - RPi:</strong> OpenCV 영상 처리 및 WebSocket 서버 (Non-Realtime).
+            </li>
+            <li>
+                <strong>Role - STM32:</strong> 모터 PWM 생성 및 엔코더 카운팅 (Hard Real-time).
+            </li>
+        </ul>
     </div>
 
-    <div class="feature-card">
-        <h3><i class="fas fa-random" style="color: #f59e0b;"></i> Issue 2: Thread Race Condition</h3>
-        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">
-            웹 서버 요청(Read)과 상태 모니터링(Write) 스레드가<br> 
-            <strong>단일 시리얼 포트에 동시 접근</strong>하여 충돌 발생.
+    <div class="feature-card" style="border-left: 3px solid #f59e0b;">
+        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1.1rem;">
+            <i class="fas fa-exchange-alt" style="color: #f59e0b; margin-right: 8px;"></i>
+            Communication Interface
+        </h4>
+        <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 15px;">
+            <strong>Context:</strong> 디버깅 용이성과 개발 속도를 고려한 <strong>ASCII Protocol</strong> 채택
         </p>
         
-        <div style="background: rgba(255, 0, 0, 0.1); border-left: 3px solid #ff4444; padding: 10px; margin-bottom: 15px;">
-            <code style="color: #ff8888; font-size: 0.8rem;">
-                [Error] SerialException: device reports readiness to read but returned no data<br>
-                Latency: > 500ms (Critical)
-            </code>
+        <div style="margin-bottom: 15px;">
+            <span style="color: #ccc; font-size: 0.85rem; font-weight: bold;">Protocol: ASCII CSV</span>
+            <p style="color: #888; font-size: 0.85rem; margin-top: 5px; line-height: 1.5;">
+                복잡한 바이너리 패킷 대신 <strong>가독성(Human-readable)</strong>이 높은 CSV 포맷을 사용하여 시리얼 터미널에서 즉각적인 디버깅이 가능하도록 설계했습니다.
+            </p>
+            <div style="background: #111; padding: 10px; margin-top: 8px; border-radius: 4px; border: 1px dashed #444; font-family: 'JetBrains Mono'; font-size: 0.75rem; color: #a5d6ff;">
+                Payload: "THROTTLE,STEERING\n" (ex: "100,1500\n")
+            </div>
         </div>
 
-        <div class="log-solution" style="border-top: 1px dashed #444; padding-top: 10px;">
-            <div style="margin-bottom: 5px;">
-                <span class="spec-badge" style="color: #f59e0b; border-color: #f59e0b;">Solution</span>
-                <span style="color: #ccc; font-size: 0.9rem; margin-left: 5px;">Semaphore Lock & Eventlet</span>
-            </div>
-            <p style="color: #888; font-size: 0.85rem; line-height: 1.5;">
-                공유 자원(UART) 접근 시 <strong>Semaphore</strong>로 상호 배제(Mutex)를 구현하고, 
-                <strong>Non-blocking I/O</strong>로 스레드 블로킹을 방지했습니다.
+        <div>
+            <span style="color: #ccc; font-size: 0.85rem; font-weight: bold;">Implementation: Polling & Parsing</span>
+            <p style="color: #888; font-size: 0.85rem; margin-top: 5px;">
+                초기 단계의 안정성을 위해 Polling 방식으로 수신하며, <code>sscanf</code>를 통해 정수형 데이터를 추출합니다.
             </p>
+            <pre style="margin-top: 5px; padding: 10px; background: #0d0d0d; border: 1px solid #333;"><code class="cpp"><span class="comment">// main.c: Simple ASCII Parsing</span>
+<span class="keyword">if</span> (rx_data == <span class="string">'\n'</span>) {
+    buffer[idx] = 0; <span class="comment">// Null Terminate</span>
+    <span class="function">sscanf</span>((<span class="keyword">char</span>*)buffer, <span class="string">"%d,%d"</span>, &speed, &angle);
+}</code></pre>
         </div>
     </div>
 </div>
 
 <div class="feature-card">
-  <h3><i class="fas fa-wave-square" style="color: var(--accent-purple);"></i> Issue 3: Encoder Bring-up</h3>
-  <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">
-    수동 주행은 정상인데 엔코더(ENC)가 0으로 고정되는 문제를 “펌웨어 기반 계측”으로 해결.
-  </p>
-
-  <div style="background: rgba(255, 0, 0, 0.08); border-left: 3px solid #ff6b6b; padding: 10px; margin-bottom: 12px;">
-    <code style="color: #ffb4b4; font-size: 0.8rem;">
-      Symptom: ENC always 0 → raw counter not moving
-    </code>
-  </div>
-
-  <div class="log-solution" style="border-top: 1px dashed #444; padding-top: 10px;">
-    <div style="margin-bottom: 5px;">
-      <span class="spec-badge" style="color: var(--accent-purple); border-color: var(--accent-purple);">Solution</span>
-      <span style="color: #ccc; font-size: 0.9rem; margin-left: 5px;">TIM1 Clock Enable + Counter Reset</span>
-    </div>
-    <p style="color: #888; font-size: 0.85rem; line-height: 1.5;">
-      PC에서 UART 로그로 “ENC:0” 고정 확인 → PA8/PA9를 GPIO 입력으로 임시 전환해 A/B 토글 검증 →
-      <strong>TIM1 클럭 enable</strong> 및 <strong>카운터 초기화</strong>로 카운트 정상화.
+    <h3><i class="fas fa-microchip" style="color: var(--accent-green);"></i> Hardware Utilization (HAL)</h3>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+        소프트웨어의 개입을 최소화하기 위해 <strong>STM32의 내부 타이머(TIM) 하드웨어</strong>를 적극 활용했습니다.
     </p>
-  </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid #333;">
+            <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 10px;">
+                <i class="fas fa-tachometer-alt" style="color: #659ad2; margin-right: 8px;"></i> 
+                Encoder: TIM Hardware Mode
+            </h4>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
+                <strong>Mechanism:</strong> <code>TIM1</code>을 <strong>Encoder Interface Mode</strong>로 설정.
+            </p>
+            <ul style="color: #888; font-size: 0.85rem; padding-left: 15px; margin-top:8px;">
+                <li>GPIO 인터럽트 방식이 아님</li>
+                <li>CPU가 코드를 실행하지 않아도 <strong>하드웨어 레지스터가 펄스를 자동 카운팅</strong></li>
+                <li>고속 주행 시에도 CPU 부하(Overhead) <strong>Zero</strong></li>
+            </ul>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid #333;">
+            <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 10px;">
+                <i class="fas fa-shield-alt" style="color: #d63384; margin-right: 8px;"></i> 
+                Safety: Multi-Layer Logic
+            </h4>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
+                <strong>Software Lock (Py):</strong> <code>eventlet.semaphore</code>로 시리얼 자원 충돌 방지.<br>
+                <strong>Hardware Failsafe (C):</strong> 통신 두절 시 자동 정지 로직 구현.
+            </p>
+            <div style="background: #000; padding: 8px; margin-top: 8px; border-radius: 4px; font-family: 'JetBrains Mono'; font-size: 0.7rem; color: #ccc;">
+                if (HAL_GetTick() - last_cmd > 500) Stop();
+            </div>
+        </div>
+
+    </div>
 </div>
 
-<div class="info-box">
-    <h4 style="color: var(--accent-green); margin-bottom: 10px;">Result & Engineering Insight</h4>
-    <p style="color: var(--text-muted); line-height: 1.6;">
-        Phase 1(Linux C++)과 비교했을 때 <strong>평균 Latency는 약 10ms 내외로 비슷</strong>하지만, 
-        가장 큰 성과는 <strong>"예측 가능한 제어(Deterministic Control)"</strong>를 확보했다는 점입니다.
+<div class="feature-card" style="border-left: 3px solid #666; background: rgba(0,0,0,0.4);">
+    <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #ccc;">
+        <i class="fas fa-step-forward" style="margin-right: 8px;"></i>
+        Next Steps: Optimization Plan
+    </h3>
+    <p style="color: #888; font-size: 0.85rem; margin-bottom: 15px;">
+        현재의 <strong>Polling + Open-loop</strong> 방식은 초기 구현과 디버깅에 유리하지만, 
+        향후 고속 자율주행을 위해 다음과 같은 기술적 부채(Technical Debt)를 개선할 예정입니다.
     </p>
-    <ul style="margin-top: 15px; padding-left: 20px; color: #aaa; font-size: 0.9rem; line-height: 1.8;">
-        <li>
-            <strong>Measurement:</strong> 시스템 로그(Timestamp) 분석 결과, 스레드 충돌 해결 후 안정적인 통신 확인.
-        </li>
-        <li>
-            <strong>Benefit:</strong> 모터 제어 부하를 MCU로 이관함에 따라, 
-            향후 <strong>Phase 3(자율주행 AI)</strong> 도입 시 라즈베리파이의 연산 자원을 온전히 영상 처리에 집중할 수 있게 되었습니다.
-        </li>
-    </ul>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        
+        <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 6px;">
+            <span style="color: var(--accent-blue); font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 5px;">I/O Efficiency</span>
+            <div style="color: #aaa; font-size: 0.8rem;">
+                <s style="color: #555;">Polling Mode</s> &rarr; <strong style="color: #fff;">Interrupt & DMA</strong>
+                <p style="margin-top: 5px; font-size: 0.75rem; color: #666;">
+                    UART 수신 대기로 인한 CPU 낭비를 제거하고, 비동기 처리를 강화하여 통신 효율 극대화.
+                </p>
+            </div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 6px;">
+            <span style="color: var(--accent-green); font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 5px;">Motor Control</span>
+            <div style="color: #aaa; font-size: 0.8rem;">
+                <s style="color: #555;">Open-Loop</s> &rarr; <strong style="color: #fff;">PID Control</strong>
+                <p style="margin-top: 5px; font-size: 0.75rem; color: #666;">
+                    현재의 단순 PWM 제어는 경사로 등에서 속도 유지가 어려움. 엔코더 피드백을 활용한 속도 제어(PID) 구현 예정.
+                </p>
+            </div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 6px;">
+            <span style="color: var(--accent-purple); font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 5px;">System Structure</span>
+            <div style="color: #aaa; font-size: 0.8rem;">
+                <s style="color: #555;">Super-Loop</s> &rarr; <strong style="color: #fff;">FreeRTOS</strong>
+                <p style="margin-top: 5px; font-size: 0.75rem; color: #666;">
+                    센서(IMU, Lidar)가 늘어남에 따라 단일 루프의 한계를 극복하기 위해 RTOS 멀티태스킹 도입.
+                </p>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 <div class="engineer-note phase2">
     <h4><i class="fas fa-pen-nib"></i> 박해진's Note</h4>
     <p>
-        "펌웨어 레벨로 내려오면서 <strong>클럭 설정과 물리적 배선</strong>이라는 새로운 변수를 만났습니다. 
-        초기엔 시행착오가 많았지만, 덕분에 OS 의존성을 제거한 <strong>Hard Real-time 제어</strong>의 
-        강력함과 필수성을 몸소 체험한 계기가 되었습니다."
+        "OS가 관리하던 자원을 직접 통제해야 하는 펌웨어 개발은 Phase 1과는 차원이 다른 도전이었습니다. 
+        <br>
+        이에 화려한 최신 기술보다 <strong>'완전한 통제'</strong>를 최우선 목표로 삼았습니다. 불확실성을 줄이기 위해 <strong>Polling과 ASCII 프로토콜</strong>로 디버깅 가능한 환경을 먼저 구축했고, 
+        대신 리얼타임 성능은 <strong>하드웨어 타이머</strong>에 전적으로 위임하는 실용적인 접근을 택했습니다."
     </p>
 </div>

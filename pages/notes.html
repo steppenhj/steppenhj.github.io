@@ -2,8 +2,9 @@
     <span style="color: #ccc; font-weight: bold; letter-spacing: 2px;">TECHNICAL LOG</span>
     <h1>Engineering Notes</h1>
     <p class="page-subtitle">
-        "삽질"의 기록.<br>
-        문제의 원인을 찾고 해결하기까지의 치열한 고민들을 남깁니다.
+        삽질 기록.<br>
+        며칠 동안 고민하여 해결한 문제들 중점<br>
+        발생 순서와 해결 순서 기반으로 수시로 기록
     </p>
 </div>
 
@@ -20,7 +21,7 @@
     <div class="note-card" onclick="openNoteModal('note-race-condition')">
         <div class="note-header">
             <span class="note-cat" style="color: var(--accent-orange);">Server Critical</span>
-            <span class="note-date">Log #01</span>
+            <span class="note-date">Log #01 - Phase 2</span>
         </div>
         <h3>Race Condition & Mutex</h3>
         <p class="note-summary" style="color: #ccc; font-weight: bold;">
@@ -37,19 +38,37 @@
     <div class="note-card" onclick="openNoteModal('note-power-trap')">
         <div class="note-header">
             <span class="note-cat" style="color: #ff6b6b;">H/W Trouble</span>
-            <span class="note-date">Log #02</span>
+            <span class="note-date">Log #02 - Phase 2</span>
         </div>
-        <h3>The 5V Power Trap</h3>
+        <h3>Single Battery Architecture</h3>
         <p class="note-summary" style="color: #ccc; font-weight: bold;">
-            "보조배터리로 1주일을 날렸다."<br>
+            "보조배터리 고장, 라즈베리파이5 전원 연결 일주일 동안 실패."<br>
             <span style="color: #888; font-weight: normal; font-size: 0.9rem;">
-                UBEC와 점퍼선의 배신. 라즈베리파이 전원 문제를 해결한 건 결국 '직결'이었다.
+                7.4V 리튬폴리머 하나로 모터와 RPi 5(5A)를 모두 구동하기 위한 UBEC 전원 설계 및 트러블슈팅.
             </span>
         </p>
         <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #333; color: var(--accent-blue); font-size: 0.85rem; font-weight: bold;">
             Read Detail <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>
         </div>
     </div>
+
+    <div class="note-card" onclick="openNoteModal('note-frequency')">
+        <div class="note-header">
+            <span class="note-cat" style="color: var(--accent-purple);">Motor Control</span>
+            <span class="note-date">Log #03 - Phase 2</span>
+        </div>
+        <h3>PWM Frequency & Torque</h3>
+        <p class="note-summary" style="color: #ccc; font-weight: bold;">
+            "직진은 잘 되는데, 코너링만 하면 멈춘다?"<br>
+            <span style="color: #888; font-weight: normal; font-size: 0.9rem;">
+                고주파수(840Hz) 설정으로 인한 기동 토크 부족 현상. 주파수를 60Hz로 낮춰 물리적 한계를 극복하다.
+            </span>
+        </p>
+        <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #333; color: var(--accent-blue); font-size: 0.85rem; font-weight: bold;">
+            Read Detail <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>
+        </div>
+    </div>
+
 </div>
 
 <div id="textModal" class="modal-overlay" onclick="closeNoteModal(event)" 
@@ -72,29 +91,76 @@
 
 <template id="note-race-condition">
     <div data-title="Async Eventlet & Semaphore Locking" data-date="Server Architecture | Log #01">
-        <h4 style="color:var(--accent-orange); margin-bottom:10px;">1. 문제 상황 (Problem)</h4>
+        <h4 style="color:var(--accent-orange); margin-bottom:10px;">1. 문제 상황</h4>
         <p>Flask-SocketIO 기반 서버에서 모터 제어 명령 시 간헐적 패킷 손실 및 멈춤 현상 발생. 로그 분석 결과, 웹 요청 스레드와 상태 모니터링 스레드가 <strong>단일 시리얼 포트(/dev/ttyACM0)에 동시 접근</strong>하여 충돌함.</p>
         
-        <h4 style="color:var(--accent-orange); margin-top:30px; margin-bottom:10px;">2. 해결 (Solution)</h4>
+        <h4 style="color:var(--accent-orange); margin-top:30px; margin-bottom:10px;">2. 해결</h4>
         <p><code>eventlet.semaphore</code>를 도입하여 상호 배제(Mutex) 구현.</p>
         <div style="background:#000; padding:15px; border-radius:6px; margin:15px 0; font-family:'JetBrains Mono', monospace; font-size:0.85rem; border:1px solid #333;">
             with serial_lock:<br>&nbsp;&nbsp;ser.write(packet)
         </div>
 
-        <h4 style="color:var(--accent-orange); margin-top:30px; margin-bottom:10px;">3. 결과 (Result)</h4>
-        <p>Race Condition 완전 제거 및 통신 안정성 확보.</p>
+        <h4 style="color:var(--accent-orange); margin-top:30px; margin-bottom:10px;">3. 결과</h4>
+        <p>Race Condition 제거 및 통신 안정성 확보.</p>
     </div>
 </template>
 
+
 <template id="note-power-trap">
-    <div data-title="The 5V Power Trap: 점퍼선의 배신" data-date="Hardware Troubleshooting | Log #02">
-        <h4 style="color:#ff6b6b; margin-bottom:10px;">1. 문제 상황 (Problem)</h4>
-        <p>라즈베리파이 5의 높은 전력 소모로 인해 일반 보조배터리 및 UBEC 사용 시에도 <strong>Low Voltage Warning</strong>과 함께 셧다운 발생.</p>
+    <div data-title="Single Battery & Power Stability" data-date="Hardware Power Design | Log #02">
+        <h4 style="color:#ff6b6b; margin-bottom:10px;">1. 배경</h4>
+        <p>보조배터리 고장 상황에서 RPi 5에서 요구하는 5V 5A의 보조 배터리를 찾지 못하는 문제 발생</p>
         
-        <h4 style="color:#ff6b6b; margin-top:30px; margin-bottom:10px;">2. 원인 분석</h4>
-        <p>브레드보드용 <strong>점퍼선의 얇은 두께로 인한 전압 강하(Voltage Drop)</strong>가 주원인. 5V를 공급해도 끝단에서는 4.7V 미만으로 떨어짐.</p>
+        <h4 style="color:#ff6b6b; margin-top:30px; margin-bottom:10px;">2. 문제</h4>
+        <p>
+            5V/5A UBEC를 도입했으나 <strong>라즈베리 파이5의 전원은 켜지지 않는 현상</strong> 발생.<br>
+            원인은 <strong>점퍼선의 높은 저항</strong>. 5A 전류가 얇은 선을 통과하며 <strong>전압 강하(Voltage Drop)</strong>가 발생함.
+        </p>
         
-        <h4 style="color:#ff6b6b; margin-top:30px; margin-bottom:10px;">3. 해결 (Solution)</h4>
-        <p>점퍼선을 제거하고 굵은 전선으로 <strong>GPIO 5V/GND 핀에 직접 납땜/직결</strong>하여 해결.</p>
+        <h4 style="color:#ff6b6b; margin-top:30px; margin-bottom:10px;">3. 해결</h4>
+        <div style="margin-top:10px; background:rgba(255, 107, 107, 0.1); border-left:3px solid #ff6b6b; padding:15px; border-radius:4px;">
+            <span style="color:#ff6b6b; font-weight:bold; font-size:0.85rem;">"Minimal Impedance Path"</span>
+            <p style="color:#ccc; font-size:0.9rem; margin-top:5px; line-height:1.5;">
+                중간 배선(점퍼선)을 제거하여 접촉 저항을 없애는 것이 핵심이라 판단했습니다.<br>
+                UBEC의 2.54mm 커넥터가 RPi의 <strong>GPIO 4(5V), 6(GND) 핀과 물리적으로 호환</strong>됨을 이용하여, 
+                전원을 <strong>PCB에 직접 주입(Direct Injection)</strong>하는 방식으로 전압 강하를 0에 가깝게 만들었습니다.
+            </p>
+        </div>
+    </div>
+</template>
+
+
+
+<template id="note-frequency">
+    <div data-title="PWM Frequency & Motor Stall" data-date="Firmware Optimization | Log #03">
+        <h4 style="color:var(--accent-purple); margin-bottom:10px;">1. 문제 상황</h4>
+        <p>
+            직진 주행은 원활하나, <strong>조향(Steering) 시 차량이 멈추는 Stall 현상</strong> 발생.<br>
+            소프트웨어 로직(Python)에는 문제가 없었으나, Phase 1(RPi 제어) 대비 Phase 2(STM32 제어)에서 구동력이 현저히 약해짐.
+        </p>
+        <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:4px; margin-top:10px; font-size:0.85rem; color:#aaa;">
+            <i class="fas fa-search"></i> <strong>Troubleshooting Flow:</strong><br>
+            제어 로직(app.py)은 Phase 1과 동일했기에 소프트웨어 문제는 아니라고 판단.<br>
+            하드웨어 제어권이 <strong>OS(Linux)에서 펌웨어(STM32)로 이관</strong>되는 과정에서, <strong>타이머/PWM 설정</strong>에 물리적 차이가 발생했을 것이라는 가설 수립.
+        </div>
+        
+        <h4 style="color:var(--accent-purple); margin-top:30px; margin-bottom:10px;">2. 원인 분석 (Root Cause)</h4>
+        <p>
+            STM32 타이머 설정 시 <strong>해상도(Resolution, 1000단계)</strong> 확보에만 치중하여, 
+            <strong>PWM 주파수가 840Hz까지 상승</strong>한 것이 원인.
+        </p>
+        <ul style="color:#aaa; font-size:0.9rem; margin-top:10px; padding-left:20px; line-height:1.6;">
+            <li><strong>Inductance Effect:</strong> 주파수가 너무 높으면 모터 코일의 전류가 충분히 상승하기 전에 전원이 차단됨(Off).</li>
+            <li><strong>Result:</strong> 평균 전압은 같아도 <strong>피크 전류(Peak Current)가 낮아져</strong> 코너링 저항을 이길 기동 토크(Torque)가 부족해짐.</li>
+        </ul>
+        
+        <h4 style="color:var(--accent-purple); margin-top:30px; margin-bottom:10px;">3. 해결 (Optimization)</h4>
+        <div style="margin-top:10px; background:rgba(139, 92, 246, 0.1); border-left:3px solid var(--accent-purple); padding:15px; border-radius:4px;">
+            <span style="color:var(--accent-purple); font-weight:bold; font-size:0.85rem;">"Prescaler Tuning: 840Hz &rarr; 60Hz"</span>
+            <p style="color:#ccc; font-size:0.9rem; margin-top:5px; line-height:1.5;">
+                펌웨어의 <strong>Prescaler 값을 재조정(99 &rarr; 1399)</strong>하여 PWM 주파수를 <strong>60Hz 대역</strong>으로 낮췄습니다.<br>
+                이를 통해 1주기당 전류 통전 시간을 늘려 <strong>강력한 기동 토크</strong>를 확보했고, 별도의 소프트웨어 보정 없이 물리적 마찰 문제를 근본적으로 해결했습니다.
+            </p>
+        </div>
     </div>
 </template>

@@ -272,7 +272,10 @@ setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, ...);
 <div class="engineer-note">
     <h4><i class="fas fa-pen-nib"></i> 박해진's Note</h4>
     <p>
-        "초기에는 Python 라이브러리만 사용했으나 성능 이슈를 우려하여 <strong>C++로 모터 드라이버를 재작성</strong>했습니다. 
+        "전반적으로 Linux OS 사용 및 RPi5만으로 수동 주행에는 큰 어려움이 없었습니다. 
+        <br>
+        C++과 Python의 IPC 패턴 설계 부분이 조금 헷갈렸지만 빠른 시간 안에 해결했습니다.
+        <br>
         이 과정에서 <strong>UDP 소켓을 활용한 로컬 IPC</strong> 패턴을 설계하였고, 
         이는 추후 분산 시스템(Phase 2)을 이해하는 중요한 기반이 되었습니다."
     </p>
