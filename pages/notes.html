@@ -1,3 +1,62 @@
+<style>
+    /* 맥북 윈도우 컨테이너 */
+    .mac-window {
+        background-color: #1e1e1e; /* VS Code 배경색 */
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        overflow: hidden;
+        border: 1px solid #333;
+        font-family: 'JetBrains Mono', monospace; /* 기존 폰트 유지 */
+        margin-top: 15px;
+    }
+
+    /* 상단 타이틀 바 (신호등 영역) */
+    .mac-header {
+        background-color: #2d2d2d;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #111;
+    }
+
+    /* 신호등 버튼들 */
+    .mac-dots {
+        display: flex;
+        gap: 8px;
+    }
+    .mac-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+    .mac-red { background-color: #ff5f56; }
+    .mac-yellow { background-color: #ffbd2e; }
+    .mac-green { background-color: #27c93f; }
+
+    /* 파일명 (선택사항) */
+    .mac-title {
+        margin-left: 15px;
+        color: #888;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    /* 코드 본문 */
+    .mac-body {
+        padding: 20px;
+        color: #d4d4d4;
+        font-size: 0.85rem;
+        line-height: 1.6;
+    }
+
+    /* 간단한 문법 강조 (Syntax Highlighting) */
+    .kwd { color: #c586c0; font-weight: bold; } /* 키워드 (if) - 보라색 */
+    .func { color: #dcdcaa; } /* 함수 (abs) - 노란색 */
+    .num { color: #b5cea8; } /* 숫자 - 연두색 */
+    .op { color: #569cd6; } /* 연산자 - 파란색 */
+</style>
+
+
 <div class="phase-header">
     <span style="color: #ccc; font-weight: bold; letter-spacing: 2px;">TECHNICAL LOG</span>
     <h1>Engineering Notes</h1>
@@ -61,7 +120,7 @@
         <p class="note-summary" style="color: #ccc; font-weight: bold;">
             "직진은 잘 되는데, 코너링만 하면 멈춘다?"<br>
             <span style="color: #888; font-weight: normal; font-size: 0.9rem;">
-                고주파수(840Hz) 설정으로 인한 기동 토크 부족 현상. 주파수를 60Hz로 낮춰 물리적 한계를 극복하다.
+                고주파수(840Hz) 설정으로 인한 기동 토크 부족 현상. 주파수를 60Hz로 낮춰 해결.
             </span>
         </p>
         <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #333; color: var(--accent-blue); font-size: 0.85rem; font-weight: bold;">
@@ -132,35 +191,61 @@
 
 
 <template id="note-frequency">
-    <div data-title="PWM Frequency & Motor Stall" data-date="Firmware Optimization | Log #03">
-        <h4 style="color:var(--accent-purple); margin-bottom:10px;">1. 문제 상황</h4>
+    <div data-title="Torque Optimization: Hybrid Approach" data-date="Firmware & Software | Log #03">
+        
+        <h4 style="color:var(--accent-purple); margin-bottom:10px;">1. 현상 (Symptom)</h4>
         <p>
-            직진 주행은 원활하나, <strong>조향(Steering) 시 차량이 멈추는 Stall 현상</strong> 발생.<br>
-            소프트웨어 로직(Python)에는 문제가 없었으나, Phase 1(RPi 제어) 대비 Phase 2(STM32 제어)에서 구동력이 현저히 약해짐.
+            직진 주행은 원활하나, <strong>코너링 시 차량이 멈추는 Stall 현상</strong> 발생.<br>
+            단순한 PWM 출력 부족이라기엔, Phase 1(RPi 직접 제어) 대비 Phase 2(STM32)의 구동 토크가 현저히 떨어지는 물리적 차이가 관측됨.
         </p>
-        <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:4px; margin-top:10px; font-size:0.85rem; color:#aaa;">
-            <i class="fas fa-search"></i> <strong>Troubleshooting Flow:</strong><br>
-            제어 로직(app.py)은 Phase 1과 동일했기에 소프트웨어 문제는 아니라고 판단.<br>
-            하드웨어 제어권이 <strong>OS(Linux)에서 펌웨어(STM32)로 이관</strong>되는 과정에서, <strong>타이머/PWM 설정</strong>에 물리적 차이가 발생했을 것이라는 가설 수립.
-        </div>
         
         <h4 style="color:var(--accent-purple); margin-top:30px; margin-bottom:10px;">2. 원인 분석 (Root Cause)</h4>
-        <p>
-            STM32 타이머 설정 시 <strong>해상도(Resolution, 1000단계)</strong> 확보에만 치중하여, 
-            <strong>PWM 주파수가 840Hz까지 상승</strong>한 것이 원인.
-        </p>
-        <ul style="color:#aaa; font-size:0.9rem; margin-top:10px; padding-left:20px; line-height:1.6;">
-            <li><strong>Inductance Effect:</strong> 주파수가 너무 높으면 모터 코일의 전류가 충분히 상승하기 전에 전원이 차단됨(Off).</li>
-            <li><strong>Result:</strong> 평균 전압은 같아도 <strong>피크 전류(Peak Current)가 낮아져</strong> 코너링 저항을 이길 기동 토크(Torque)가 부족해짐.</li>
+        <ul style="color:#ccc; font-size:0.9rem; padding-left:20px; line-height:1.6;">
+            <li>
+                <strong>H/W 요인 (High Frequency):</strong> STM32 타이머의 해상도 확보에 집중하다 보니 PWM 주파수가 <strong>840Hz</strong>까지 상승함. 모터 코일의 인덕턴스(Inductance)로 인해 전류가 충분히 흐르지 못해 기동 토크가 급감함.
+            </li>
+            <li>
+                <strong>S/W 요인 (Static Throttle):</strong> 조향(Steering) 시 앞바퀴 마찰력이 증가함에도 불구하고, 
+                소프트웨어는 직진과 동일한 출력을 유지하여 부하를 이기지 못함.
+            </li>
         </ul>
-        
+
         <h4 style="color:var(--accent-purple); margin-top:30px; margin-bottom:10px;">3. 해결 (Optimization)</h4>
+        
         <div style="margin-top:10px; background:rgba(139, 92, 246, 0.1); border-left:3px solid var(--accent-purple); padding:15px; border-radius:4px;">
-            <span style="color:var(--accent-purple); font-weight:bold; font-size:0.85rem;">"Prescaler Tuning: 840Hz &rarr; 60Hz"</span>
+            <span style="color:var(--accent-purple); font-weight:bold; font-size:0.85rem;">Step 1: Firmware Tuning (Physical Layer)</span>
             <p style="color:#ccc; font-size:0.9rem; margin-top:5px; line-height:1.5;">
-                펌웨어의 <strong>Prescaler 값을 재조정(99 &rarr; 1399)</strong>하여 PWM 주파수를 <strong>60Hz 대역</strong>으로 낮췄습니다.<br>
-                이를 통해 1주기당 전류 통전 시간을 늘려 <strong>강력한 기동 토크</strong>를 확보했고, 별도의 소프트웨어 보정 없이 물리적 마찰 문제를 근본적으로 해결했습니다.
+                <strong>Prescaler 재조정 (99 &rarr; 1399):</strong><br>
+                PWM 주파수를 <strong>840Hz에서 60Hz 대역으로 하향 조정</strong>. 
+                1주기당 통전 시간을 물리적으로 늘려 모터의 코일이 충분한 자기장을 형성하도록 유도, 기초 기동 토크를 확보함.
             </p>
         </div>
+
+        <div style="margin-top:10px; background:rgba(139, 92, 246, 0.1); border-left:3px solid var(--accent-purple); padding:15px; border-radius:4px;">
+            <span style="color:var(--accent-purple); font-weight:bold; font-size:0.85rem;">Step 2: Dynamic Throttle Boost (Logic Layer)</span>
+            <p style="color:#ccc; font-size:0.9rem; margin-top:5px; line-height:1.5;">
+                <strong>조향각 비례 출력 보정:</strong><br>
+                조향 시 증가하는 마찰 저항을 상쇄하기 위해 <code>app.py</code>에 가중치 알고리즘 추가.
+            </p>
+<div class="mac-window">
+    <div class="mac-header">
+        <div class="mac-dots">
+            <div class="mac-dot mac-red"></div>
+            <div class="mac-dot mac-yellow"></div>
+            <div class="mac-dot mac-green"></div>
+        </div>
+        <span class="mac-title">app.py</span> </div>
+    <div class="mac-body">
+        <span class="kwd">if</span> <span class="func">abs</span>(steering) > <span class="num">0.1</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;boost_factor = <span class="num">1.0</span> <span class="op">+</span> (<span class="func">abs</span>(steering) <span class="op">*</span> <span class="num">0.8</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;throttle = throttle <span class="op">*</span> boost_factor
+    </div>
+</div>
+        </div>
+
+        <h4 style="color:var(--accent-purple); margin-top:30px; margin-bottom:10px;">4. 결과</h4>
+        <p>
+            Stall 없이 부드러운 코너링 주행 성공.
+        </p>
     </div>
 </template>
