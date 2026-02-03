@@ -13,8 +13,8 @@
     <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-top: 20px;">
         <div style="flex: 1; min-width: 300px;">
             <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
-                Phase 3 진입 직전, 전원부 쇼트로 인해 상위 제어기(RPi 5)를 사용할 수 없게 되었습니다. 
-                단순히 부품을 재구매하는 대신, 저는 <strong>"불확실한 상위 제어기 없이도 완벽하게 동작하는 하부 제어 시스템"</strong>을 
+                Phase 3 진입 직전, 전원부 배선 작업 중 실수(Short Circuit)로 인해 상위 제어기(RPi 5)를 사용할 수 없게 되었습니다. 
+                단순히 부품을 재구매하여 기다리는 대신, 저는 <strong>"불확실한 상위 제어기 없이도 완벽하게 동작하는 하부 제어 시스템"</strong>을 
                 먼저 완성하는 것이 임베디드 엔지니어의 핵심 역량이라 판단했습니다.
             </p>
         </div>
@@ -28,7 +28,7 @@
                 <li>
                     <strong style="color: #ef4444;">New Strategy (Phase 3)</strong><br>
                     Laptop을 가상 ECU로 활용한 <strong>HILs 시뮬레이션</strong>.<br>
-                    <strong>FreeRTOS & PID 제어</strong> 완벽 검증 후 Vision 통합.
+                    <strong>FreeRTOS & Interrupt</strong> 기반의 완전한 제어기 검증.
                 </li>
             </ul>
         </div>
@@ -58,7 +58,26 @@
         <div style="background: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 12px; border: 1px solid #ef4444;">
             <i class="fas fa-microchip" style="font-size: 2rem; color: #ef4444; margin-bottom: 10px;"></i>
             <h4 style="color: #fff; font-size: 0.9rem;">STM32 + FreeRTOS</h4>
-            <small style="color: #888;">Target System / PID Control</small>
+            <small style="color: #888;">Target System / Interrupt Driven</small>
+        </div>
+    </div>
+</div>
+
+<div class="feature-card">
+    <h3><i class="fas fa-video" style="color: var(--accent-blue);"></i> HILs Verification</h3>
+    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+                노트북 터미널을 통해 가상 명령(Throttle: 999, Steering: 1500)을 주입하고, 
+                <strong>RTOS 기반의 펌웨어</strong>가 지연 없이 모터를 구동하는지 검증하는 HILs 테스트 영상입니다.<br>
+                <span style="color: var(--accent-orange); font-size: 0.85rem;">* 통신(Interrupt)과 제어(Task)가 완벽히 분리되어 병렬 처리됨을 확인했습니다.</span>
+            </p>
+        </div>
+        <div class="media-thumbnail" onclick="openModal('video', 'assets/phase3_rtos.mp4')" style="width: 200px; height: 350px;">
+            <video muted loop autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;">
+                <source src="assets/phase3_rtos.mp4" type="video/mp4">
+            </video>
+            <div class="thumbnail-overlay"><i class="fas fa-play-circle"></i></div>
         </div>
     </div>
 </div>
@@ -67,36 +86,37 @@
     <div class="feature-card">
         <h3><i class="fas fa-tasks" style="color: #ef4444;"></i> RTOS Task Architecture</h3>
         <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">
-            단일 루프(Super Loop)의 한계를 넘어, <strong>선점형 멀티태스킹</strong>을 도입했습니다.
+            단일 루프(Super Loop)의 한계를 넘어, <strong>선점형 멀티태스킹</strong>과 <strong>인터럽트</strong>를 도입했습니다.
         </p>
-        <div class="bom-table-container">
-            <table class="bom-table">
+        
+        <div class="bom-table-container" style="overflow-x: auto;">
+            <table class="bom-table" style="min-width: 600px;">
                 <thead>
                     <tr>
-                        <th>Task Name</th>
-                        <th>Priority</th>
-                        <th>Period</th>
+                        <th style="width: 20%;">Context</th>
+                        <th style="width: 15%;">Type</th>
+                        <th style="width: 15%;">Priority</th>
                         <th>Role</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
+                        <td style="color: var(--accent-purple); font-weight: bold;">ISR (UART)</td>
+                        <td><span class="tag sub" style="border-color:var(--accent-purple); color:var(--accent-purple);">Hardware</span></td>
+                        <td>Highest</td>
+                        <td>Data Reception & Queue Push</td>
+                    </tr>
+                    <tr>
                         <td style="color: #ef4444; font-weight: bold;">Safety_Task</td>
                         <td><span class="tag main" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:#ef4444;">Realtime</span></td>
-                        <td>5ms</td>
+                        <td>High</td>
                         <td>Emergency Stop check</td>
                     </tr>
                     <tr>
-                        <td style="color: var(--accent-green); font-weight: bold;">Motor_PID</td>
-                        <td><span class="tag main">High</span></td>
-                        <td>10ms</td>
-                        <td>Closed-Loop PID Control</td>
-                    </tr>
-                    <tr>
-                        <td style="color: var(--accent-blue);">Comm_Parser</td>
-                        <td><span class="tag sub">Normal</span></td>
-                        <td>Event</td>
-                        <td>UART DMA Packet Parsing</td>
+                        <td style="color: var(--accent-green); font-weight: bold;">Motor_Task</td>
+                        <td><span class="tag main">Normal</span></td>
+                        <td>Mid</td>
+                        <td>Queue Consumer & Control</td>
                     </tr>
                 </tbody>
             </table>
@@ -104,49 +124,42 @@
     </div>
 
     <div class="feature-card">
-        <h3><i class="fas fa-chart-line" style="color: var(--accent-green);"></i> PID Control Tuning</h3>
+        <h3><i class="fas fa-bolt" style="color: #f59e0b;"></i> Key Logic: Event-Driven (Interrupt)</h3>
         <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">
-            Open-Loop 방식의 속도 저하 문제를 해결하기 위해 엔코더 피드백 기반의 PID 제어기를 구현했습니다.
+            기존 Polling 방식의 CPU 낭비를 제거하기 위해 <strong>UART Rx Interrupt</strong>를 적용했습니다.
+            데이터가 도착했을 때만 하드웨어 인터럽트가 발생하여 큐에 데이터를 넣고, 평소에는 CPU가 다른 작업에 집중합니다.
         </p>
-        <div style="background: #000; padding: 15px; border-radius: 6px; border: 1px solid #333; height: 180px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-            <i class="fas fa-wave-square" style="font-size: 3rem; color: #333; margin-bottom: 10px;"></i>
-            <span style="color: #666; font-size: 0.8rem;">[Placeholder] PID Response Graph</span>
-            <span style="color: #444; font-size: 0.7rem;">Target vs Actual RPM</span>
-        </div>
-        <div style="margin-top: 15px; display: flex; gap: 10px;">
-            <span class="spec-badge">Kp: 2.5</span>
-            <span class="spec-badge">Ki: 0.1</span>
-            <span class="spec-badge">Kd: 0.5</span>
-        </div>
-    </div>
-</div>
+        <div style="background: #0d0d0d; padding: 15px; border-radius: 6px; border: 1px solid #333;">
+            <div style="font-size: 0.8rem; color: #666; margin-bottom: 8px;">stm32_it.c (Interrupt Service Routine)</div>
+            <pre style="margin: 0; border: none; padding: 0;"><code class="cpp"><span class="comment">// UART 수신 완료 시 하드웨어가 자동 호출 (Callback)</span>
+<span class="keyword">void</span> <span class="function">HAL_UART_RxCpltCallback</span>(UART_HandleTypeDef *huart) {
+    
+    <span class="comment">// 1. Parse Data immediately</span>
+    <span class="keyword">if</span> (parse_packet(buffer, &cmd)) {
+        
+        <span class="comment">// 2. Push to Queue (Non-blocking form ISR)</span>
+        <span class="comment">// 인터럽트 컨텍스트에서 안전하게 큐 전송</span>
+        <span class="function">osMessageQueuePut</span>(myQueueHandle, &cmd, 0, 0);
+        
+        <span class="comment">// 3. Trigger Debug LED</span>
+        HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+    }
 
-<div class="feature-card">
-    <h3><i class="fas fa-code-branch" style="color: var(--accent-purple);"></i> Key Improvement: DMA & Queue</h3>
-    <div style="background: #0d0d0d; padding: 15px; border-radius: 6px; border: 1px solid #333;">
-        <div style="font-size: 0.8rem; color: #666; margin-bottom: 8px;">stm32_uart.c (Interrupt to Queue)</div>
-        <pre style="margin: 0; border: none; padding: 0;"><code class="cpp"><span class="comment">// UART Rx Complete Callback (ISR Context)</span>
-<span class="keyword">void</span> <span class="function">HAL_UARTEx_RxEventCallback</span>(...) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    
-    <span class="comment">// 1. Send Data to Queue directly from ISR</span>
-    xQueueSendFromISR(CommQueue, &rx_data, &xHigherPriorityTaskWoken);
-    
-    <span class="comment">// 2. Restart DMA</span>
-    HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_buffer, 64);
-    
-    <span class="comment">// 3. Context Switch if needed</span>
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    <span class="comment">// 4. Re-arm Interrupt (다음 수신 대기)</span>
+    <span class="function">HAL_UART_Receive_IT</span>(&huart2, &rx_data, 1);
 }</code></pre>
+        </div>
     </div>
 </div>
 
 <div class="engineer-note phase2">
     <h4><i class="fas fa-pen-nib"></i> 박해진's Note</h4>
     <p>
-        "전화위복(Turn a misfortune into a blessing).<br>
-        라즈베리파이의 부재는 오히려 저를 <strong>'펌웨어의 깊은 곳'</strong>으로 이끌었습니다. 
-        자율주행 코드를 올리기 전에, <strong>어떤 명령이 와도 0.001초의 오차 없이 수행해내는 완벽한 하부 제어기</strong>를 만드는 것이 
-        진정한 엔지니어링임을 깨달았습니다."
+        "RTOS를 도입하며 가장 크게 배운 것은 <strong>'기다림의 미학(Blocking)'</strong>과 <strong>'사건 중심(Event-Driven)'</strong> 사고방식입니다.
+        <br>
+        데이터가 오는지 계속 감시하던(Polling) 비효율적인 구조를 버리고, 
+        하드웨어가 신호를 줄 때만 반응하는 <strong>인터럽트 구조</strong>로 변경함으로써 
+        시스템의 응답성과 효율성을 동시에 잡을 수 있었습니다.
+        이것이 바로 자원을 극한으로 아껴야 하는 임베디드 시스템의 본질임을 깨달았습니다."
     </p>
 </div>

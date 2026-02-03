@@ -118,9 +118,27 @@
         </div>
         <h3>PWM Frequency & Torque</h3>
         <p class="note-summary" style="color: #ccc; font-weight: bold;">
-            "직진은 잘 되는데, 코너링만 하면 멈춘다?"<br>
+            "직진은 잘 되는데, 코너링만 하면 멈추는 현상"<br>
             <span style="color: #888; font-weight: normal; font-size: 0.9rem;">
                 고주파수(840Hz) 설정으로 인한 기동 토크 부족 현상. 주파수를 60Hz로 낮춰 해결.
+            </span>
+        </p>
+        <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #333; color: var(--accent-blue); font-size: 0.85rem; font-weight: bold;">
+            Read Detail <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>
+        </div>
+    </div>
+
+
+    <div class="note-card" onclick="openNoteModal('note-short-circuit')">
+        <div class="note-header">
+            <span class="note-cat" style="color: #ef4444;">Catastrophic Failure</span>
+            <span class="note-date">Log #04 - Phase 3</span>
+        </div>
+        <h3>The 7.4V GPIO Disaster</h3>
+        <p class="note-summary" style="color: #ccc; font-weight: bold;">
+            "처음 보드 태운 경험"<br>
+            <span style="color: #888; font-weight: normal; font-size: 0.9rem;">
+                물리적 충격으로 이탈한 7.4V 배터리 선이 3.3V GPIO 핀을 타격. RPi 5 사망 및 HILs 전환 계기.
             </span>
         </p>
         <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #333; color: var(--accent-blue); font-size: 0.85rem; font-weight: bold;">
@@ -247,5 +265,46 @@
         <p>
             Stall 없이 부드러운 코너링 주행 성공.
         </p>
+    </div>
+    
+</template>
+
+
+<template id="note-short-circuit">
+    <div data-title="Critical Hardware Failure Analysis" data-date="Incident Report | Log #04">
+        
+        <h4 style="color:#ef4444; margin-bottom:10px;">1. 사고 개요 (Incident)</h4>
+        <p>
+            초기 자율주행 테스트 중 차량이 트랙 벽과 충돌. 직후 라즈베리파이 전원이 차단되었으며 재부팅 불가.<br>
+            <strong>손실:</strong> Raspberry Pi 5 (8GB) 영구 손상.
+        </p>
+        
+        <h4 style="color:#ef4444; margin-top:30px; margin-bottom:10px;">2. 원인 분석 (Root Cause)</h4>
+        <div style="background:rgba(255,0,0,0.05); padding:15px; border-radius:6px; border:1px dashed #ef4444;">
+            <ul style="color:#ccc; font-size:0.9rem; padding-left:20px; line-height:1.6; margin:0;">
+                <li><strong>물리적 고정 불량:</strong> 배터리 커넥터가 진동과 충격을 견디지 못하고 이탈함.</li>
+                <li><strong>절연 미비:</strong> RPi가 케이스 없이 노출된 상태로 장착되어 있었음.</li>
+                <li><strong>Fatal Short:</strong> 덜렁거리는 <strong>7.4V 배터리 양극(+) 선이 RPi의 3.3V GPIO 핀 헤더에 접촉</strong>하여 SoC 과전압 소손 발생.</li>
+            </ul>
+        </div>
+
+        <h4 style="color:#ef4444; margin-top:30px; margin-bottom:10px;">3. 대응 및 교훈 (Action Plan)</h4>
+        
+        <div style="margin-top:10px; background:rgba(239, 68, 68, 0.1); border-left:3px solid #ef4444; padding:15px; border-radius:4px;">
+            <span style="color:#ef4444; font-weight:bold; font-size:0.85rem;">Immediate Pivot: HILs Simulation</span>
+            <p style="color:#ccc; font-size:0.9rem; margin-top:5px; line-height:1.5;">
+                하드웨어 재구매 기간 동안 프로젝트가 중단되지 않도록, <strong>노트북을 상위 제어기로 활용하는 HILs(Hardware-in-the-Loop) 환경</strong>을 구축.<br>
+                위기를 기회로 삼아 STM32 RTOS 펌웨어의 신뢰성을 극한까지 검증함.
+            </p>
+        </div>
+
+        <div style="margin-top:15px; background:rgba(16, 185, 129, 0.1); border-left:3px solid var(--accent-green); padding:15px; border-radius:4px;">
+            <span style="color:var(--accent-green); font-weight:bold; font-size:0.85rem;">Prevention: Mechanical Reinforcement</span>
+            <p style="color:#ccc; font-size:0.9rem; margin-top:5px; line-height:1.5;">
+                <strong>1. Housing:</strong> 정품 케이스 및 하부 절연 아크릴 장착.<br>
+                <strong>2. Wiring:</strong> 점퍼선 대신 납땜 및 수축 튜브로 커넥터 마감.<br>
+                <strong>3. Fixation:</strong> 나일론 서포트(M2.5)를 사용하여 기판을 차체로부터 1cm 이상 이격(공중 부양) 고정.
+            </p>
+        </div>
     </div>
 </template>
