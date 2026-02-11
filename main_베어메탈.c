@@ -72,10 +72,38 @@ int main(void)
   uint32_t last_command_time = HAL_GetTick(); // 마지막으로 명령 받은 시간 (Failsafe용)
   uint16_t prev_cnt = (uint16_t)__HAL_TIM_GET_COUNTER(&htim1); // 이전 엔코더 값
 
+  // [성능 측정 변수 선언]
+  uint32_t last_loop_time = HAL_GetTick();
+  uint32_t current_time = 0;
+  uint32_t time_diff = 0;
+  
+  uint32_t max_jitter = 0;
+  uint32_t min_jitter = 9999;
+  uint32_t loop_count = 0;
+
   /* 5. 메인 루프 (Super Loop) */
   // [RTOS 이식 포인트] 이 while(1) 안에 있는 내용들이 쪼개져서 각기 다른 Task로 들어갑니다.
     while (1)
     {
+
+        // ★ [측정 시작] 루프 한 바퀴 도는 시간 측정
+      current_time = HAL_GetTick();
+      time_diff = current_time - last_loop_time;
+      last_loop_time = current_time;
+
+      // 통계 집계 (초반 안정화 10회 무시)
+      if (loop_count > 10) {
+          if (time_diff > max_jitter) max_jitter = time_diff;
+          if (time_diff < min_jitter) min_jitter = time_diff;
+      }
+      loop_count++;
+
+    // 100회(약 2초? 베어메탈은 주기가 들쑥날쑥함)마다 출력
+    if (loop_count % 10 == 0) {
+        printf("PERF: %lu, MAX: %lu, MIN: %lu\r\n", time_diff, max_jitter, min_jitter);
+        max_jitter = 0;
+        min_jitter = 9999;
+    }
         /* ====================================================
          * [1] UART 수신 (Polling 방식 -> DMA로 변경 예정)
          * ==================================================== */
@@ -187,7 +215,11 @@ int main(void)
 
             last_telemetry_time = HAL_GetTick();
         }
+
+          // [비교를 위한 공정 조건] RTOS처럼 20ms(50Hz) 주기를 맞추려고 노력함
+        HAL_Delay(20);
     }
+
 }
 
 /* --- 하단은 하드웨어 초기화 함수들 (CubeMX 자동 생성 + 수정) --- */
@@ -331,6 +363,21 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+}
+
+/* USER CODE BEGIN 4 */
+
+// ★ [필수 추가] printf를 UART로 쏘기 위한 함수
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif
+
+PUTCHAR_PROTOTYPE
+{
+  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
+  return ch;
 }
 
 static void Force_Hardware_Config(void)

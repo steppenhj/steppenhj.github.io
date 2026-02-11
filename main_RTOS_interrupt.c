@@ -1,7 +1,7 @@
 /* USER CODE BEGIN Header */
 /**
-  * @brief          : Neuro-Driver Firmware (Simple Polling Version)
-  * @note           : DMA/Interrupt 제거됨. 가장 기본 모드.
+  * @brief          : 인터럽트해보자. 
+  * @note           : 
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
@@ -48,21 +48,21 @@ UART_HandleTypeDef huart2;
 osThreadId_t Task_CommHandle;
 const osThreadAttr_t Task_Comm_attributes = {
   .name = "Task_Comm",
-  .stack_size = 512 * 4,
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for Task_Motor */
 osThreadId_t Task_MotorHandle;
 const osThreadAttr_t Task_Motor_attributes = {
   .name = "Task_Motor",
-  .stack_size = 512 * 4,
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for Task_Safety */
 osThreadId_t Task_SafetyHandle;
 const osThreadAttr_t Task_Safety_attributes = {
   .name = "Task_Safety",
-  .stack_size = 512 * 4,
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
 /* USER CODE BEGIN PV */
@@ -132,6 +132,9 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+  // ★ [긴급 추가] 타이머 3번 전원 강제 공급
+    __HAL_RCC_TIM3_CLK_ENABLE();
+
     // 1. 핀 설정 강제 적용
     Force_Hardware_Config();
 
@@ -140,10 +143,14 @@ int main(void)
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3); // Servo
 
     // 큐 생성 (크기: 16개, 데이터 크기: 상자 크기만큼)
-    myQueueHandle = osMessageQueueNew(16, sizeof(MotorCommand_t), NULL);
+    // 큐 생성 옮겨야 함
     // 3. 변수 초기화
     last_command_time = HAL_GetTick();
-  /* USER CODE END 2 */
+
+    // 인터럽트 수신 시작( 한 글자 들어오면 인터럽트 발생해라는 느낌)
+    // 이것도 옮겨야함
+
+    /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();
@@ -162,6 +169,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+  myQueueHandle = osMessageQueueNew(16, sizeof(MotorCommand_t), NULL);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -447,6 +455,67 @@ void Force_Hardware_Config(void)
   GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
+
+// uart 인터럽트 콜백 함수 (데이터 오면 여기로 점프)
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart->Instance == USART2)
+	{
+		//디버깅. 인터럽트가 지금 잘 안되는 중.
+		// 일단 데이터 오는지 확인해야 하니깐 데이터 오면 무조건 깜빡이기
+		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+
+		static uint8_t buffer[64]; //static으로 선언 ..
+		static uint8_t buf_index = 0;
+
+		if(rx_data == '\n' || rx_data == '\r')
+		{
+			if(buf_index > 0)
+			{
+				buffer[buf_index] = 0;
+
+				int temp_speed = 0;
+				int temp_angle = 1500;
+
+				//ㅠㅏ싱 성공하면 큐에 넣음
+				if(sscanf((char*)buffer, "%d,%d", &temp_speed, &temp_angle) == 2)
+				{
+					MotorCommand_t send_msg;
+					send_msg.speed = temp_speed;
+					send_msg.angle = temp_angle;
+
+					//큐에 넣기
+					osMessageQueuePut(myQueueHandle, &send_msg, 0, 0);
+
+					last_command_time = HAL_GetTick();
+					HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+				}
+				buf_index = 0;
+				memset(buffer, 0, sizeof(buffer));
+			}
+		}
+		else
+		{
+			if(buf_index < 60){
+				buffer[buf_index++] = rx_data;
+			}
+		}
+
+		// 다음 인터럽트 장전
+		HAL_UART_Receive_IT(&huart2, &rx_data, 1);
+	}
+}
+
+//dp에러 발생 시(노이즈 같은 거) 자동 복구 함수
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+	if(huart->Instance == USART2)
+	{
+		// 에러 발생하면 빨간불(LD2) 대신 끄거나 다른 표시 가능
+		// 핵심 : 다시 수신 모드로 복귀시켜야 함
+		HAL_UART_Receive_IT(&huart2, &rx_data, 1);
+	}
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -457,59 +526,62 @@ void Force_Hardware_Config(void)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+  HAL_UART_Receive_IT(&huart2, &rx_data, 1);
+
   /* Infinite loop */
   for(;;)
   {
     // [Polling] 데이터 수신 확인
-    if (HAL_UART_Receive(&huart2, &rx_data, 1, 1) == HAL_OK)
-    {
-        // 1. 엔터키 감지 (\r 또는 \n 둘 다 처리)
-        if (rx_data == '\n' || rx_data == '\r')
-        {
-            if (buf_index > 0) // 버퍼에 데이터가 있을 때만 실행
-            {
-                buffer[buf_index] = 0; // 문자열 끝 맺음 (Null termination)
-
-                int temp_speed = 0;
-                int temp_angle = 1500;
-
-                // 2. 파싱 및 명령어 적용
-                if (sscanf((char*)buffer, "%d,%d", &temp_speed, &temp_angle) == 2)
-                {
-//                    speed_cmd = temp_speed;
-//                    angle_us = temp_angle;
-
-                	//큐에 넣기
-                	MotorCommand_t send_msg;
-                	send_msg.speed = temp_speed;
-                	send_msg.angle = temp_angle;
-
-                	// 큐에 발송
-                	osMessageQueuePut(myQueueHandle, &send_msg, 0, 0);
-
-                    last_command_time = HAL_GetTick(); // 안전장치 타이머 리셋
-
-                    // ★ 성공 확인용: 명령 알아들으면 LED 깜빡!
-                    HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-                }
-
-                // 버퍼 초기화
-                buf_index = 0;
-                memset(buffer, 0, sizeof(buffer));
-            }
-        }
-        else
-        {
-            // 3. 일반 문자 저장 (숫자, 쉼표 등)
-            if (buf_index < 60) {
-                buffer[buf_index++] = rx_data;
-            }
-        }
-    }
-    else
+//    if (HAL_UART_Receive(&huart2, &rx_data, 1, 1) == HAL_OK)
+//    {
+//        // 1. 엔터키 감지 (\r 또는 \n 둘 다 처리)
+//        if (rx_data == '\n' || rx_data == '\r')
+//        {
+//            if (buf_index > 0) // 버퍼에 데이터가 있을 때만 실행
+//            {
+//                buffer[buf_index] = 0; // 문자열 끝 맺음 (Null termination)
+//
+//                int temp_speed = 0;
+//                int temp_angle = 1500;
+//
+//                // 2. 파싱 및 명령어 적용
+//                if (sscanf((char*)buffer, "%d,%d", &temp_speed, &temp_angle) == 2)
+//                {
+////                    speed_cmd = temp_speed;
+////                    angle_us = temp_angle;
+//
+//                	//큐에 넣기
+//                	MotorCommand_t send_msg;
+//                	send_msg.speed = temp_speed;
+//                	send_msg.angle = temp_angle;
+//
+//                	// 큐에 발송
+//                	osMessageQueuePut(myQueueHandle, &send_msg, 0, 0);
+//
+//                    last_command_time = HAL_GetTick(); // 안전장치 타이머 리셋
+//
+//                    // ★ 성공 확인용: 명령 알아들으면 LED 깜빡!
+//                    HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+//                }
+//
+//                // 버퍼 초기화
+//                buf_index = 0;
+//                memset(buffer, 0, sizeof(buffer));
+//            }
+//        }
+//        else
+//        {
+//            // 3. 일반 문자 저장 (숫자, 쉼표 등)
+//            if (buf_index < 60) {
+//                buffer[buf_index++] = rx_data;
+//            }
+//        }
+//    }
+//    else
     {
         // 데이터 없으면 대기 (RTOS 스케줄링 양보)
-        osDelay(1);
+    	// 이제 폴링 방식에서 인터럽트로 바꿀거라서 주석때림
+        osDelay(1000);
     }
   }
   /* USER CODE END 5 */
@@ -521,20 +593,21 @@ void StartDefaultTask(void *argument)
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE BEGIN Header_StartTask02 */
-/* USER CODE BEGIN Header_StartTask02 */
+/* USER CODE END Header_StartTask02 */
 void StartTask02(void *argument)
 {
   /* USER CODE BEGIN StartTask02 */
-  MotorCommand_t rcv_msg;
+	// 받을 빈 상자 준비
+	MotorCommand_t rcv_msg;
+
   int current_speed = 0;
   int current_angle = 1500;
 
-  // [성능 측정 변수]
+  //성능 측정용 변수
   uint32_t last_wake_time = osKernelGetTickCount();
   uint32_t current_time = 0;
   uint32_t time_diff = 0;
-  
+  //통계용
   uint32_t max_jitter = 0;
   uint32_t min_jitter = 9999;
   uint32_t loop_count = 0;
@@ -542,34 +615,38 @@ void StartTask02(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    // ★ [측정 시작] 태스크가 다시 깨어나는 데 걸린 시간
-    current_time = osKernelGetTickCount();
-    time_diff = current_time - last_wake_time;
-    last_wake_time = current_time;
+	  //(1) 측정 시작
+	  current_time = osKernelGetTickCount();
+	  time_diff = current_time - last_wake_time;
+	  last_wake_time = current_time;
 
-    // 통계
-    if (loop_count > 10) {
-        if (time_diff > max_jitter) max_jitter = time_diff;
-        if (time_diff < min_jitter) min_jitter = time_diff;
-    }
-    loop_count++;
+	  //(2) 통계 집계 (처음 10번은 무시)
+	  if(loop_count > 10){
+		  if(time_diff > max_jitter) max_jitter = time_diff;
+		  if(time_diff < min_jitter) min_jitter = time_diff;
+	  }
+	  loop_count++;
 
-    // 출력
-    if (loop_count % 100 == 0) {
-        printf("PERF: %lu, MAX: %lu, MIN: %lu\r\n", time_diff, max_jitter, min_jitter);
-        max_jitter = 0;
-        min_jitter = 9999;
-    }
+	  //(3) 데이터 출력 - 100번(약 2초)마다 리포트 출력
+	  // "현재주기, 최대지연, 최소지연" csv 로 뽑음
+	  if(loop_count % 100 == 0){
+		  printf("PERF: %lu, MAX: %lu, MIN: %lu\r\n", time_diff, max_jitter, min_jitter);
+		  //측정값 다시 초기화 (구간별 측정위해)
+		  max_jitter = 0;
+		  min_jitter = 9999;
+	  }
+    // 1. 전역 변수 읽기 (통신 태스크가 받아온 값)
+//    current_speed = speed_cmd;
+//    current_angle = angle_us;
+	  // 큐에서 데이터 꺼내기
+	  // 데이터가 없으면 여기서 멈춰서 (Block) 기다림 (osWaitForever)
+	  // 데이터가 오면 꺠어나서 아래 코드를 실행
+	  osStatus_t status = osMessageQueueGet(myQueueHandle, &rcv_msg, NULL, 0);
 
-    // 1. 큐 확인 (문제의 코드: osWaitForever)
-    // 데이터가 없으면 여기서 무한정 대기하므로, time_diff가 엄청 커질 수 있습니다.
-    // 반대로 데이터가 폭주하면 time_diff가 거의 0에 수렴합니다.
-    osStatus_t status = osMessageQueueGet(myQueueHandle, &rcv_msg, NULL, osWaitForever);
-
-    if(status == osOK){
-      current_speed = rcv_msg.speed;
-      current_angle = rcv_msg.angle;
-    }
+	  if(status == osOK){
+		  current_speed = rcv_msg.speed;
+		  current_angle = rcv_msg.angle;
+	  }
 
     // 2. DC 모터 방향 및 속도 제어
     if (current_speed > MOTOR_PWM_MAX) current_speed = MOTOR_PWM_MAX;
@@ -595,11 +672,15 @@ void StartTask02(void *argument)
     if (current_angle > SERVO_MAX_US) current_angle = SERVO_MAX_US;
     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (uint32_t)current_angle);
 
+    last_wake_time = current_time;
+    osDelayUntil(last_wake_time + 20);
+
     // 100Hz 주기
 //    osDelay(10);
   }
   /* USER CODE END StartTask02 */
 }
+
 /* USER CODE BEGIN Header_StartTask03 */
 /**
 * @brief Function implementing the Task_Safety thread.

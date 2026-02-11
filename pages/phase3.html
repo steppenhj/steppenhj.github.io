@@ -1,165 +1,214 @@
 <div class="phase-header">
-    <span style="color: #ef4444; font-weight: bold; letter-spacing: 2px;">PHASE 03: REAL-TIME CONTROL</span>
-    <h1>RTOS & HILs Simulation</h1>
+    <span style="color: #ef4444; font-weight: bold; letter-spacing: 2px;">PHASE 03: IMPLEMENTATION</span>
+    <h1>Full-Stack Control Pipeline</h1>
     <p class="page-subtitle">
-        메인 프로세서(RPi)의 하드웨어 이슈 발생.<br>
-        이를 기회 삼아, <strong>MCU(STM32)의 제어 신뢰성</strong>을 극한으로 끌어올리는<br>
-        <strong>RTOS 기반 HILs(Hardware-in-the-Loop)</strong> 검증 단계로 전환했습니다.
+        웹 프론트엔드부터 임베디드 펌웨어까지.<br>
+        <strong>"데이터가 어떻게 변환되어 바퀴를 움직이는가"</strong>에 대한 End-to-End 구현을 완성했습니다.
     </p>
 </div>
 
-<div class="feature-card" style="border-left: 4px solid #ef4444;">
-    <h3><i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i> Strategic Pivot: Reliability First</h3>
-    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-top: 20px;">
-        <div style="flex: 1; min-width: 300px;">
-            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
-                Phase 3 진입 직전, 전원부 배선 작업 중 실수(Short Circuit)로 인해 상위 제어기(RPi 5)를 사용할 수 없게 되었습니다. 
-                단순히 부품을 재구매하여 기다리는 대신, 저는 <strong>"불확실한 상위 제어기 없이도 완벽하게 동작하는 하부 제어 시스템"</strong>을 
-                먼저 완성하는 것이 임베디드 엔지니어의 핵심 역량이라 판단했습니다.
-            </p>
-        </div>
-        
-        <div style="flex: 1; background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;">
-            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #ccc;">
-                <li style="margin-bottom: 10px; opacity: 0.6; text-decoration: line-through;">
-                    <strong style="color: #777;">Original Plan</strong><br>
-                    RPi Vision 주행 구현 (불안정한 제어기 위에 AI 얹기)
-                </li>
-                <li>
-                    <strong style="color: #ef4444;">New Strategy (Phase 3)</strong><br>
-                    Laptop을 가상 ECU로 활용한 <strong>HILs 시뮬레이션</strong>.<br>
-                    <strong>FreeRTOS & Interrupt</strong> 기반의 완전한 제어기 검증.
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-<div class="feature-card">
-    <h3><i class="fas fa-laptop-code" style="color: var(--accent-blue);"></i> HILs (Hardware-in-the-Loop) Setup</h3>
-    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
-        라즈베리파이 대신 <strong>노트북(Host PC)</strong>을 연결하여 극한의 통신 부하와 가상 주행 명령을 주입합니다.
-        MCU는 이것이 시뮬레이션인지 모른 채 <strong>실시간(1ms)</strong>으로 모터를 제어합니다.
+<div class="feature-card" style="border-top: 4px solid #ef4444;">
+    <h3 style="color: #fff; margin-bottom: 20px;">
+        <i class="fas fa-stream" style="color: #ef4444; margin-right: 10px;"></i>
+        The Data Journey
+    </h3>
+    <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 0.9rem;">
+        서로 다른 4개의 언어와 3개의 통신 프로토콜이 하나의 유기체처럼 동작합니다.
     </p>
-    
-    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; text-align: center; margin-top: 30px; flex-wrap: wrap;">
-        <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 12px; border: 1px solid var(--accent-blue);">
-            <i class="fas fa-laptop" style="font-size: 2rem; color: var(--accent-blue); margin-bottom: 10px;"></i>
-            <h4 style="color: #fff; font-size: 0.9rem;">Host PC (Laptop)</h4>
-            <small style="color: #888;">Virtual ECU / High Load Injector</small>
-        </div>
-        
-        <div style="display: flex; flex-direction: column; align-items: center;">
-            <span style="font-size: 0.7rem; color: #888;">UART / USB</span>
-            <i class="fas fa-exchange-alt" style="color: #555; font-size: 1.2rem;"></i>
-            <span style="font-size: 0.7rem; color: #ef4444; font-weight: bold;">115200 bps</span>
-        </div>
-        
-        <div style="background: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 12px; border: 1px solid #ef4444;">
-            <i class="fas fa-microchip" style="font-size: 2rem; color: #ef4444; margin-bottom: 10px;"></i>
-            <h4 style="color: #fff; font-size: 0.9rem;">STM32 + FreeRTOS</h4>
-            <small style="color: #888;">Target System / Interrupt Driven</small>
-        </div>
-    </div>
-</div>
 
-<div class="feature-card">
-    <h3><i class="fas fa-video" style="color: var(--accent-blue);"></i> HILs Verification</h3>
-    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 250px;">
-            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
-                노트북 터미널을 통해 가상 명령(Throttle: 999, Steering: 1500)을 주입하고, 
-                <strong>RTOS 기반의 펌웨어</strong>가 지연 없이 모터를 구동하는지 검증하는 HILs 테스트 영상입니다.<br>
-                <span style="color: var(--accent-orange); font-size: 0.85rem;">* 통신(Interrupt)과 제어(Task)가 완벽히 분리되어 병렬 처리됨을 확인했습니다.</span>
-            </p>
+    <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; text-align: center;">
+        
+        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444; min-width: 100px;">
+            <h4 style="color: #f7df1e; font-size: 0.9rem;"><i class="fab fa-js"></i> Web</h4>
+            <small style="color: #888;">Joystick</small>
+            <div style="font-size: 0.7rem; color: #555; margin-top: 5px;">JSON</div>
         </div>
-        <div class="media-thumbnail" onclick="openModal('video', 'assets/phase3_rtos.mp4')" style="width: 200px; height: 350px;">
-            <video muted loop autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;">
-                <source src="assets/phase3_rtos.mp4" type="video/mp4">
-            </video>
-            <div class="thumbnail-overlay"><i class="fas fa-play-circle"></i></div>
+        
+        <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
+            <span style="font-size: 0.65rem; color: #aaa; font-weight: bold;">WebSocket</span>
+            <i class="fas fa-long-arrow-alt-right" style="color: #666;"></i>
+            <span style="font-size: 0.6rem; color: #555;">100ms</span>
         </div>
+
+        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #3776ab; min-width: 100px;">
+            <h4 style="color: #3776ab; font-size: 0.9rem;"><i class="fab fa-python"></i> Py</h4>
+            <small style="color: #888;">Gateway</small>
+            <div style="font-size: 0.7rem; color: #555; margin-top: 5px;">Struct</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
+            <span style="font-size: 0.65rem; color: #aaa; font-weight: bold;">UDP</span>
+            <i class="fas fa-long-arrow-alt-right" style="color: #666;"></i>
+            <span style="font-size: 0.6rem; color: #555;">Async</span>
+        </div>
+
+        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid var(--accent-blue); min-width: 100px;">
+            <h4 style="color: var(--accent-blue); font-size: 0.9rem;"><i class="fas fa-cogs"></i> C++</h4>
+            <small style="color: #888;">Core</small>
+            <div style="font-size: 0.7rem; color: #555; margin-top: 5px;">String</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
+            <span style="font-size: 0.65rem; color: #aaa; font-weight: bold;">UART</span>
+            <i class="fas fa-long-arrow-alt-right" style="color: #666;"></i>
+            <span style="font-size: 0.6rem; color: #555;">115200</span>
+        </div>
+
+        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #10b981; min-width: 100px;">
+            <h4 style="color: #10b981; font-size: 0.9rem;"><i class="fas fa-microchip"></i> F/W</h4>
+            <small style="color: #888;">STM32</small>
+            <div style="font-size: 0.7rem; color: #555; margin-top: 5px;">PWM</div>
+        </div>
+
     </div>
 </div>
 
 <div class="grid-container">
+    
     <div class="feature-card">
-        <h3><i class="fas fa-tasks" style="color: #ef4444;"></i> RTOS Task Architecture</h3>
-        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">
-            단일 루프(Super Loop)의 한계를 넘어, <strong>선점형 멀티태스킹</strong>과 <strong>인터럽트</strong>를 도입했습니다.
+        <h4 style="color: #3776ab; margin-bottom: 10px;">
+            <i class="fab fa-python"></i> Layer 1: The Gateway
+        </h4>
+        <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">
+            웹에서의 비동기 요청을 받아 <strong>안전장치(Safety Lock)</strong>를 거친 후, 
+            C++ 코어가 이해할 수 있는 <strong>Binary Packet</strong>으로 압축하여 전송합니다.
         </p>
-        
-        <div class="bom-table-container" style="overflow-x: auto;">
-            <table class="bom-table" style="min-width: 600px;">
-                <thead>
-                    <tr>
-                        <th style="width: 20%;">Context</th>
-                        <th style="width: 15%;">Type</th>
-                        <th style="width: 15%;">Priority</th>
-                        <th>Role</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="color: var(--accent-purple); font-weight: bold;">ISR (UART)</td>
-                        <td><span class="tag sub" style="border-color:var(--accent-purple); color:var(--accent-purple);">Hardware</span></td>
-                        <td>Highest</td>
-                        <td>Data Reception & Queue Push</td>
-                    </tr>
-                    <tr>
-                        <td style="color: #ef4444; font-weight: bold;">Safety_Task</td>
-                        <td><span class="tag main" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:#ef4444;">Realtime</span></td>
-                        <td>High</td>
-                        <td>Emergency Stop check</td>
-                    </tr>
-                    <tr>
-                        <td style="color: var(--accent-green); font-weight: bold;">Motor_Task</td>
-                        <td><span class="tag main">Normal</span></td>
-                        <td>Mid</td>
-                        <td>Queue Consumer & Control</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+                <span class="mac-title">app.py</span>
+            </div>
+            <div class="mac-body">
+<span class="kwd">if not</span> engine_running: <span class="kwd">return</span> <span class="comment"># Safety Gate</span><br>
+<br>
+<span class="comment"># float(4byte) 2개를 8byte 패킷으로 압축</span><br>
+packet = struct.<span class="func">pack</span>(<span class="string">'ff'</span>, throttle, steering)<br>
+sock.<span class="func">sendto</span>(packet, (UDP_IP, UDP_PORT))
+            </div>
         </div>
     </div>
 
     <div class="feature-card">
-        <h3><i class="fas fa-bolt" style="color: #f59e0b;"></i> Key Logic: Event-Driven (Interrupt)</h3>
-        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">
-            기존 Polling 방식의 CPU 낭비를 제거하기 위해 <strong>UART Rx Interrupt</strong>를 적용했습니다.
-            데이터가 도착했을 때만 하드웨어 인터럽트가 발생하여 큐에 데이터를 넣고, 평소에는 CPU가 다른 작업에 집중합니다.
+        <h4 style="color: var(--accent-blue); margin-bottom: 10px;">
+            <i class="fas fa-code"></i> Layer 2: The Core
+        </h4>
+        <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">
+            <strong>Multi-threading</strong> 구조입니다. 수신(Receiver) 스레드와 제어(Control) 스레드가 
+            <strong>Mutex</strong>를 통해 데이터를 안전하게 공유하며 하드웨어(UART)로 명령을 쏘아줍니다.
         </p>
-        <div style="background: #0d0d0d; padding: 15px; border-radius: 6px; border: 1px solid #333;">
-            <div style="font-size: 0.8rem; color: #666; margin-bottom: 8px;">stm32_it.c (Interrupt Service Routine)</div>
-            <pre style="margin: 0; border: none; padding: 0;"><code class="cpp"><span class="comment">// UART 수신 완료 시 하드웨어가 자동 호출 (Callback)</span>
-<span class="keyword">void</span> <span class="function">HAL_UART_RxCpltCallback</span>(UART_HandleTypeDef *huart) {
-    
-    <span class="comment">// 1. Parse Data immediately</span>
-    <span class="keyword">if</span> (parse_packet(buffer, &cmd)) {
-        
-        <span class="comment">// 2. Push to Queue (Non-blocking form ISR)</span>
-        <span class="comment">// 인터럽트 컨텍스트에서 안전하게 큐 전송</span>
-        <span class="function">osMessageQueuePut</span>(myQueueHandle, &cmd, 0, 0);
-        
-        <span class="comment">// 3. Trigger Debug LED</span>
-        HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-    }
-
-    <span class="comment">// 4. Re-arm Interrupt (다음 수신 대기)</span>
-    <span class="function">HAL_UART_Receive_IT</span>(&huart2, &rx_data, 1);
-}</code></pre>
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+                <span class="mac-title">control_core.cpp</span>
+            </div>
+            <div class="mac-body">
+<span class="comment">// Thread 1: Receiver (Locking)</span><br>
+lock_guard&lt;mutex&gt; <span class="func">lock</span>(data_lock);<br>
+shared_data = packet;<br>
+<br>
+<span class="comment">// Thread 2: Controller (Non-blocking Write)</span><br>
+<span class="func">snprintf</span>(buf, ... <span class="string">"%d,%d\n"</span>, speed, angle);<br>
+<span class="func">write</span>(serial_fd, buf, len);
+            </div>
         </div>
+    </div>
+
+</div>
+
+<div class="feature-card" style="border-left: 4px solid #ef4444;">
+    <h3 style="color: #fff; margin-bottom: 15px;">
+        <i class="fas fa-microchip" style="color: #ef4444; margin-right: 10px;"></i> 
+        Layer 3: RTOS & Queue (STM32)
+    </h3>
+    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+        
+        <div style="flex: 1; min-width: 280px;">
+            <p style="font-size: 0.9rem; color: #ccc; line-height: 1.6;">
+                인터럽트(ISR)의 처리 시간을 최소화하기 위해 <strong>생산자-소비자 패턴(Producer-Consumer)</strong>을 적용했습니다.
+            </p>
+            <ul style="margin-top: 15px; color: #888; font-size: 0.85rem; line-height: 1.8;">
+                <li>
+                    <strong style="color: #ef4444;">Producer (ISR):</strong> 
+                    UART로 데이터가 오면 즉시 <strong>Queue</strong>에 넣고 종료 (Latency < 10us).
+                </li>
+                <li>
+                    <strong style="color: #10b981;">Consumer (Task):</strong> 
+                    모터 태스크가 Queue를 감시하다가 데이터가 있으면 꺼내서 PID 제어 수행.
+                </li>
+                <li>
+                    <strong>Decoupling:</strong> 통신 속도와 제어 속도의 차이를 완충(Buffer).
+                </li>
+            </ul>
+        </div>
+
+        <div style="flex: 1; min-width: 280px;">
+             <div class="mac-window" style="margin-top: 0;">
+                <div class="mac-header">
+                    <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+                    <span class="mac-title">main.c (RTOS Pattern)</span>
+                </div>
+                <div class="mac-body">
+<span class="comment">// 1. [Producer] UART Interrupt (Fast)</span><br>
+<span class="kwd">void</span> <span class="func">HAL_UART_RxCpltCallback</span>(...) {<br>
+&nbsp;&nbsp;<span class="comment">// 큐에 넣고 즉시 복귀 (Non-blocking)</span><br>
+&nbsp;&nbsp;<span class="func">osMessageQueuePut</span>(cmdQueue, &data, ...);<br>
+}<br>
+<br>
+<span class="comment">// 2. [Consumer] Motor Task (Heavy)</span><br>
+<span class="kwd">void</span> <span class="func">StartMotorTask</span>(...) {<br>
+&nbsp;&nbsp;<span class="kwd">while</span>(<span class="num">1</span>) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// 데이터가 올 때까지 대기 (Sleep)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">osMessageQueueGet</span>(cmdQueue, &msg, ...);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">PID_Calculate</span>(msg.speed); <span class="comment">// 복잡한 연산 수행</span><br>
+&nbsp;&nbsp;}<br>
+}
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
-<div class="engineer-note phase2">
+<div class="feature-card" style="border-top: 3px solid #ef4444;">
+    <h3 style="color: #fff; margin-bottom: 20px;">
+        <i class="fas fa-check-circle" style="color: #ef4444; margin-right: 10px;"></i>
+        Performance Verification
+    </h3>
+    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+        
+        <div style="flex: 1; min-width: 280px;">
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+                RTOS와 인터럽트 큐(Queue)를 도입하여 구조 복잡도는 증가했지만, 
+                결과적으로 <strong>"예측 가능한 제어(Deterministic Control)"</strong>를 달성했습니다.
+            </p>
+            
+            <div style="margin-top: 15px; background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 6px; border-left: 3px solid #ef4444;">
+                <span style="font-size: 0.85rem; color: #ccc; font-weight: bold;">Test Scenario:</span>
+                <p style="font-size: 0.85rem; color: #888; margin-top: 5px;">
+                    Host(노트북)에서 고속으로 랜덤한 주행 명령을 쏟아붓는 상황(Stress Test)에서도, 
+                    STM32가 <strong>100Hz 주기를 놓치지 않고 즉각 반응</strong>하는 것을 확인했습니다.
+                </p>
+            </div>
+        </div>
+
+        <div class="media-thumbnail" onclick="openModal('video', 'assets/phase3_rtos.mp4')" style="width: 240px; height: 160px; flex-shrink: 0;">
+            <video muted loop autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9;">
+                <source src="assets/phase3_rtos.mp4" type="video/mp4">
+            </video>
+            <div class="thumbnail-overlay"><i class="fas fa-play-circle"></i></div>
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.7rem; padding: 5px; text-align: center;">
+                Click to Watch Demo
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="engineer-note phase3">
     <h4><i class="fas fa-pen-nib"></i> 박해진's Note</h4>
     <p>
-        "RTOS를 도입하며 가장 크게 배운 것은 <strong>'기다림의 미학(Blocking)'</strong>과 <strong>'사건 중심(Event-Driven)'</strong> 사고방식입니다.
-        <br>
-        데이터가 오는지 계속 감시하던(Polling) 비효율적인 구조를 버리고, 
-        하드웨어가 신호를 줄 때만 반응하는 <strong>인터럽트 구조</strong>로 변경함으로써 
-        시스템의 응답성과 효율성을 동시에 잡을 수 있었습니다.
-        이것이 바로 자원을 극한으로 아껴야 하는 임베디드 시스템의 본질임을 깨달았습니다."
+        "RPi를 태운 후에 성급하게 자율주행을 하지 말고 더욱 더 안전하게 완벽한 수동주행을 추구하게 되었습니다.
+        <br>우선 phase 1일 때처럼 C++을 다시 도입하여 python의 부담을 줄였고, 멀티 스레드로 안전성을 추가했습니다.
+        <br>펌웨어에는 FreeRTOS, Interrupt를 적용했습니다."
     </p>
 </div>
