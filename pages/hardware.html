@@ -13,10 +13,10 @@
 <div class="grid-container">
     <div class="feature-card">
         <h3><i class="fab fa-raspberry-pi" style="color: #d63384;"></i> Raspberry Pi 5</h3>
-        <span class="spec-badge">8GB RAM / Bookworm OS</span>
+        <span class="spec-badge">4GB RAM (Final) / Active Cooler</span>
         <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
             고성능 쿼드코어 CPU로 웹 서버, 영상 스트리밍, 자율주행(AI) 추론을 담당합니다. 
-            <strong>Active Cooler</strong>를 장착하여 쓰로틀링을 방지했습니다.
+            초기 8GB 모델의 쇼트 이슈로 <strong>4GB 모델로 최적화</strong>하였으며, 전용 쿨러로 발열을 제어합니다.
         </p>
     </div>
 
@@ -45,19 +45,28 @@
 
     <div class="feature-card">
         <h3><i class="fas fa-bolt" style="color: #f59e0b;"></i> L298N Motor Driver</h3>
-        <span class="spec-badge">Dual H-Bridge</span>
+        <span class="spec-badge">Main Driver (Phase 2)</span>
         <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
             STM32의 제어 신호를 증폭하여 DC 모터를 구동합니다. 
-            최대 2A 전류 허용, 12V 외부 전원을 공급받아 5V 레귤레이터 기능을 겸합니다.
+            최대 2A 전류 허용, 듀얼 H-Bridge 구조로 전진/후진 및 속도 제어를 담당합니다.
+        </p>
+    </div>
+
+    <div class="feature-card" style="border: 1px dashed var(--text-muted); opacity: 0.9;">
+        <h3><i class="fas fa-microchip" style="color: #6c757d;"></i> Waveshare Motor HAT</h3>
+        <span class="spec-badge" style="background: #444;">Phase 1 Prototype</span>
+        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
+            <strong>PCA9685 칩셋</strong> 기반의 I2C 인터페이스 드라이버입니다. 
+            초기 개발 단계(Phase 1)에서 라즈베리파이 직결 제어 테스트 용도로 활용되었습니다.
         </p>
     </div>
 
     <div class="feature-card">
-        <h3><i class="fas fa-battery-full" style="color: var(--accent-green);"></i> Power System</h3>
-        <span class="spec-badge">7.4V Li-Po / 35C</span>
+        <h3><i class="fas fa-battery-full" style="color: var(--accent-green);"></i> Power System (UBEC)</h3>
+        <span class="spec-badge">7.4V Li-Po + 5V/5A UBEC</span>
         <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
-            구동계(Motor)는 고출력 리튬폴리머 배터리(7.4V)로, 제어기(RPi)는 보조배터리(5V)로 
-            <strong>전원을 물리적으로 분리</strong>하여 전압 강하로 인한 셧다운을 방지했습니다.
+            고출력 리튬폴리머(7.4V) 배터리 하나로 시스템 전체를 구동합니다.
+            별도의 <strong>UBEC(5V 5A) 레귤레이터</strong>를 통해 라즈베리파이에 안정적인 전원을 공급하여 셧다운을 방지했습니다.
         </p>
     </div>
 </div>
@@ -93,7 +102,7 @@
                 <tr>
                     <td><span class="tag main">Main Board</span></td>
                     <td>Raspberry Pi 5</td>
-                    <td>8GB RAM</td>
+                    <td>4GB RAM (Replaced due to short)</td>
                 </tr>
                 <tr>
                     <td><span class="tag main">MCU</span></td>
@@ -108,22 +117,32 @@
                 <tr>
                     <td><span class="tag main">Platform</span></td>
                     <td>Ackermann Chassis</td>
-                    <td>5kg Load, 12V Motor</td>
+                    <td>Front Steering, Rear DC Motor</td>
                 </tr>
                 <tr>
                     <td><span class="tag main">Drive</span></td>
                     <td>L298N Motor Driver</td>
-                    <td>Dual H-Bridge</td>
+                    <td>Main Driver (Current)</td>
+                </tr>
+                 <tr>
+                    <td><span class="tag sub">Drive (Legacy)</span></td>
+                    <td>Waveshare Motor Driver HAT</td>
+                    <td>PCA9685 / I2C (Phase 1)</td>
                 </tr>
                 <tr>
                     <td><span class="tag main">Vision</span></td>
                     <td>RPi Camera Module 3</td>
-                    <td>120° Wide Angle</td>
+                    <td>120° Wide Angle, IMX708</td>
                 </tr>
                 <tr>
                     <td><span class="tag main">Power</span></td>
                     <td>Li-Po Battery</td>
                     <td>7.4V, 2S1P, 35C+</td>
+                </tr>
+                <tr>
+                    <td><span class="tag sub">Power</span></td>
+                    <td>UBEC 5A Regulator</td>
+                    <td>5V 5A Output (For RPi Power)</td>
                 </tr>
             </tbody>
         </table>
