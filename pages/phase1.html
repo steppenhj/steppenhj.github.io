@@ -8,12 +8,52 @@
         </p>
 
     
-    <div style="margin-top: 20px;">
+    <div style="margin-top: 20px; margin-bottom: 20px;">
         <a href="https://github.com/steppenhj/Neuro-Drive-CPP/tree/main/phase_1_code" target="_blank" 
            style="background: #333; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; border: 1px solid #555; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;"
            onmouseover="this.style.background='#444'" onmouseout="this.style.background='#333'">
             <i class="fab fa-github"></i> View Source Code
         </a>
+    </div>
+</div>
+
+
+
+<div class="feature-card">
+    <h3><i class="fas fa-project-diagram" style="color: var(--accent-blue);"></i> Software Topology (IPC)</h3>
+    
+    <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 15px; text-align: center; margin-top: 30px;">
+        
+        <div style="background: #222; padding: 15px; border-radius: 8px; min-width: 120px; flex: 1;">
+            <h4 style="color: #fff; font-size: 0.9rem;">User Client</h4>
+            <small style="color: var(--text-muted);">WebSocket</small>
+        </div>
+        
+        <i class="fas fa-arrow-right" style="color: #666; font-size: 0.8rem;"></i>
+        
+        <div style="background: rgba(55, 118, 171, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #3776ab; min-width: 140px; flex: 1;">
+            <h4 style="color: #3776ab; font-size: 0.9rem;"><i class="fab fa-python"></i> Flask App</h4>
+            <small style="color: #ccc;">Gateway</small>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
+            <span style="font-size: 0.65rem; color: var(--accent-blue); font-weight: bold;">UDP</span>
+            <i class="fas fa-exchange-alt" style="color: var(--accent-blue);"></i>
+            <span style="font-size: 0.65rem; color: #666;">Localhost</span>
+        </div>
+        
+        <div style="background: rgba(0, 89, 156, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #00599c; min-width: 140px; flex: 1;">
+            <h4 style="color: #659ad2; font-size: 0.9rem;"><i class="fas fa-cogs"></i> C++ Engine</h4>
+            <small style="color: #ccc;">Core / Safety</small>
+        </div>
+
+        <i class="fas fa-arrow-right" style="color: #666; font-size: 0.8rem;"></i>
+
+        <div style="background: #222; padding: 15px; border-radius: 8px; min-width: 100px; flex: 1;">
+            <h4 style="color: #fff; font-size: 0.9rem;">Motors</h4>
+            <small style="color: var(--text-muted);">H/W</small>
+        </div>
+
     </div>
 </div>
 
@@ -81,43 +121,6 @@
     </div>
 </div>
 
-<div class="feature-card">
-    <h3><i class="fas fa-project-diagram" style="color: var(--accent-blue);"></i> Software Topology (IPC)</h3>
-    
-    <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 15px; text-align: center; margin-top: 30px;">
-        
-        <div style="background: #222; padding: 15px; border-radius: 8px; min-width: 120px; flex: 1;">
-            <h4 style="color: #fff; font-size: 0.9rem;">User Client</h4>
-            <small style="color: var(--text-muted);">WebSocket</small>
-        </div>
-        
-        <i class="fas fa-arrow-right" style="color: #666; font-size: 0.8rem;"></i>
-        
-        <div style="background: rgba(55, 118, 171, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #3776ab; min-width: 140px; flex: 1;">
-            <h4 style="color: #3776ab; font-size: 0.9rem;"><i class="fab fa-python"></i> Flask App</h4>
-            <small style="color: #ccc;">Gateway</small>
-        </div>
-        
-        <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
-            <span style="font-size: 0.65rem; color: var(--accent-blue); font-weight: bold;">UDP</span>
-            <i class="fas fa-exchange-alt" style="color: var(--accent-blue);"></i>
-            <span style="font-size: 0.65rem; color: #666;">Localhost</span>
-        </div>
-        
-        <div style="background: rgba(0, 89, 156, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #00599c; min-width: 140px; flex: 1;">
-            <h4 style="color: #659ad2; font-size: 0.9rem;"><i class="fas fa-cogs"></i> C++ Engine</h4>
-            <small style="color: #ccc;">Core / Safety</small>
-        </div>
-
-        <i class="fas fa-arrow-right" style="color: #666; font-size: 0.8rem;"></i>
-
-        <div style="background: #222; padding: 15px; border-radius: 8px; min-width: 100px; flex: 1;">
-            <h4 style="color: #fff; font-size: 0.9rem;">Motors</h4>
-            <small style="color: var(--text-muted);">H/W</small>
-        </div>
-
-    </div>
-</div>
 
 <div class="grid-container" style="margin-top: 0;">
     <div class="feature-card" style="border-left: 3px solid var(--accent-blue);">
@@ -210,6 +213,25 @@ setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, ...);
         <div class="media-thumbnail" onclick="openModal('image', 'assets/phase1_iso.jpg')" style="width: 200px; height: 150px;">
             <img src="assets/phase1_iso.jpg" alt="Phase 1 Hardware">
             <div class="thumbnail-overlay"><i class="fas fa-search-plus"></i></div>
+        </div>
+    </div>
+</div>
+
+
+<div class="feature-card">
+    <h3 style="margin-bottom: 20px;"><i class="fas fa-video" style="color: var(--accent-blue);"></i> System Demonstration</h3>
+    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+                웹 컨트롤러를 이용한 실제 주행 테스트 영상입니다.<br>
+                <span style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6;">(영상 클릭 시 확대)</span>
+            </p>
+        </div>
+        <div class="media-thumbnail" onclick="openModal('video', 'assets/phase1_demo.mp4')" style="width: 200px; height: 120px;">
+            <video muted loop autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;">
+                <source src="assets/phase1_demo.mp4" type="video/mp4">
+            </video>
+            <div class="thumbnail-overlay"><i class="fas fa-play-circle"></i></div>
         </div>
     </div>
 </div>

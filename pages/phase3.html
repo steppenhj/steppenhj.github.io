@@ -5,6 +5,14 @@
         웹 프론트엔드부터 임베디드 펌웨어까지.<br>
         <strong>"데이터가 어떻게 변환되어 바퀴를 움직이는가"</strong>에 대한 End-to-End 구현을 완성했습니다.
     </p>
+
+    <div style="margin-top: 20px; margin-bottom: 20px;">
+        <a href="https://github.com/steppenhj/Neuro-Drive-CPP/tree/main/phase_3_code" target="_blank" 
+           style="background: #333; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; border: 1px solid #555; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;"
+           onmouseover="this.style.background='#444'" onmouseout="this.style.background='#333'">
+            <i class="fab fa-github"></i> View Source Code
+        </a>
+    </div>
 </div>
 
 <div class="feature-card" style="border-top: 4px solid #ef4444;">
@@ -13,51 +21,42 @@
         The Data Journey
     </h3>
     <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 0.9rem;">
-        서로 다른 4개의 언어와 3개의 통신 프로토콜이 하나의 유기체처럼 동작합니다.
+        Phase 2의 하드웨어 구조 위에, <strong>안전(Safety)</strong>과 <strong>확장성(Scalability)</strong>을 위해 소프트웨어 스택을 재설계했습니다.<br>
+        <span style="color: #666; font-size: 0.8rem;">(Web → Python → C++ → UART → FreeRTOS)</span>
     </p>
 
     <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; text-align: center;">
         
-        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444; min-width: 100px;">
+        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444; min-width: 90px;">
             <h4 style="color: #f7df1e; font-size: 0.9rem;"><i class="fab fa-js"></i> Web</h4>
-            <small style="color: #888;">Joystick</small>
-            <div style="font-size: 0.7rem; color: #555; margin-top: 5px;">JSON</div>
+            <small style="color: #888;">UI</small>
         </div>
         
-        <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
-            <span style="font-size: 0.65rem; color: #aaa; font-weight: bold;">WebSocket</span>
-            <i class="fas fa-long-arrow-alt-right" style="color: #666;"></i>
-            <span style="font-size: 0.6rem; color: #555;">100ms</span>
-        </div>
+        <i class="fas fa-long-arrow-alt-right" style="color: #666;"></i>
 
-        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #3776ab; min-width: 100px;">
+        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #3776ab; min-width: 90px;">
             <h4 style="color: #3776ab; font-size: 0.9rem;"><i class="fab fa-python"></i> Py</h4>
             <small style="color: #888;">Gateway</small>
-            <div style="font-size: 0.7rem; color: #555; margin-top: 5px;">Struct</div>
         </div>
 
-        <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
-            <span style="font-size: 0.65rem; color: #aaa; font-weight: bold;">UDP</span>
-            <i class="fas fa-long-arrow-alt-right" style="color: #666;"></i>
-            <span style="font-size: 0.6rem; color: #555;">Async</span>
+        <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
+            <span style="font-size: 0.6rem; color: var(--accent-blue); font-weight: bold;">IPC</span>
+            <i class="fas fa-exchange-alt" style="color: #666;"></i>
         </div>
 
-        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid var(--accent-blue); min-width: 100px;">
+        <div style="background: rgba(0, 89, 156, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--accent-blue); min-width: 100px;">
             <h4 style="color: var(--accent-blue); font-size: 0.9rem;"><i class="fas fa-cogs"></i> C++</h4>
-            <small style="color: #888;">Core</small>
-            <div style="font-size: 0.7rem; color: #555; margin-top: 5px;">String</div>
+            <small style="color: #ccc;">Control Core</small>
         </div>
 
-        <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
-            <span style="font-size: 0.65rem; color: #aaa; font-weight: bold;">UART</span>
-            <i class="fas fa-long-arrow-alt-right" style="color: #666;"></i>
-            <span style="font-size: 0.6rem; color: #555;">115200</span>
+        <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
+            <span style="font-size: 0.6rem; color: #ef4444; font-weight: bold;">UART</span>
+            <i class="fas fa-arrow-right" style="color: #666;"></i>
         </div>
 
-        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #10b981; min-width: 100px;">
-            <h4 style="color: #10b981; font-size: 0.9rem;"><i class="fas fa-microchip"></i> F/W</h4>
-            <small style="color: #888;">STM32</small>
-            <div style="font-size: 0.7rem; color: #555; margin-top: 5px;">PWM</div>
+        <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #10b981; min-width: 110px;">
+            <h4 style="color: #10b981; font-size: 0.9rem;"><i class="fas fa-microchip"></i> RTOS</h4>
+            <small style="color: #ccc;">Task & Queue</small>
         </div>
 
     </div>
@@ -124,19 +123,20 @@ shared_data = packet;<br>
         
         <div style="flex: 1; min-width: 280px;">
             <p style="font-size: 0.9rem; color: #ccc; line-height: 1.6;">
-                인터럽트(ISR)의 처리 시간을 최소화하기 위해 <strong>생산자-소비자 패턴(Producer-Consumer)</strong>을 적용했습니다.
+                인터럽트 처리를 최소화하고, 시스템 안정성을 확보하기 위해 <strong>3-Task Architecture</strong>를 설계했습니다.
             </p>
             <ul style="margin-top: 15px; color: #888; font-size: 0.85rem; line-height: 1.8;">
                 <li>
-                    <strong style="color: #ef4444;">Producer (ISR):</strong> 
-                    UART로 데이터가 오면 즉시 <strong>Queue</strong>에 넣고 종료 (Latency < 10us).
+                    <strong style="color: #ef4444;">Comm Task (Producer):</strong> 
+                    UART 인터럽트로 데이터를 받아 <strong>Queue</strong>에 적재 (Non-blocking).
                 </li>
                 <li>
-                    <strong style="color: #10b981;">Consumer (Task):</strong> 
-                    모터 태스크가 Queue를 감시하다가 데이터가 있으면 꺼내서 PID 제어 수행.
+                    <strong style="color: #10b981;">Motor Task (Consumer):</strong> 
+                    Queue에서 명령을 꺼내 <strong>PWM 듀티비</strong>에 직접 매핑. (Open-Loop)
                 </li>
                 <li>
-                    <strong>Decoupling:</strong> 통신 속도와 제어 속도의 차이를 완충(Buffer).
+                    <strong style="color: #f7df1e;">Safety Task:</strong> 
+                    500ms 이상 통신이 끊기면 <strong>Hardware Stop</strong> 강제 수행.
                 </li>
             </ul>
         </div>
@@ -145,21 +145,22 @@ shared_data = packet;<br>
              <div class="mac-window" style="margin-top: 0;">
                 <div class="mac-header">
                     <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
-                    <span class="mac-title">main.c (RTOS Pattern)</span>
+                    <span class="mac-title">main.c (FreeRTOS Tasks)</span>
                 </div>
                 <div class="mac-body">
-<span class="comment">// 1. [Producer] UART Interrupt (Fast)</span><br>
+<span class="comment">// 1. [Producer] UART Callback</span><br>
 <span class="kwd">void</span> <span class="func">HAL_UART_RxCpltCallback</span>(...) {<br>
-&nbsp;&nbsp;<span class="comment">// 큐에 넣고 즉시 복귀 (Non-blocking)</span><br>
-&nbsp;&nbsp;<span class="func">osMessageQueuePut</span>(cmdQueue, &data, ...);<br>
+&nbsp;&nbsp;<span class="comment">// 큐에 넣고 즉시 복귀 (ISR 최소화)</span><br>
+&nbsp;&nbsp;<span class="func">osMessageQueuePut</span>(cmdQueue, &msg, 0, 0);<br>
 }<br>
 <br>
-<span class="comment">// 2. [Consumer] Motor Task (Heavy)</span><br>
-<span class="kwd">void</span> <span class="func">StartMotorTask</span>(...) {<br>
+<span class="comment">// 2. [Consumer] Motor Task</span><br>
+<span class="kwd">void</span> <span class="func">StartTask02</span>(...) {<br>
 &nbsp;&nbsp;<span class="kwd">while</span>(<span class="num">1</span>) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// 데이터가 올 때까지 대기 (Sleep)</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">osMessageQueueGet</span>(cmdQueue, &msg, ...);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">PID_Calculate</span>(msg.speed); <span class="comment">// 복잡한 연산 수행</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// 큐에서 데이터 수신 (Blocking)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">osMessageQueueGet</span>(cmdQueue, &rcv, ...);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// PWM 하드웨어 매핑</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">__HAL_TIM_SET_COMPARE</span>(&htim2, ..., rcv.speed);<br>
 &nbsp;&nbsp;}<br>
 }
                 </div>
@@ -168,6 +169,7 @@ shared_data = packet;<br>
 
     </div>
 </div>
+
 
 <div class="feature-card" style="border-top: 3px solid #ef4444;">
     <h3 style="color: #fff; margin-bottom: 20px;">

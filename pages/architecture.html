@@ -1,0 +1,79 @@
+<div class="phase-header">
+    <span style="color: var(--accent-blue); font-weight: bold; letter-spacing: 2px;">SYSTEM BLUEPRINT</span>
+    <h1>Architecture & Design</h1>
+    <p class="page-subtitle">
+        Neuro-Drive-C++ 시스템의 요구사항, 데이터 흐름, 그리고 하드웨어-소프트웨어 통합 구조를 설계한 다이어그램입니다.<br>
+        <span style="font-size: 0.85rem; color: #888;">(다이어그램을 클릭하면 원본 크기로 확대됩니다.)</span>
+    </p>
+</div>
+
+<div class="feature-card" style="border-top: 3px solid var(--accent-blue);">
+    <h3 style="margin-bottom: 20px;"><i class="fas fa-users-cog" style="color: var(--accent-blue); margin-right: 8px;"></i> 1. System Requirements (Use Case)</h3>
+    <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+        
+        <div style="flex: 1; min-width: 250px;">
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+                시스템의 바운더리와 외부 액터(Operator, Hardware) 간의 상호작용을 정의했습니다.
+            </p>
+            <ul style="color: #ccc; font-size: 0.85rem; padding-left: 20px; line-height: 1.8; margin-top: 15px;">
+                <li><strong>Core Feature:</strong> 조이스틱 조작, 엔진 토글, 텔레메트리 모니터링</li>
+                <li><strong>Safety Logic:</strong> 통신 두절 시 하드웨어를 강제 통제하는 <code>Execute Fail-safe</code> 설계</li>
+                <li><strong>Control Logic:</strong> 조향 시 마찰 저항을 상쇄하는 <code>Cornering Boost</code> 내부 로직 포함</li>
+            </ul>
+        </div>
+
+        <div class="media-thumbnail" onclick="openModal('image', 'assets/usecase_diagram.png')" style="width: 350px; height: auto; background: #fff; padding: 10px;">
+            <img src="assets/usecase_diagram.png" alt="Use Case Diagram" style="object-fit: contain;">
+            <div class="thumbnail-overlay"><i class="fas fa-search-plus" style="color: #222;"></i></div>
+        </div>
+        
+    </div>
+</div>
+
+<div class="feature-card" style="border-top: 3px solid var(--accent-green);">
+    <h3 style="margin-bottom: 20px;"><i class="fas fa-exchange-alt" style="color: var(--accent-green); margin-right: 8px;"></i> 2. Data Flow & IPC (Sequence)</h3>
+    <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+        
+        <div class="media-thumbnail" onclick="openModal('image', 'assets/sequence_diagram.png')" style="width: 350px; height: auto; background: #fff; padding: 10px;">
+            <img src="assets/sequence_diagram.png" alt="Sequence Diagram" style="object-fit: contain;">
+            <div class="thumbnail-overlay"><i class="fas fa-search-plus" style="color: #222;"></i></div>
+        </div>
+
+        <div style="flex: 1; min-width: 250px;">
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+                Web Front-end부터 STM32 펌웨어까지 이어지는 이기종 간의 제어 명령 전달 과정을 시간 순으로 설계했습니다.
+            </p>
+            <ul style="color: #ccc; font-size: 0.85rem; padding-left: 20px; line-height: 1.8; margin-top: 15px;">
+                <li><strong>Web &rarr; Py:</strong> <code>JSON</code> 포맷의 WebSocket 통신</li>
+                <li><strong>Py &rarr; C++:</strong> <code>struct.pack</code>을 이용한 8-byte 이진 데이터 UDP 송신</li>
+                <li><strong>C++ &rarr; STM32:</strong> 115200bps UART 기반 <code>ASCII String</code> 시리얼 통신</li>
+                <li><strong>STM32 내부:</strong> UART 인터럽트 수신 후 FreeRTOS <code>Message Queue</code> 삽입 및 처리</li>
+            </ul>
+        </div>
+        
+    </div>
+</div>
+
+<div class="feature-card" style="border-top: 3px solid var(--accent-purple);">
+    <h3 style="margin-bottom: 20px;"><i class="fas fa-sitemap" style="color: var(--accent-purple); margin-right: 8px;"></i> 3. System Structure (Class / BDD)</h3>
+    <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+        
+        <div style="flex: 1; min-width: 250px;">
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+                Raspberry Pi와 STM32, 그리고 하드웨어 액추에이터가 결합된 전체 시스템의 정적 구조(Topology)입니다.
+            </p>
+            <ul style="color: #ccc; font-size: 0.85rem; padding-left: 20px; line-height: 1.8; margin-top: 15px;">
+                <li><strong>Composition:</strong> NeuroDrive 최상위 시스템이 각 하위 모듈을 소유(has-a)하는 토폴로지 구성</li>
+                <li><strong>High-Level:</strong> 통신망(WebSocket, UDP)과 상위 제어(Linux) 명시</li>
+                <li><strong>Low-Level:</strong> 실시간 제어(FreeRTOS) 및 하드웨어 통신 인터페이스(UART) 분리 설계</li>
+                <li><strong>Power & Actuator:</strong> 구동을 위한 전압(7.4V) 조향 및 구동 액추에이터 명세 포함</li>
+            </ul>
+        </div>
+
+        <div class="media-thumbnail" onclick="openModal('image', 'assets/architecture_diagram.png')" style="width: 350px; height: auto; background: #fff; padding: 10px;">
+            <img src="assets/architecture_diagram.png" alt="Block Definition Diagram" style="object-fit: contain;">
+            <div class="thumbnail-overlay"><i class="fas fa-search-plus" style="color: #222;"></i></div>
+        </div>
+        
+    </div>
+</div>

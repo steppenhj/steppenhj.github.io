@@ -5,24 +5,36 @@
         제어(Control)와 연산(Computation)의 물리적 분리.<br>
         Linux의 실시간성 한계를 극복하기 위해 <strong>STM32 MCU</strong>를 도입했습니다.
     </p>
+
+    <div style="margin-top: 20px; margin-bottom: 20px;">
+        <a href="https://github.com/steppenhj/Neuro-Drive-CPP/tree/main/phase_2_code" target="_blank" 
+           style="background: #333; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; border: 1px solid #555; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;"
+           onmouseover="this.style.background='#444'" onmouseout="this.style.background='#333'">
+            <i class="fab fa-github"></i> View Source Code
+        </a>
+    </div>
+
 </div>
 
 <div class="feature-card">
     <h3><i class="fas fa-project-diagram" style="color: var(--accent-green);"></i> System Topology</h3>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+        복잡한 IPC(Process간 통신)를 제거하고, 사용자 입력을 펌웨어로 직송하는 파이프라인을 구축했습니다.
+    </p>
     <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 20px; text-align: center;">
+        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #f7df1e;">
+            <h4 style="color: #f7df1e;"><i class="fab fa-js"></i> Web Client</h4>
+            <small style="color:#888">index.html (UI)</small>
+        </div>
+        <i class="fas fa-arrow-right" style="color: #444;"></i>
         <div style="background: #222; padding: 15px; border-radius: 8px;">
-            <h4>Brain (RPi 5)</h4>
-            <small style="color:#666">Async Server</small>
+            <h4>RPi 5</h4>
+            <small style="color:#666">Serial Bridge (Relay)</small>
         </div>
         <i class="fas fa-arrow-right" style="color: #444;"></i>
         <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid var(--accent-green);">
-            <h4 style="color: var(--accent-green);">Reflex (STM32)</h4>
-            <small style="color:#666">Real-time Core</small>
-        </div>
-        <i class="fas fa-arrow-right" style="color: #444;"></i>
-        <div style="background: #222; padding: 15px; border-radius: 8px;">
-            <h4>Motors</h4>
-            <small style="color:#666">Actuator</small>
+            <h4 style="color: var(--accent-green);"><i class="fas fa-microchip"></i> STM32</h4>
+            <small style="color:#666">Firmware (Control)</small>
         </div>
     </div>
 </div>
@@ -58,7 +70,7 @@
 <div class="feature-card" style="border-top: 3px solid var(--accent-green);">
     <h3><i class="fas fa-video" style="color: var(--accent-green);"></i> System Demonstration</h3>
     <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
-        STM32 기반 분산 제어 시스템의 실제 주행 테스트입니다. 개별 영상이라 약간의 차이가 있습니다.<br>
+        STM32 기반 분산 제어 시스템의 실제 주행 테스트입니다.<br>
         <span style="font-size: 0.8rem; color: #666;">(좌측: 모바일 컨트롤러 Latency / 우측: 실제 주행 반응성)</span>
     </p>
 
