@@ -14,12 +14,13 @@
             <p style="color: #ccc; font-size: 0.95rem; line-height: 1.6;">
                 <strong>상황:</strong> 자율주행 알고리즘 테스트 중 차량이 벽과 충돌.<br>
                 <strong>원인:</strong> 충격으로 헐거워진 배터리 커넥터가 이탈하며 <strong>7.4V 전원선이 RPi 3.3V GPIO를 타격.</strong><br>
-                <strong>결과:</strong> 과전압으로 인한 SoC 소손. <strong>Main Controller(Brain) 영구 손실.</strong>
+                <strong>결과:</strong> 과전압으로 인한 고장. <strong>Main Controller(Brain) 손실.</strong>
             </p>
             <div style="margin-top: 15px; background: #000; padding: 10px; border-radius: 4px; border: 1px dashed #ef4444;">
                 <span style="color: #ef4444; font-weight: bold; font-size: 0.8rem;">REALIZATION:</span>
                 <span style="color: #888; font-size: 0.8rem;">
-                    "실제 주행은 통제된 환경과 다르다. 충돌 직전 0.1초라도 더 빨리 판단하고 멈췄어야 했다."
+                    "실제 주행은 통제된 환경과 다르다. 충돌 직전 0.1초라도 더 빨리 판단하고 멈췄어야 했다. 
+                    <br>솔직한 마음으로 너무 성급한 자율주행 학습이었다. 수동주행을 더욱 완벽하게 해보자"
                 </span>
             </div>
         </div>
