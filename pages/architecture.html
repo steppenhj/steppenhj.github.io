@@ -33,9 +33,21 @@
     <h3 style="margin-bottom: 20px;"><i class="fas fa-exchange-alt" style="color: var(--accent-green); margin-right: 8px;"></i> 2. Data Flow & IPC (Sequence)</h3>
     <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
         
-        <div class="media-thumbnail" onclick="openModal('image', 'assets/sequence_diagram.png')" style="width: 350px; height: auto; background: #fff; padding: 10px;">
-            <img src="assets/sequence_diagram.png" alt="Sequence Diagram" style="object-fit: contain;">
-            <div class="thumbnail-overlay"><i class="fas fa-search-plus" style="color: #222;"></i></div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="media-thumbnail" onclick="openModal('image', 'assets/sequence_diagram.png')" style="width: 350px; height: auto; background: #fff; padding: 10px;">
+                <img src="assets/sequence_diagram.png" alt="Sequence Diagram - Command Flow" style="object-fit: contain;">
+                <div class="thumbnail-overlay"><i class="fas fa-search-plus" style="color: #222;"></i></div>
+                <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.7); color: #fff; font-size: 0.7rem; padding: 5px; text-align: center;">
+                    ① Command Flow (Control Path)
+                </div>
+            </div>
+            <div class="media-thumbnail" onclick="openModal('image', 'assets/sequence_diagram2.png')" style="width: 350px; height: auto; background: #fff; padding: 10px;">
+                <img src="assets/sequence_diagram2.png" alt="Sequence Diagram - Feedback Flow" style="object-fit: contain;">
+                <div class="thumbnail-overlay"><i class="fas fa-search-plus" style="color: #222;"></i></div>
+                <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.7); color: #fff; font-size: 0.7rem; padding: 5px; text-align: center;">
+                    ② Encoder Feedback Path
+                </div>
+            </div>
         </div>
 
         <div style="flex: 1; min-width: 250px;">
@@ -47,6 +59,7 @@
                 <li><strong>Py &rarr; C++:</strong> <code>struct.pack</code>을 이용한 8-byte 이진 데이터 UDP 송신</li>
                 <li><strong>C++ &rarr; STM32:</strong> 115200bps UART 기반 <code>ASCII String</code> 시리얼 통신</li>
                 <li><strong>STM32 내부:</strong> UART 인터럽트 수신 후 FreeRTOS <code>Message Queue</code> 삽입 및 처리</li>
+                <li><strong>STM32 &rarr; Web:</strong> 엔코더 속도값 <code>printf("ENC:%d")</code> → C++ UDP 역전송 → WebSocket</li>
             </ul>
         </div>
         
@@ -90,7 +103,6 @@
             <span style="color: var(--accent-orange); font-size: 0.85rem; font-weight: bold;">[1] Object Model Diagram (OMD)</span>
             <ul style="color: #ccc; font-size: 0.85rem; padding-left: 20px; line-height: 1.8; margin-top: 10px;">
                 <li><strong>Active Class:</strong> <code>UdpReceiver</code>와 <code>VehicleController</code>를 독립된 스레드를 가지는 활성 클래스로 정의</li>
-                <li><strong>Event Messaging:</strong> 공유 메모리(Shared Memory) 통신 방식을 버리고, <code>evUpdateCmd</code> 이벤트를 통한 비동기 메시지 큐 통신으로 Deadlock 위험성 원천 차단</li>
             </ul>
         </div>
         <div class="media-thumbnail" onclick="openModal('image', 'assets/omd_diagram.png')" style="width: 350px; height: auto; background: #fff; padding: 10px;">

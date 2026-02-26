@@ -104,6 +104,28 @@
 </div>
 
 <div class="feature-card">
+    <h3><i class="fas fa-microchip" style="color: var(--accent-blue);"></i> Physical Setup</h3>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
+                초기 프로토타입 하드웨어 구성입니다. (이미지 클릭 시 확대)
+            </p>
+            <ul style="color: #aaa; font-size: 0.85rem; padding-left: 20px; line-height: 1.6;">
+                <li><strong>Main:</strong> Raspberry Pi 5 (8GB)</li>
+                <li><strong>Driver:</strong> Waveshare Motor HAT (PCA9685 via I2C)</li>
+                <li><strong>Steering:</strong> Servo on GPIO 18 (Soft-PWM via libgpiod)</li>
+                <li><strong>Power:</strong> Logic(5V) / Drive(7.4V) Separated</li>
+            </ul>
+
+        </div>
+        <div class="media-thumbnail" onclick="openModal('image', 'assets/phase1_iso.jpg')" style="width: 200px; height: 150px;">
+            <img src="assets/phase1_iso.jpg" alt="Phase 1 Hardware">
+            <div class="thumbnail-overlay"><i class="fas fa-search-plus"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="feature-card">
     <h3 style="margin-bottom: 20px;"><i class="fas fa-video" style="color: var(--accent-blue);"></i> System Demonstration</h3>
     <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
         <div style="flex: 1; min-width: 250px;">
@@ -192,49 +214,8 @@ setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, ...);
     </div>
 </div>
 
-<div class="feature-card">
-    <h3><i class="fas fa-microchip" style="color: var(--accent-blue);"></i> Physical Setup</h3>
-    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 250px;">
-             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">
-                초기 프로토타입 하드웨어 구성입니다. (이미지 클릭 시 확대)
-            </p>
-            <ul style="color: #aaa; font-size: 0.85rem; padding-left: 20px; line-height: 1.6;">
-                <li><strong>Main:</strong> Raspberry Pi 5 (8GB)</li>
-                <li><strong>Driver:</strong> Waveshare Motor HAT (PCA9685 via I2C)</li>
-                <li><strong>Steering:</strong> Servo on GPIO 18 (Soft-PWM via libgpiod)</li>
-                <li><strong>Power:</strong> Logic(5V) / Drive(7.4V) Separated</li>
-            </ul>
-            <p style="color:#666; font-size:0.8rem; margin-top:-8px;">
-  * 현재 시스템 구성은 Phase 2 이후 개선된 하드웨어/배선 기준이며, 이미지는 Phase 1 당시 기록입니다.
-</p>
-
-        </div>
-        <div class="media-thumbnail" onclick="openModal('image', 'assets/phase1_iso.jpg')" style="width: 200px; height: 150px;">
-            <img src="assets/phase1_iso.jpg" alt="Phase 1 Hardware">
-            <div class="thumbnail-overlay"><i class="fas fa-search-plus"></i></div>
-        </div>
-    </div>
-</div>
 
 
-<div class="feature-card">
-    <h3 style="margin-bottom: 20px;"><i class="fas fa-video" style="color: var(--accent-blue);"></i> System Demonstration</h3>
-    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 250px;">
-            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
-                웹 컨트롤러를 이용한 실제 주행 테스트 영상입니다.<br>
-                <span style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6;">(영상 클릭 시 확대)</span>
-            </p>
-        </div>
-        <div class="media-thumbnail" onclick="openModal('video', 'assets/phase1_demo.mp4')" style="width: 200px; height: 120px;">
-            <video muted loop autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;">
-                <source src="assets/phase1_demo.mp4" type="video/mp4">
-            </video>
-            <div class="thumbnail-overlay"><i class="fas fa-play-circle"></i></div>
-        </div>
-    </div>
-</div>
 
 <div class="info-box" style="border-left: 4px solid var(--accent-green);">
     <h3 style="color: #fff; margin-bottom: 15px;">
