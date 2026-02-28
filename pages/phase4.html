@@ -1,104 +1,327 @@
 <div class="phase-header">
-    <span style="color: var(--accent-purple); font-weight: bold; letter-spacing: 2px;">PHASE 04: 자율주행 시작</span>
-    <h1>Visual Perception & Autonomy</h1>
+    <span style="color: var(--accent-orange); font-weight: bold; letter-spacing: 2px;">PHASE 04: IMPLEMENTATION</span>
+    <h1>Return To Home (RTH)</h1>
     <p class="page-subtitle">
-        단순한 원격 제어를 넘어, 카메라 센서를 통해 도로 상황을 인지(Perception)하고<br>
-        스스로 경로를 판단(Decision)하는 <strong>자율주행 시스템</strong> 구현 단계입니다.
+        GPS 없이, 엔코더 데이터만으로 주행 경로를 기억하고 역추적하는<br>
+        <strong>"Path Stack 기반 자동 복귀 시스템"</strong>을 구현했습니다.<br>
+        <span style="color: #666; font-size: 0.85rem;">기존 워치독(Fail-safe)과 통합하여 안전성을 확보합니다.</span>
     </p>
+
+    <div style="margin-top: 20px; margin-bottom: 20px;">
+        <a href="https://github.com/steppenhj/Neuro-Drive-CPP/tree/main/phase_4_code" target="_blank" 
+           style="background: #333; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; border: 1px solid #555; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;"
+           onmouseover="this.style.background='#444'" onmouseout="this.style.background='#333'">
+            <i class="fab fa-github"></i> View Source Code
+        </a>
+    </div>
 </div>
 
-<div class="feature-card">
-    <h3><i class="fas fa-sitemap" style="color: var(--accent-purple);"></i> Perception Pipeline</h3>
-    <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px; text-align: center; margin-top: 30px;">
+<!-- ===== 1. RTH 동작 모드 흐름도 ===== -->
+<div class="feature-card" style="border-top: 4px solid var(--accent-orange);">
+    <h3 style="color: #fff; margin-bottom: 20px;">
+        <i class="fas fa-route" style="color: var(--accent-orange); margin-right: 10px;"></i>
+        RTH State Machine
+    </h3>
+    <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 0.9rem;">
+        RTH는 <strong>3개의 모드(mode)</strong>로 동작합니다. 웹 UI의 버튼 하나로 상태가 순환하며,<br>
+        각 모드는 통신 프로토콜의 <code>mode</code> 필드를 통해 전체 스택에 전파됩니다.
+    </p>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px; text-align: center; flex-wrap: wrap;">
         
-        <div style="background: #222; padding: 15px; border-radius: 12px; border: 1px solid #444;">
-            <h4 style="color: #fff; margin-bottom: 5px;">Camera</h4>
-            <small style="color: var(--text-muted);">Raw Frame (30 FPS)</small>
+        <div style="flex: 1; min-width: 140px; background: rgba(255, 255, 255, 0.03); border: 1px solid #444; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🟢</div>
+            <h4 style="color: #fff; font-size: 0.95rem;">mode = 0</h4>
+            <span style="color: var(--accent-green); font-weight: bold; font-size: 0.85rem;">NORMAL</span>
+            <p style="color: #888; font-size: 0.8rem; margin-top: 8px;">일반 주행<br>조이스틱 명령 수행</p>
         </div>
-        
-        <i class="fas fa-arrow-right" style="color: var(--text-muted);"></i>
-        
-        <div style="background: linear-gradient(145deg, #222, #1a102e); padding: 20px; border-radius: 12px; border: 1px solid var(--accent-purple); box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);">
-            <h4 style="color: var(--accent-purple);">RPi 5 (Brain)</h4>
-            <div style="margin-top: 10px; font-size: 0.8rem; color: #ccc;">
-                <span style="display:block; margin-bottom:4px;">🔹 Lane Keeping (OpenCV)</span>
-                <span style="display:block;">🔸 Object Detection (AI)</span>
+
+        <i class="fas fa-long-arrow-alt-right" style="color: #555; font-size: 1.2rem;"></i>
+
+        <div style="flex: 1; min-width: 140px; background: rgba(239, 68, 68, 0.08); border: 1px solid #ef4444; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🔴</div>
+            <h4 style="color: #fff; font-size: 0.95rem;">mode = 1</h4>
+            <span style="color: #ef4444; font-weight: bold; font-size: 0.85rem;">REC (Recording)</span>
+            <p style="color: #888; font-size: 0.8rem; margin-top: 8px;">경로 기록 중<br>엔코더 수신마다 Stack Push</p>
+        </div>
+
+        <i class="fas fa-long-arrow-alt-right" style="color: #555; font-size: 1.2rem;"></i>
+
+        <div style="flex: 1; min-width: 140px; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent-orange); padding: 20px; border-radius: 8px;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">↩️</div>
+            <h4 style="color: #fff; font-size: 0.95rem;">mode = 2</h4>
+            <span style="color: var(--accent-orange); font-weight: bold; font-size: 0.85rem;">RTH (Returning)</span>
+            <p style="color: #888; font-size: 0.8rem; margin-top: 8px;">자동 복귀 중<br>Stack Pop → 역방향 명령</p>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== 2. 핵심 설계: 프로토콜 확장 + Path Stack ===== -->
+<div class="grid-container">
+    
+    <div class="feature-card" style="border-left: 3px solid var(--accent-orange);">
+        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1.1rem;">
+            <i class="fas fa-broadcast-tower" style="color: var(--accent-orange); margin-right: 8px;"></i>
+            Protocol Extension
+        </h4>
+        <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 15px;">
+            <strong>Context:</strong> RTH 상태를 모든 레이어에 전파하기 위해 기존 8바이트 UDP 패킷에 <code>mode</code> 필드를 추가했습니다.
+        </p>
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+                <span class="mac-title">Protocol Change</span>
+            </div>
+            <div class="mac-body">
+<span class="comment">// Before: 8 bytes</span><br>
+<span class="kwd">struct</span> Packet { <span class="kwd">float</span> th; <span class="kwd">float</span> st; };<br>
+<br>
+<span class="comment">// After: 12 bytes (+mode field)</span><br>
+<span class="kwd">struct</span> Packet { <span class="kwd">float</span> th; <span class="kwd">float</span> st; <span class="kwd">int</span> mode; };<br>
+<br>
+<span class="comment"># Python side</span><br>
+struct.<span class="func">pack</span>(<span class="string">'ffi'</span>, throttle, steering, mode)
             </div>
         </div>
-        
-        <i class="fas fa-arrow-right" style="color: var(--text-muted);"></i>
-        
-        <div style="background: #222; padding: 15px; border-radius: 12px; border: 1px solid #444;">
-            <h4 style="color: #fff; margin-bottom: 5px;">Arbitrator</h4>
-            <small style="color: var(--text-muted);">Safety Logic</small>
-        </div>
-
-        <i class="fas fa-arrow-right" style="color: var(--text-muted);"></i>
-
-        <div style="background: #222; padding: 15px; border-radius: 12px; border: 1px solid var(--accent-green);">
-            <h4 style="color: var(--accent-green);">STM32</h4>
-            <small style="color: var(--text-muted);">Actuation (Phase 2)</small>
-        </div>
-
     </div>
+
+    <div class="feature-card" style="border-left: 3px solid #ef4444;">
+        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1.1rem;">
+            <i class="fas fa-layer-group" style="color: #ef4444; margin-right: 8px;"></i>
+            Path Stack (LIFO)
+        </h4>
+        <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 15px;">
+            <strong>Context:</strong> GPS/IMU 없이 엔코더 이벤트마다 <strong>{방향, 조향각}</strong>을 기록하고, 복귀 시 역순으로 꺼냅니다.
+        </p>
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+                <span class="mac-title">SharedContext (C++)</span>
+            </div>
+            <div class="mac-body">
+<span class="comment">// 경로 데이터 구조</span><br>
+std::vector&lt;std::pair&lt;<span class="kwd">int</span>, <span class="kwd">int</span>&gt;&gt; path;<br>
+<span class="comment">// pair = {throttle_sign, pwm_angle}</span><br>
+<span class="comment">//   throttle_sign: +1(전진) / -1(후진)</span><br>
+<span class="comment">//   pwm_angle: 서보 조향각 (1500±900)</span><br>
+<br>
+<span class="comment">// REC: push_back (FIFO 순서 기록)</span><br>
+<span class="comment">// RTH: pop_back  (LIFO 역순 복귀)</span>
+            </div>
+        </div>
+    </div>
+
 </div>
 
-
-
-<h3 style="color: #fff; margin-bottom: 20px; border-left: 3px solid var(--accent-purple); padding-left: 15px;">
-    Core Algorithms: Hybrid Approach
-</h3>
-
-<div class="grid-container">
-    <div class="feature-card">
-        <h3><i class="fas fa-road" style="color: var(--accent-blue);"></i> Lane Keeping (LKAS)</h3>
-        <span class="spec-badge" style="border-color: var(--accent-blue); color: var(--accent-blue);">Classic CV</span>
-        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
-            고속 주행 시 빠른 응답속도를 위해 가벼운 <strong>OpenCV</strong> 알고리즘을 사용합니다.
-            딥러닝보다 연산량이 적어 30 FPS 이상의 실시간성을 보장합니다.
-        </p>
-        <ul style="margin-top: 10px; font-size: 0.85rem; color: #888; padding-left: 20px; line-height: 1.6;">
-            <li>Preprocessing: Gaussian Blur + Bird's Eye View</li>
-            <li>Edge Detection: Canny & Sobel</li>
-            <li>Lane Fitting: Sliding Window + Polyfit</li>
-        </ul>
-    </div>
-
-    <div class="feature-card">
-        <h3><i class="fas fa-brain" style="color: var(--accent-purple);"></i> Object Detection</h3>
-        <span class="spec-badge" style="border-color: var(--accent-purple); color: var(--accent-purple);">Deep Learning</span>
-        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
-            정지 표지판, 신호등, 보행자 등 복잡한 패턴 인식을 위해 <strong>YOLOv8 Nano</strong> 모델을 도입합니다.
-            라즈베리파이 NPU/GPU 가속을 활용해 추론 시간을 최적화합니다.
-        </p>
-        <div style="margin-top: 15px; background: #111; padding: 10px; border-radius: 6px;">
-            <small style="color: #666; display: block;">Target Metrics:</small>
-            <span style="color: #fff; font-family: monospace;">Input: 320x320 | Latency: < 50ms</span>
-        </div>
-    </div>
-</div>
-
-<div class="info-box" style="border-left: 4px solid #f59e0b;">
+<!-- ===== 3. 핵심 코드: 기록과 복귀 ===== -->
+<div class="feature-card" style="border-left: 4px solid var(--accent-orange);">
     <h3 style="color: #fff; margin-bottom: 15px;">
-        <i class="fas fa-balance-scale" style="color: #f59e0b; margin-right: 10px;"></i>
-        The Arbitrator: Human-in-the-loop
+        <i class="fas fa-code" style="color: var(--accent-orange); margin-right: 10px;"></i> 
+        Core Logic: Record & Return
     </h3>
-    <p style="color: var(--text-muted); margin-bottom: 20px;">
-        자율주행 시스템은 완벽하지 않으므로 언제나 사람의 개입을 최우선으로 합니다.
-        소프트웨어적인 <strong>중재자(Arbitrator)</strong> 패턴을 구현하여 제어권 충돌을 방지합니다.
-    </p>
+    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+        
+        <div style="flex: 1; min-width: 280px;">
+            <p style="font-size: 0.9rem; color: #ccc; line-height: 1.6;">
+                모든 RTH 로직은 <code>controlLoop()</code> 안에서 <strong>엔코더 수신 이벤트</strong>를 트리거로 동작합니다.
+            </p>
+            <ul style="margin-top: 15px; color: #888; font-size: 0.85rem; line-height: 1.8;">
+                <li>
+                    <strong style="color: #ef4444;">Recording (mode=1):</strong> 
+                    엔코더 수신 시 throttle_sign과 현재 조향각을 path에 push.
+                    <strong>정지 구간(sign=0)은 제외</strong>하여 과주행 방지.
+                </li>
+                <li>
+                    <strong style="color: var(--accent-orange);">Returning (mode=2):</strong> 
+                    엔코더 수신마다 path에서 pop → <strong>역방향 PWM</strong>을 시리얼로 전송.
+                    워치독 timeout 시 즉시 중단.
+                </li>
+                <li>
+                    <strong style="color: var(--accent-green);">Done:</strong> 
+                    path가 비면 <code>rth_mode=0</code>으로 복귀 후 정지 명령 전송.
+                </li>
+            </ul>
+        </div>
 
-    <pre><code class="cpp"><span class="comment">// Safety Override Logic (Concept)</span>
-<span class="keyword">void</span> <span class="function">Arbitrate_Control_Signal</span>() {
-    <span class="keyword">if</span> (user_joystick.is_active()) {
-        <span class="comment">// 1. Human Input Detected -> Disengage AI</span>
-        current_state = MANUAL_MODE;
-        stm32.send(user_joystick.data);
-    } 
-    <span class="keyword">else</span> {
-        <span class="comment">// 2. No User Input -> AI Auto Pilot</span>
-        current_state = AUTO_MODE;
-        stm32.send(ai_lane_follower.data);
-    }
-}</code></pre>
+        <div style="flex: 1; min-width: 280px;">
+            <div class="mac-window" style="margin-top: 0;">
+                <div class="mac-header">
+                    <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+                    <span class="mac-title">control_core_oop.cpp</span>
+                </div>
+                <div class="mac-body">
+<span class="comment">// 1. [REC] 엔코더 수신 시 경로 기록</span><br>
+<span class="kwd">if</span>(rth_mode == <span class="num">1</span>) {<br>
+&nbsp;&nbsp;<span class="kwd">int</span> sign = (th > <span class="num">0.05f</span>) ? <span class="num">1</span> : <span class="num">-1</span>;<br>
+&nbsp;&nbsp;<span class="kwd">if</span>(sign != <span class="num">0</span>) <span class="comment">// 정지 구간 제외</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;path.<span class="func">push_back</span>({sign, angle});<br>
+}<br>
+<br>
+<span class="comment">// 2. [RTH] 엔코더 수신 시 역주행</span><br>
+<span class="kwd">if</span>(rth_mode == <span class="num">2</span> && !timeout) {<br>
+&nbsp;&nbsp;<span class="kwd">auto</span> [dir, angle] = path.<span class="func">back</span>();<br>
+&nbsp;&nbsp;path.<span class="func">pop_back</span>();<br>
+&nbsp;&nbsp;<span class="kwd">int</span> spd = (dir > <span class="num">0</span>) ? <span class="num">-600</span> : <span class="num">600</span>;<br>
+&nbsp;&nbsp;<span class="func">write</span>(serial_fd, spd, angle);<br>
+}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== 4. 워치독 연동 & Keep-Alive ===== -->
+<div class="grid-container">
+
+    <div class="feature-card">
+        <h4 style="color: #fff; margin-bottom: 10px;">
+            <i class="fas fa-shield-alt" style="color: #ef4444;"></i> Watchdog Integration
+        </h4>
+        <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">
+            RTH 복귀 중에도 워치독은 <strong>항상 동작</strong>합니다.
+            500ms 이상 패킷이 끊기면 RTH도 즉시 중단되어, 
+            <strong>"복귀 중 2차 사고"</strong>를 방지합니다.
+        </p>
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+                <span class="mac-title">control_core_oop.cpp</span>
+            </div>
+            <div class="mac-body">
+<span class="comment">// RTH 중에도 워치독 적용</span><br>
+<span class="kwd">if</span>(rth_mode == <span class="num">2</span> && <strong>!timeout</strong>) {<br>
+&nbsp;&nbsp;<span class="comment">// timeout이면 이 블록 진입 불가</span><br>
+&nbsp;&nbsp;<span class="comment">// → RTH 자동 중단, 차량 정지</span><br>
+}
+            </div>
+        </div>
+    </div>
+
+    <div class="feature-card">
+        <h4 style="color: #fff; margin-bottom: 10px;">
+            <i class="fas fa-heartbeat" style="color: var(--accent-orange);"></i> Keep-Alive Task
+        </h4>
+        <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">
+            RTH 버튼을 누르면 단발성 패킷만 전송됩니다. 
+            그 상태로 두면 <strong>500ms 후 워치독이 발동</strong>하여 RTH가 중단됩니다.
+            이를 방지하기 위해 Python에서 <strong>100ms 주기 Keep-Alive</strong> 패킷을 전송합니다.
+        </p>
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+                <span class="mac-title">app.py</span>
+            </div>
+            <div class="mac-body">
+<span class="kwd">def</span> <span class="func">rth_keep_alive_task</span>():<br>
+&nbsp;&nbsp;<span class="kwd">while</span> <span class="num">True</span>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> rth_active:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">send_udp_command</span>(<span class="num">0.0</span>, <span class="num">0.0</span>, <span class="num">2</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;socketio.<span class="func">sleep</span>(<span class="num">0.1</span>) <span class="comment"># 100ms</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ===== 5. 데이터 흐름도 ===== -->
+<div class="feature-card">
+    <h3><i class="fas fa-project-diagram" style="color: var(--accent-orange);"></i> RTH Data Flow</h3>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+        RTH 명령이 웹 UI에서 하드웨어까지 전파되는 전체 경로입니다.
+    </p>
+    <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; text-align: center;">
+
+        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444; min-width: 80px;">
+            <h4 style="color: #f7df1e; font-size: 0.85rem;"><i class="fab fa-js"></i> Web</h4>
+            <small style="color: #888;">toggleRTH()</small>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
+            <span style="font-size: 0.6rem; color: #aaa; font-weight: bold;">WebSocket</span>
+            <i class="fas fa-arrow-right" style="color: #666;"></i>
+        </div>
+
+        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #3776ab; min-width: 100px;">
+            <h4 style="color: #3776ab; font-size: 0.85rem;"><i class="fab fa-python"></i> Python</h4>
+            <small style="color: #888;">keep-alive<br>+ mode relay</small>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
+            <span style="font-size: 0.6rem; color: var(--accent-orange); font-weight: bold;">UDP (mode)</span>
+            <i class="fas fa-arrow-right" style="color: #666;"></i>
+        </div>
+
+        <div style="background: rgba(0, 89, 156, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--accent-blue); min-width: 110px;">
+            <h4 style="color: var(--accent-blue); font-size: 0.85rem;"><i class="fas fa-cogs"></i> C++</h4>
+            <small style="color: #ccc;">Path Stack<br>Record / Return</small>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
+            <span style="font-size: 0.6rem; color: #ef4444; font-weight: bold;">UART</span>
+            <i class="fas fa-exchange-alt" style="color: #666;"></i>
+        </div>
+
+        <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #10b981; min-width: 100px;">
+            <h4 style="color: #10b981; font-size: 0.85rem;"><i class="fas fa-microchip"></i> STM32</h4>
+            <small style="color: #ccc;">Encoder ↑<br>PWM ↓</small>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== 6. 해결한 문제들 ===== -->
+<div class="feature-card" style="border-top: 3px solid var(--accent-orange);">
+    <h3 style="color: #fff; margin-bottom: 20px;">
+        <i class="fas fa-bug" style="color: var(--accent-orange); margin-right: 10px;"></i>
+        Engineering Challenges
+    </h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid #333;">
+            <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 10px;">
+                <i class="fas fa-clock" style="color: #ef4444; margin-right: 8px;"></i>
+                Watchdog vs RTH 충돌
+            </h4>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
+                <strong>Problem:</strong> RTH 버튼 클릭 → 단발 패킷 → 500ms 후 워치독 발동 → RTH 중단.<br>
+                <strong>Solution:</strong> Python 백그라운드에서 100ms 주기 Keep-Alive 패킷을 지속 전송.
+            </p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid #333;">
+            <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 10px;">
+                <i class="fas fa-road" style="color: var(--accent-orange); margin-right: 8px;"></i>
+                정지 구간 과주행
+            </h4>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
+                <strong>Problem:</strong> 조이스틱 미조작 시 sign=0 기록 → 복귀 시 직진(600)으로 변환 → 과주행.<br>
+                <strong>Solution:</strong> <code>if(throttle_sign != 0)</code> 조건 추가하여 정지 구간 기록 제외.
+            </p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid #333;">
+            <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 10px;">
+                <i class="fas fa-lock" style="color: var(--accent-blue); margin-right: 8px;"></i>
+                Thread-Safety
+            </h4>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
+                <strong>Problem:</strong> UdpReceiver와 controlLoop가 path에 동시 접근 가능.<br>
+                <strong>Solution:</strong> <code>std::mutex path_mutex</code> 도입 + <code>std::atomic&lt;int&gt; rth_mode</code>로 lock-free 상태 전파.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== 7. 엔지니어 노트 ===== -->
+<div class="engineer-note phase4" style="border-left: 3px solid var(--accent-orange);">
+    <h4><i class="fas fa-pen-nib"></i> 박해진's Note</h4>
+    <p>
+        "처음엔 IMU + GPS로 정밀한 RTH를 구상했지만, 현재 하드웨어 조건에서는 오히려 <strong>단순한 접근이 더 신뢰성 있다</strong>고 판단했습니다.
+        <br>엔코더의 방향(sign)과 조향각만으로 경로를 기록하고, Stack의 LIFO 특성을 그대로 활용하여 역추적하는 방식은
+        <br>구현이 간결하면서도 <strong>워치독, 프로토콜 확장, Keep-Alive</strong> 등 실제 시스템 통합에서 마주치는 엔지니어링 문제를 모두 해결해야 했습니다."
+    </p>
 </div>

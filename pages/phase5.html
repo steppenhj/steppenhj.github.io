@@ -1,92 +1,546 @@
 <div class="phase-header">
-    <span style="color: var(--accent-orange); font-weight: bold; letter-spacing: 2px;">PHASE 05: 통신 중단 시 안전 수칙 추가</span>
-    <h1>Active Safety Protocol</h1>
+    <span style="color: #db2777; font-weight: bold; letter-spacing: 2px;">PHASE 05: IMPLEMENTATION</span>
+    <h1>OTA Firmware Update</h1>
     <p class="page-subtitle">
-        단순한 정지를 넘어선 <strong>생존(Survival) 알고리즘</strong>.<br>
-        통신 두절이나 서버 장애 발생 시, 시스템이 스스로 위험을 감지하고<br> 
-        지정된 안전 구역으로 자동 복귀(RTH: Return To Home)합니다.
+        ST-Link 없이, 웹 브라우저에서 .bin 파일을 업로드하는 것만으로<br>
+        STM32 펌웨어를 원격 업데이트하는 <strong>"UART IAP(In-Application Programming)"</strong> 시스템을 구현했습니다.<br>
+        <span style="color: #666; font-size: 0.85rem;">기존 End-to-End 파이프라인(Web → RPi → STM32)을 펌웨어 배포까지 확장합니다.</span>
     </p>
-</div>
 
-<div class="feature-card">
-    <h3><i class="fas fa-heartbeat" style="color: var(--accent-orange);"></i> Heartbeat Monitoring System</h3>
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px; text-align: center; margin-top: 30px; flex-wrap: wrap;">
-        
-        <div style="flex: 1; min-width: 120px; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent-green); padding: 15px; border-radius: 8px;">
-            <i class="fas fa-wifi" style="color: var(--accent-green); font-size: 1.5rem; margin-bottom: 10px;"></i>
-            <h4 style="color: #fff; font-size: 0.9rem;">Connected</h4>
-            <small style="color: #888;">Ping < 100ms</small>
-        </div>
-
-        <i class="fas fa-long-arrow-alt-right" style="color: #555; font-size: 1.2rem;"></i>
-
-        <div style="flex: 1; min-width: 120px; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--accent-orange); padding: 15px; border-radius: 8px;">
-            <i class="fas fa-exclamation-triangle" style="color: var(--accent-orange); font-size: 1.5rem; margin-bottom: 10px;"></i>
-            <h4 style="color: #fff; font-size: 0.9rem;">Signal Loss</h4>
-            <small style="color: #888;">Timeout > 500ms</small>
-        </div>
-
-        <i class="fas fa-long-arrow-alt-right" style="color: #555; font-size: 1.2rem;"></i>
-
-        <div style="flex: 1; min-width: 120px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 15px; border-radius: 8px;">
-            <i class="fas fa-undo-alt" style="color: #ef4444; font-size: 1.5rem; margin-bottom: 10px;"></i>
-            <h4 style="color: #fff; font-size: 0.9rem;">Auto RTH</h4>
-            <small style="color: #888;">Backtracking</small>
-        </div>
-
+    <div style="margin-top: 20px; margin-bottom: 20px;">
+        <a href="https://github.com/steppenhj/Neuro-Drive-CPP/tree/main/phase_6_code" target="_blank" 
+           style="background: #333; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; border: 1px solid #555; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;"
+           onmouseover="this.style.background='#444'" onmouseout="this.style.background='#333'">
+            <i class="fab fa-github"></i> View Source Code
+        </a>
     </div>
 </div>
 
-<div class="grid-container">
-    <div class="feature-card">
-        <h3><i class="fas fa-shield-alt" style="color: var(--accent-orange);"></i> Fail-Safe Logic</h3>
-        <p style="color: var(--text-muted); margin-bottom: 15px;">
-            STM32(제어기)는 RPi(서버)로부터 <strong>Heartbeat 패킷</strong>을 주기적으로 수신합니다. 
-            만약 500ms 이상 패킷이 오지 않으면 즉시 <strong>비상 모드(Emergency Mode)</strong>로 진입합니다.
-        </p>
-        <ul style="color: #ccc; font-size: 0.9rem; line-height: 1.8; padding-left: 20px;">
-            <li><strong style="color: var(--accent-orange);">Level 1:</strong> 모터 즉시 정지 (PWM Disable)</li>
-            <li><strong style="color: var(--accent-orange);">Level 2:</strong> 비상등 점멸 (Visual Alert)</li>
-            <li><strong style="color: var(--accent-orange);">Level 3:</strong> 3초 후 RTH 시퀀스 시작</li>
-        </ul>
-    </div>
-
-    <div class="feature-card" style="padding: 0; overflow: hidden; background: #0d0d0d;">
-        <div style="padding: 15px; border-bottom: 1px solid #333; font-size: 0.8rem; color: #888;">
-            stm32_safety.c
-        </div>
-        <pre style="margin: 0; border: none;"><code class="cpp"><span class="keyword">void</span> <span class="function">Safety_Task</span>(<span class="keyword">void</span>) {
-    uint32_t current_time = HAL_GetTick();
-    
-    <span class="comment">// Check Heartbeat Timeout (500ms)</span>
-    <span class="keyword">if</span> (current_time - last_heartbeat > 500) {
-        
-        <span class="comment">// 1. Disengage Manual Control</span>
-        Motor_Stop();
-        
-        <span class="comment">// 2. Trigger Return-To-Home</span>
-        <span class="keyword">if</span> (is_safe_to_move()) {
-            RTH_Execute_Backtracking();
-        }
-    }
-}</code></pre>
-    </div>
-</div>
-
-<div class="info-box" style="border-left: 4px solid var(--accent-orange);">
-    <h3 style="color: #fff; margin-bottom: 15px;">
-        <i class="fas fa-map-marker-alt" style="color: var(--accent-orange); margin-right: 10px;"></i>
-        How RTH Works? (Odometry Backtracking)
+<!-- ===== 1. Before vs After ===== -->
+<div class="feature-card" style="border-top: 4px solid #db2777;">
+    <h3 style="color: #fff; margin-bottom: 20px;">
+        <i class="fas fa-exchange-alt" style="color: #db2777; margin-right: 10px;"></i>
+        Why OTA? — The Problem
     </h3>
-    <p style="color: var(--text-muted); line-height: 1.7;">
-        별도의 GPS 없이도, 엔코더(Encoder)와 IMU 센서를 통해 이동 경로를 메모리에 스택(Stack) 형태로 저장합니다.<br>
-        비상 상황 발생 시, 저장된 경로의 <strong>역순(Reverse Stack)</strong>으로 주행하여 시작 지점으로 복귀합니다.
+    <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem;">
+        펌웨어를 수정할 때마다 차량의 케이스를 분해하고, ST-Link를 물리적으로 연결해야 했습니다.<br>
+        실제 자동차 ECU도 동일한 문제를 갖고 있으며, 이를 해결하는 기술이 <strong>IAP(In-Application Programming)</strong>입니다.
     </p>
-    <div style="margin-top: 15px; display: flex; gap: 10px;">
-        <span class="spec-badge" style="color: var(--accent-orange); border-color: var(--accent-orange);">Dead Reckoning</span>
-        <span class="spec-badge">IMU Fusion</span>
-        <span class="spec-badge">Path Stack</span>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+        <div style="background: rgba(239, 68, 68, 0.05); padding: 20px; border-radius: 8px; border: 1px solid #333;">
+            <h4 style="color: #ef4444; font-size: 0.85rem; margin-bottom: 12px;">
+                <i class="fas fa-times-circle" style="margin-right: 6px;"></i> BEFORE (ST-Link)
+            </h4>
+            <div style="color: #888; font-size: 0.82rem; line-height: 1.8;">
+                ① 코드 수정 → CubeIDE 빌드<br>
+                ② <strong style="color: #ef4444;">케이스 분해</strong><br>
+                ③ <strong style="color: #ef4444;">UART 선 분리</strong> (RPi 연결 해제)<br>
+                ④ <strong style="color: #ef4444;">ST-Link USB 연결</strong><br>
+                ⑤ Flash Download<br>
+                ⑥ <strong style="color: #ef4444;">ST-Link 분리 → 재조립</strong><br>
+                ⑦ 테스트
+            </div>
+        </div>
+
+        <div style="background: rgba(16, 185, 129, 0.05); padding: 20px; border-radius: 8px; border: 1px solid var(--accent-green);">
+            <h4 style="color: var(--accent-green); font-size: 0.85rem; margin-bottom: 12px;">
+                <i class="fas fa-check-circle" style="margin-right: 6px;"></i> AFTER (OTA)
+            </h4>
+            <div style="color: #ccc; font-size: 0.82rem; line-height: 1.8;">
+                ① 코드 수정 → CubeIDE 빌드<br>
+                ② <strong style="color: var(--accent-green);">브라우저에서 .bin 업로드</strong><br>
+                ③ <strong style="color: var(--accent-green);">자동 업데이트 완료</strong><br>
+                ④ 테스트<br>
+                <br>
+                <span style="color: #666;">물리적 접촉 불필요. RPi-STM32 연결 유지.</span>
+            </div>
+        </div>
+
     </div>
 </div>
 
+<!-- ===== 2. Flash Memory Layout ===== -->
+<div class="feature-card" style="border-left: 4px solid #db2777;">
+    <h3 style="color: #fff; margin-bottom: 15px;">
+        <i class="fas fa-hdd" style="color: #db2777; margin-right: 10px;"></i>
+        Flash Memory Layout (STM32F411RE)
+    </h3>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+        512KB Flash를 두 영역으로 분할합니다. <strong>Sector 0</strong>에 부트로더가 상주하며, 
+        <strong>Sector 1~7</strong>에 애플리케이션(FreeRTOS 코드)이 위치합니다.
+    </p>
+
+    <div style="background: #111; padding: 25px; border-radius: 8px; border: 1px solid #333; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">
+        
+        <!-- Bootloader -->
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 4px;">
+            <span style="color: #666; width: 110px;">0x0800 0000</span>
+            <div style="flex: 1; background: #db2777; height: 35px; border-radius: 4px 4px 0 0; display: flex; align-items: center; padding-left: 15px;">
+                <span style="color: #fff; font-weight: bold;">Bootloader (16KB)</span>
+            </div>
+        </div>
+        
+        <!-- Separator -->
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 4px;">
+            <span style="color: #db2777; width: 110px; font-weight: bold;">0x0800 4000</span>
+            <div style="flex: 1; height: 2px; background: #db2777; position: relative;">
+                <span style="position: absolute; right: 0; top: -8px; font-size: 0.65rem; color: #db2777;">← APP_ADDRESS</span>
+            </div>
+        </div>
+
+        <!-- Application -->
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 4px;">
+            <span style="color: #666; width: 110px;">Sector 1~7</span>
+            <div style="flex: 1; background: linear-gradient(to bottom, var(--accent-green), #1a3a2a); height: 120px; border-radius: 0 0 4px 4px; display: flex; flex-direction: column; justify-content: center; padding-left: 15px;">
+                <span style="color: #fff; font-weight: bold;">Application (FreeRTOS)</span>
+                <span style="color: rgba(255,255,255,0.5); font-size: 0.7rem; margin-top: 4px;">현재 main.c + FreeRTOS Tasks</span>
+                <span style="color: rgba(255,255,255,0.3); font-size: 0.7rem;">↑ 이 영역만 Erase & Re-write</span>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span style="color: #666; width: 110px;">0x0807 FFFF</span>
+            <div style="flex: 1; height: 1px; background: #333;"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== 3. OTA Data Flow ===== -->
+<div class="feature-card">
+    <h3><i class="fas fa-project-diagram" style="color: #db2777;"></i> OTA Update Flow</h3>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+        기존 제어 파이프라인(Phase 3)의 Web → Python → UART 경로를 <strong>그대로 재활용</strong>하여 펌웨어 배포 경로를 구축했습니다.
+    </p>
+    <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; text-align: center;">
+
+        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444; min-width: 90px;">
+            <h4 style="color: #f7df1e; font-size: 0.85rem;"><i class="fab fa-js"></i> Web</h4>
+            <small style="color: #888;">.bin 파일 업로드</small>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
+            <span style="font-size: 0.6rem; color: #aaa; font-weight: bold;">WebSocket</span>
+            <i class="fas fa-arrow-right" style="color: #666;"></i>
+        </div>
+
+        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #3776ab; min-width: 110px;">
+            <h4 style="color: #3776ab; font-size: 0.85rem;"><i class="fab fa-python"></i> Python</h4>
+            <small style="color: #888;">Reset 신호 전송<br>+ 바이너리 스트리밍</small>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
+            <span style="font-size: 0.6rem; color: #db2777; font-weight: bold;">UART (115200)</span>
+            <i class="fas fa-arrow-right" style="color: #666;"></i>
+        </div>
+
+        <div style="background: rgba(219, 39, 119, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #db2777; min-width: 120px;">
+            <h4 style="color: #db2777; font-size: 0.85rem;"><i class="fas fa-microchip"></i> Bootloader</h4>
+            <small style="color: #ccc;">Flash Erase<br>→ Write → Verify</small>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
+            <span style="font-size: 0.6rem; color: var(--accent-green); font-weight: bold;">Jump</span>
+            <i class="fas fa-arrow-right" style="color: #666;"></i>
+        </div>
+
+        <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--accent-green); min-width: 100px;">
+            <h4 style="color: var(--accent-green); font-size: 0.85rem;"><i class="fas fa-cogs"></i> New App</h4>
+            <small style="color: #ccc;">Updated<br>FreeRTOS Code</small>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== 4. Boot Sequence State Machine ===== -->
+<div class="feature-card" style="border-top: 4px solid #db2777;">
+    <h3 style="color: #fff; margin-bottom: 20px;">
+        <i class="fas fa-power-off" style="color: #db2777; margin-right: 10px;"></i>
+        Boot Sequence (매 전원 투입 시)
+    </h3>
+    <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem;">
+        STM32가 부팅하면 <strong>항상 부트로더가 먼저 실행</strong>됩니다.<br>
+        3초간 업데이트 신호를 기다린 후, 신호가 없으면 즉시 애플리케이션으로 점프합니다.
+    </p>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px; text-align: center; flex-wrap: wrap;">
+        
+        <div style="flex: 1; min-width: 130px; background: #222; border: 1px solid #db2777; padding: 18px; border-radius: 8px;">
+            <div style="font-size: 1.5rem; margin-bottom: 8px;">⚡</div>
+            <h4 style="color: #db2777; font-size: 0.85rem;">Power On</h4>
+            <p style="color: #888; font-size: 0.75rem; margin-top: 6px;">부트로더 진입<br>(0x0800_0000)</p>
+        </div>
+
+        <i class="fas fa-long-arrow-alt-right" style="color: #555; font-size: 1.2rem;"></i>
+
+        <div style="flex: 1; min-width: 130px; background: rgba(245, 158, 11, 0.08); border: 1px solid var(--accent-orange); padding: 18px; border-radius: 8px;">
+            <div style="font-size: 1.5rem; margin-bottom: 8px;">⏳</div>
+            <h4 style="color: var(--accent-orange); font-size: 0.85rem;">Wait 3s</h4>
+            <p style="color: #888; font-size: 0.75rem; margin-top: 6px;">UART에서<br>"UPDATE" 대기</p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="background: #222; padding: 6px 12px; border-radius: 4px; border: 1px solid #333;">
+                    <span style="color: var(--accent-green); font-size: 0.7rem; font-weight: bold;">No Signal</span>
+                </div>
+                <i class="fas fa-arrow-right" style="color: #555;"></i>
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 14px 18px; border-radius: 8px; border: 1px solid var(--accent-green);">
+                    <h4 style="color: var(--accent-green); font-size: 0.8rem;">Jump to App</h4>
+                    <small style="color: #888;">정상 부팅 (99%)</small>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="background: #222; padding: 6px 12px; border-radius: 4px; border: 1px solid #333;">
+                    <span style="color: #db2777; font-size: 0.7rem; font-weight: bold;">"UPDATE" 수신</span>
+                </div>
+                <i class="fas fa-arrow-right" style="color: #555;"></i>
+                <div style="background: rgba(219, 39, 119, 0.1); padding: 14px 18px; border-radius: 8px; border: 1px solid #db2777;">
+                    <h4 style="color: #db2777; font-size: 0.8rem;">Flash Mode</h4>
+                    <small style="color: #888;">업데이트 시작</small>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ===== 5. Implementation: 3 Layers ===== -->
+<h3 style="color: #fff; margin-bottom: 20px; border-left: 3px solid #db2777; padding-left: 15px; margin-top: 40px;">
+    Implementation: Three Layers
+</h3>
+
+<!-- Layer 1: STM32 Bootloader -->
+<div class="feature-card" style="border-left: 4px solid #db2777;">
+    <h3 style="color: #fff; margin-bottom: 15px;">
+        <i class="fas fa-microchip" style="color: #db2777; margin-right: 10px;"></i> 
+        Layer 1: Custom Bootloader (STM32)
+    </h3>
+    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+        
+        <div style="flex: 1; min-width: 280px;">
+            <p style="font-size: 0.9rem; color: #ccc; line-height: 1.6;">
+                CubeIDE에서 <strong>별도 프로젝트</strong>로 생성한 Bare-metal 부트로더입니다.<br>
+                FreeRTOS 없이 최소한의 코드로 Flash 쓰기에만 집중합니다.
+            </p>
+            <ul style="margin-top: 15px; color: #888; font-size: 0.85rem; line-height: 1.8;">
+                <li>
+                    <strong style="color: #db2777;">UART 대기:</strong> 
+                    부팅 후 3초간 <code>"UPDATE\n"</code> 문자열 수신 대기. Timeout 시 App 점프.
+                </li>
+                <li>
+                    <strong style="color: #db2777;">Flash Erase:</strong> 
+                    HAL_FLASHEx_Erase()로 Sector 1~7 삭제. <strong>Sector 0(부트로더)은 절대 건드리지 않음.</strong>
+                </li>
+                <li>
+                    <strong style="color: #db2777;">Chunk Receive:</strong> 
+                    256바이트 단위로 UART 수신 → <code>HAL_FLASH_Program()</code>으로 Word(4B) 단위 기록.
+                </li>
+                <li>
+                    <strong style="color: #db2777;">CRC Verify:</strong> 
+                    STM32 내장 CRC 하드웨어로 전체 영역 검증. 불일치 시 재시도 요청.
+                </li>
+                <li>
+                    <strong style="color: var(--accent-green);">Jump to App:</strong> 
+                    Vector Table 재설정(SCB→VTOR) 후 Application Reset Handler로 점프.
+                </li>
+            </ul>
+        </div>
+
+        <div style="flex: 1; min-width: 280px;">
+            <div class="mac-window" style="margin-top: 0;">
+                <div class="mac-header">
+                    <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+                    <span class="mac-title">bootloader_main.c</span>
+                </div>
+                <div class="mac-body">
+<span class="comment">// 1. 업데이트 신호 대기 (3초 Timeout)</span><br>
+<span class="kwd">if</span> (<span class="func">WaitForUpdateSignal</span>(<span class="num">3000</span>) == <span class="num">TIMEOUT</span>) {<br>
+&nbsp;&nbsp;<span class="func">JumpToApp</span>();  <span class="comment">// 신호 없으면 즉시 정상 부팅</span><br>
+}<br>
+<br>
+<span class="comment">// 2. Flash Erase (Sector 1~7만)</span><br>
+<span class="func">HAL_FLASH_Unlock</span>();<br>
+FLASH_EraseInitTypeDef erase = {<br>
+&nbsp;&nbsp;.TypeErase = FLASH_TYPEERASE_SECTORS,<br>
+&nbsp;&nbsp;.Sector = FLASH_SECTOR_1,<br>
+&nbsp;&nbsp;.NbSectors = <span class="num">7</span><br>
+};<br>
+<span class="func">HAL_FLASHEx_Erase</span>(&erase, &error);<br>
+<br>
+<span class="comment">// 3. 바이너리 수신 & 기록 (256B 청크)</span><br>
+<span class="kwd">while</span> (received < total_size) {<br>
+&nbsp;&nbsp;<span class="func">HAL_UART_Receive</span>(&huart2, chunk, <span class="num">256</span>, <span class="num">5000</span>);<br>
+&nbsp;&nbsp;<span class="kwd">for</span> (<span class="kwd">int</span> i = <span class="num">0</span>; i < <span class="num">256</span>; i += <span class="num">4</span>) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">HAL_FLASH_Program</span>(FLASH_TYPEPROGRAM_WORD,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;APP_ADDRESS + received + i,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(<span class="kwd">uint32_t</span>*)&chunk[i]);<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="func">HAL_UART_Transmit</span>(..., <span class="string">"ACK"</span>, ...);<br>
+}<br>
+<br>
+<span class="comment">// 4. CRC 검증 후 재부팅</span><br>
+<span class="kwd">if</span> (<span class="func">VerifyCRC</span>() == <span class="num">OK</span>) <span class="func">NVIC_SystemReset</span>();
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Layer 2: Python Flasher -->
+<div class="feature-card" style="border-left: 4px solid #3776ab;">
+    <h3 style="color: #fff; margin-bottom: 15px;">
+        <i class="fab fa-python" style="color: #3776ab; margin-right: 10px;"></i> 
+        Layer 2: Flasher Script (RPi)
+    </h3>
+    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+        
+        <div style="flex: 1; min-width: 280px;">
+            <p style="font-size: 0.9rem; color: #ccc; line-height: 1.6;">
+                RPi에서 실행되는 Python 스크립트로, 기존 <code>app.py</code>에 업데이트 엔드포인트를 추가합니다.<br>
+                <strong>기존 제어 모드를 중단</strong>한 뒤 부트로더와 통신합니다.
+            </p>
+            <ul style="margin-top: 15px; color: #888; font-size: 0.85rem; line-height: 1.8;">
+                <li>
+                    <strong style="color: #3776ab;">Step 1 — 제어 모드 중단:</strong> 
+                    C++ 프로세스 종료 → UART 점유 해제.
+                </li>
+                <li>
+                    <strong style="color: #3776ab;">Step 2 — STM32 리셋:</strong> 
+                    RPi GPIO로 STM32의 NRST 핀을 Low→High 토글하여 하드웨어 리셋.
+                </li>
+                <li>
+                    <strong style="color: #3776ab;">Step 3 — Handshake:</strong> 
+                    리셋 직후 UART로 <code>"UPDATE\n"</code> 전송. <code>"READY"</code> 응답 대기.
+                </li>
+                <li>
+                    <strong style="color: #3776ab;">Step 4 — Streaming:</strong> 
+                    .bin 파일을 256바이트 청크로 분할 → 전송 → ACK 수신 → 다음 청크.
+                </li>
+                <li>
+                    <strong style="color: var(--accent-green);">Step 5 — 완료:</strong> 
+                    CRC 전송 → STM32 자동 재부팅 → C++ 프로세스 재시작.
+                </li>
+            </ul>
+        </div>
+
+        <div style="flex: 1; min-width: 280px;">
+            <div class="mac-window" style="margin-top: 0;">
+                <div class="mac-header">
+                    <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+                    <span class="mac-title">ota_flasher.py</span>
+                </div>
+                <div class="mac-body">
+<span class="kwd">import</span> serial, struct, zlib, os<br>
+<br>
+<span class="kwd">def</span> <span class="func">flash_firmware</span>(bin_path):<br>
+&nbsp;&nbsp;<span class="comment"># 1. C++ 제어 프로세스 중단</span><br>
+&nbsp;&nbsp;os.<span class="func">system</span>(<span class="string">"pkill control_core"</span>)<br>
+<br>
+&nbsp;&nbsp;<span class="comment"># 2. STM32 하드웨어 리셋 (GPIO)</span><br>
+&nbsp;&nbsp;<span class="func">reset_stm32</span>()  <span class="comment"># NRST Low→High</span><br>
+<br>
+&nbsp;&nbsp;<span class="comment"># 3. 부트로더 Handshake</span><br>
+&nbsp;&nbsp;ser = serial.<span class="func">Serial</span>(<span class="string">'/dev/ttyACM0'</span>, <span class="num">115200</span>)<br>
+&nbsp;&nbsp;ser.<span class="func">write</span>(<span class="string">b'UPDATE\n'</span>)<br>
+&nbsp;&nbsp;resp = ser.<span class="func">readline</span>()  <span class="comment"># "READY\n"</span><br>
+<br>
+&nbsp;&nbsp;<span class="comment"># 4. 바이너리 청크 전송</span><br>
+&nbsp;&nbsp;data = <span class="func">open</span>(bin_path, <span class="string">'rb'</span>).<span class="func">read</span>()<br>
+&nbsp;&nbsp;ser.<span class="func">write</span>(struct.<span class="func">pack</span>(<span class="string">'&lt;I'</span>, <span class="func">len</span>(data)))<br>
+<br>
+&nbsp;&nbsp;<span class="kwd">for</span> i <span class="kwd">in</span> <span class="func">range</span>(<span class="num">0</span>, <span class="func">len</span>(data), <span class="num">256</span>):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;chunk = data[i:i+<span class="num">256</span>].<span class="func">ljust</span>(<span class="num">256</span>, <span class="string">b'\xff'</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ser.<span class="func">write</span>(chunk)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ser.<span class="func">readline</span>()  <span class="comment"># "ACK\n" 대기</span><br>
+<br>
+&nbsp;&nbsp;<span class="comment"># 5. CRC 전송 & 완료</span><br>
+&nbsp;&nbsp;crc = zlib.<span class="func">crc32</span>(data) & <span class="num">0xFFFFFFFF</span><br>
+&nbsp;&nbsp;ser.<span class="func">write</span>(struct.<span class="func">pack</span>(<span class="string">'&lt;I'</span>, crc))
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Layer 3: Web UI -->
+<div class="feature-card" style="border-left: 4px solid #f7df1e;">
+    <h3 style="color: #fff; margin-bottom: 15px;">
+        <i class="fab fa-js" style="color: #f7df1e; margin-right: 10px;"></i>
+        Layer 3: Web Upload UI
+    </h3>
+    <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">
+        기존 조종 인터페이스(index.html)에 <strong>Firmware Update 탭</strong>을 추가했습니다.<br>
+        .bin 파일을 드래그앤드롭하면 WebSocket을 통해 Python 서버로 전달됩니다.
+    </p>
+
+    <div class="mac-window">
+        <div class="mac-header">
+            <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+            <span class="mac-title">index.html (OTA Section)</span>
+        </div>
+        <div class="mac-body">
+<span class="comment">// 파일 업로드 → WebSocket 전송</span><br>
+fileInput.<span class="func">addEventListener</span>(<span class="string">'change'</span>, (e) => {<br>
+&nbsp;&nbsp;<span class="kwd">const</span> file = e.target.files[<span class="num">0</span>];<br>
+&nbsp;&nbsp;<span class="kwd">const</span> reader = <span class="kwd">new</span> <span class="func">FileReader</span>();<br>
+&nbsp;&nbsp;reader.<span class="func">onload</span> = () => {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;socket.<span class="func">emit</span>(<span class="string">'firmware_upload'</span>, {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data: reader.result,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filename: file.name<br>
+&nbsp;&nbsp;&nbsp;&nbsp;});<br>
+&nbsp;&nbsp;};<br>
+&nbsp;&nbsp;reader.<span class="func">readAsArrayBuffer</span>(file);<br>
+});<br>
+<br>
+<span class="comment">// 진행률 수신</span><br>
+socket.<span class="func">on</span>(<span class="string">'flash_progress'</span>, (pct) => {<br>
+&nbsp;&nbsp;progressBar.style.width = pct + <span class="string">'%'</span>;<br>
+});
+        </div>
+    </div>
+</div>
+
+<!-- ===== 6. Application Side: Vector Table Offset ===== -->
+<div class="grid-container" style="margin-top: 40px;">
+    <div class="feature-card">
+        <h4 style="color: #fff; margin-bottom: 10px;">
+            <i class="fas fa-map-marker-alt" style="color: #db2777;"></i> Application 수정사항
+        </h4>
+        <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">
+            기존 FreeRTOS 애플리케이션도 한 줄 수정이 필요합니다.<br>
+            시작 주소가 0x0800_0000이 아닌 <strong>0x0800_4000</strong>이므로 Vector Table 오프셋을 재설정해야 합니다.
+        </p>
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+                <span class="mac-title">system_stm32f4xx.c (수정)</span>
+            </div>
+            <div class="mac-body">
+<span class="comment">// 기존 (0x0800_0000에서 직접 실행)</span><br>
+<span class="comment">// #define VECT_TAB_OFFSET 0x00</span><br>
+<br>
+<span class="comment">// 변경 (부트로더 뒤에서 실행)</span><br>
+<span class="kwd">#define</span> VECT_TAB_OFFSET <span class="num">0x4000</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="feature-card">
+        <h4 style="color: #fff; margin-bottom: 10px;">
+            <i class="fas fa-cog" style="color: #db2777;"></i> Linker Script 수정
+        </h4>
+        <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 15px;">
+            CubeIDE의 링커 스크립트에서 Flash 시작 주소와 크기를 조정하여,
+            애플리케이션이 <strong>Sector 1부터 배치</strong>되도록 합니다.
+        </p>
+        <div class="mac-window">
+            <div class="mac-header">
+                <div class="mac-dots"><div class="mac-dot mac-red"></div><div class="mac-dot mac-yellow"></div><div class="mac-dot mac-green"></div></div>
+                <span class="mac-title">STM32F411RETx_FLASH.ld (수정)</span>
+            </div>
+            <div class="mac-body">
+<span class="comment">/* 기존 */</span><br>
+<span class="comment">/* FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 512K */</span><br>
+<br>
+<span class="comment">/* 변경: 부트로더 16KB 이후부터 시작 */</span><br>
+FLASH (rx) : ORIGIN = <span class="num">0x08004000</span>, LENGTH = <span class="num">496K</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 7. UART Protocol ===== -->
+<div class="feature-card" style="border-top: 3px solid #db2777;">
+    <h3 style="color: #fff; margin-bottom: 20px;">
+        <i class="fas fa-handshake" style="color: #db2777; margin-right: 10px;"></i>
+        UART Handshake Protocol
+    </h3>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+        부트로더와 Python Flasher 간의 통신 프로토콜입니다. 
+        모든 단계에서 <strong>ACK/NACK 확인</strong>을 통해 데이터 무결성을 보장합니다.
+    </p>
+
+    <div style="background: #111; padding: 20px; border-radius: 8px; border: 1px solid #333; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 2;">
+        <span style="color: #666;">RPi (Python)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; STM32 (Bootloader)</span><br>
+        <span style="color: #3776ab;">&nbsp;&nbsp;&nbsp;"UPDATE\n"</span> <span style="color: #555;">──────────→</span><br>
+        <span style="color: #555;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;←──────────</span> <span style="color: #db2777;">"READY\n"</span><br>
+        <span style="color: #3776ab;">&nbsp;&nbsp;&nbsp;[4B: total_size]</span> <span style="color: #555;">──────────→</span><br>
+        <span style="color: #555;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;←──────────</span> <span style="color: #db2777;">"ACK\n"</span><br>
+        <span style="color: #3776ab;">&nbsp;&nbsp;&nbsp;[256B: chunk 0]</span> <span style="color: #555;">──────────→</span><br>
+        <span style="color: #555;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;←──────────</span> <span style="color: #db2777;">"ACK\n"</span><br>
+        <span style="color: #3776ab;">&nbsp;&nbsp;&nbsp;[256B: chunk 1]</span> <span style="color: #555;">──────────→</span><br>
+        <span style="color: #555;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;←──────────</span> <span style="color: #db2777;">"ACK\n"</span><br>
+        <span style="color: #888;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...반복...</span><br>
+        <span style="color: #3776ab;">&nbsp;&nbsp;&nbsp;[4B: CRC32]</span> <span style="color: #555;">──────────→</span><br>
+        <span style="color: #555;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;←──────────</span> <span style="color: var(--accent-green);">"DONE\n"</span> <span style="color: #888;">(→ 재부팅)</span>
+    </div>
+</div>
+
+<!-- ===== 8. Safety: Rollback ===== -->
+<div class="feature-card" style="border-top: 3px solid #ef4444;">
+    <h3 style="color: #fff; margin-bottom: 20px;">
+        <i class="fas fa-shield-alt" style="color: #ef4444; margin-right: 10px;"></i>
+        Safety: Fail-safe & Recovery
+    </h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid #333;">
+            <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 10px;">
+                <i class="fas fa-unlink" style="color: #ef4444; margin-right: 8px;"></i>
+                전송 중 통신 끊김
+            </h4>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
+                <strong>Problem:</strong> 청크 전송 도중 WiFi 끊김 → Flash가 불완전한 상태.<br>
+                <strong>Solution:</strong> ACK 5초 Timeout 시 부트로더가 Flash를 재삭제(Erase)하고 대기 상태로 복귀. <strong>부트로더 자체는 Sector 0에 있어 절대 손상되지 않으므로</strong> 전원만 넣으면 재시도 가능.
+            </p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid #333;">
+            <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 10px;">
+                <i class="fas fa-check-double" style="color: var(--accent-green); margin-right: 8px;"></i>
+                CRC 불일치
+            </h4>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
+                <strong>Problem:</strong> 전송 완료 후 CRC가 맞지 않음 → 손상된 펌웨어 실행 위험.<br>
+                <strong>Solution:</strong> CRC 불일치 시 <code>"NACK"</code> 전송 후 Application으로 점프하지 않음. 부트로더 대기 상태를 유지하여 <strong>재전송 요청</strong> 가능.
+            </p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid #333;">
+            <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 10px;">
+                <i class="fas fa-power-off" style="color: var(--accent-orange); margin-right: 8px;"></i>
+                전원 차단 복구
+            </h4>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
+                <strong>Problem:</strong> Flash 쓰기 중 배터리 분리.<br>
+                <strong>Solution:</strong> 부트로더(Sector 0)는 쓰기 대상이 아니므로 항상 살아있음. 재전원 시 부트로더가 정상 시작 → 업데이트 재시도 가능. <strong>"Bricking 불가" 구조.</strong>
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===== 9. Engineer's Note ===== -->
+<div class="engineer-note" style="border-left: 3px solid #db2777;">
+    <h4 style="color: #db2777;"><i class="fas fa-pen-nib"></i> 박해진's Note</h4>
+    <p>
+        "처음에는 '부트로더'라는 개념이 막연했습니다. 하지만 구현하고 보니 원리는 단순합니다 — <strong>Flash 메모리를 둘로 나누고, 앞쪽의 작은 프로그램이 뒤쪽의 큰 프로그램을 교체하는 것.</strong>
+        <br><br>
+        핵심은 <strong>'부트로더 자체는 절대 덮어쓰지 않는다'</strong>는 설계 원칙입니다.
+        이 원칙 하나로 전송 실패, CRC 불일치, 전원 차단 등 모든 예외 상황에서 시스템이 복구 가능해집니다.
+        <br><br>
+        실제 자동차 ECU의 펌웨어 업데이트(UDS 프로토콜 기반)도 이 원리 위에 보안 인증과 암호화 계층이 추가된 것이라는 점에서, 이번 Phase는 <strong>전장 소프트웨어의 핵심 메커니즘을 직접 체득</strong>하는 경험이었습니다."
+    </p>
+</div>
+
+<div style="margin-top: 30px; text-align: right;">
+    <button class="nav-btn" onclick="loadPage('roadmap')" style="width: auto; display: inline-flex; background: rgba(219, 39, 119, 0.1); color: #db2777; border: 1px solid #db2777;">
+        Back to Roadmap <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+    </button>
+</div>

@@ -22,6 +22,17 @@ typedef struct {
 	int speed;   //속도 (PWM)
 	int angle;   //각도 (Servo)
 } MotorCommand_t;
+
+//PID관련 구조체
+typedef struct {
+	float kp; //비례 게인
+	float ki; //적분 게인
+	float kd; //미분 게인
+	float integral; //누적 오차 (I항용)
+	float prev_error; //이전 오차 (D항용)
+	float output_min;  //출력 하한
+	float output_max; //출력 상한
+} PID_t;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -158,6 +169,8 @@ int main(void)
 
     // 인터럽트 수신 시작( 한 글자 들어오면 인터럽트 발생해라는 느낌)
     // 이것도 옮겨야함
+
+
 
   /* USER CODE END 2 */
 
@@ -496,6 +509,30 @@ PUTCHAR_PROTOTYPE
   HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
   return ch;
 }
+
+// PID함수
+float PID_Calculate(PID_t *pid, float error){
+	// P항: 지금 오차에 비례
+	float p = pid->kp * error;
+
+	// I항: 오차를 누적 (dt = 0.01s 고정, 100Hz 루프)
+	pid->integral += error * 0.01f;
+	float i = pid->ki * pid->integral;
+
+	// D항: 오차의 변화율
+	float d = pid->kd * (error - pid->prev_error) / 0.01f;
+	pid->prev_error = error;
+
+	float output = p + i + d;
+
+	// 출력 범위 제한 (Antil-windup)
+	if(output > pid->output_max) output = pid->output_max;
+	if(output < pid->output_min) output = pid->output_min;
+
+	return output;
+}
+
+
 // 기존 코드에서 가져온 핀 강제 설정 함수
 void Force_Hardware_Config(void)
 {
@@ -657,7 +694,12 @@ void StartDefaultTask(void *argument)
     {
         // 데이터 없으면 대기 (RTOS 스케줄링 양보)
     	// 이제 폴링 방식에서 인터럽트로 바꿀거라서 주석때림
-        osDelay(1000); // 할 거 없으니깐 대기 (자는거임)
+
+    	//****엔코더 때문에 바뀜
+    	char enc_buf[32];
+    	int len = snprintf(enc_buf, sizeof(enc_buf), "ENC:%d\r\n", current_speed_rpm);
+    	HAL_UART_Transmit(&huart2, (uint8_t*)enc_buf, len, 100);
+        osDelay(50); // 할 거 없으니깐 대기 (자는거임) -> 엔코더 받는 역할해보자
     }
   }
   /* USER CODE END 5 */
@@ -679,6 +721,21 @@ void StartTask02(void *argument)
 
   int current_speed = 0;
   int current_angle = 1500;
+
+  //PID 관련
+  int target_speed = 0;
+  float error = 0.0f;
+  int pwm_output = 0;
+
+  PID_t pid_speed = {
+		  .kp = 0.5f,
+		  .ki = 0.0f,
+		  .kd = 0.0f,
+		  .integral = 0.0f,
+		  .prev_error = 0.0f,
+		  .output_min = -999.0f,
+		  .output_max = 999.0f
+  };
 
   // 성능 측정용 변수
   uint32_t last_wake_time = osKernelGetTickCount();
@@ -717,7 +774,17 @@ void StartTask02(void *argument)
       int16_t diff = (int16_t)(current_count - last_encoder_count);
       current_speed_rpm = diff;
       last_encoder_count = current_count;
+
+
       // ---------------------------------------------------------
+
+      //*************엔코더 값 보내기
+      // Task_Motor 루프 안, 엔코더 계산 바로 아래에 추가
+      static uint8_t enc_tick = 0;
+      if(++enc_tick >= 5) { // 100Hz 루프에서 5번마다 = 20Hz 전송
+          current_speed_rpm = diff;  //전역변수에 저장. 프린트 안하기
+          enc_tick = 0;
+      }
 
       // (3) 데이터 수신 및 처리 (순서 수정됨)
       // 먼저 큐를 확인
@@ -726,12 +793,25 @@ void StartTask02(void *argument)
       // 데이터가 "있으면" (osOK)
       if(status == osOK){
           // 1. 변수 갱신
-          current_speed = rcv_msg.speed;
-          current_angle = rcv_msg.angle;
+//          current_speed = rcv_msg.speed;
+//          current_angle = rcv_msg.angle;
+    	  //위 방식이 Open-Loop임 (명령을 그대로 PWM에 떄려 박음)
 
-          // 2. ★ 로그 출력 (명령 받았을 때만 찍힘)
-          printf("CMD_RECV: Speed=%d, Angle=%d\r\n", current_speed, current_angle);
+    	  //목표: Closed-Loop (엔코더 피드백으로 보정)
+    	  target_speed = rcv_msg.speed; // 목표값
+    	  current_angle = rcv_msg.angle;
+//
+//    	  error = target_speed - current_speed_rpm; //오차
+//    	  current_speed = (int)PID_Calculate(&pid_speed, error);
+//    	  pwm_output = current_speed;
+//    	  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pwm_output);
+//
+//          // 2. ★ 로그 출력 (명령 받았을 때만 찍힘)
+//          printf("CMD_RECV: Speed=%d, Angle=%d\r\n", current_speed, current_angle);
       }
+
+      error = target_speed - current_speed_rpm;
+      current_speed = (int)PID_Calculate(&pid_speed, error);
 
       // ---------------------------------------------------------
       // 모터 구동 로직

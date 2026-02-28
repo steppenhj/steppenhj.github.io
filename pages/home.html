@@ -7,17 +7,6 @@
         Engineer.
     </h1>
 
-    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #bbb; margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
-        <span style="color: var(--accent-blue); font-weight: bold;">RPi5 + STM32 Distributed Control</span>
-        <span style="color: #333;">//</span>
-        <span>RTOS & IPC</span>
-        <span style="color: #333;">//</span>
-        <span>Interrupt-Driven</span>
-        <span style="color: #333;">//</span>
-        <span style="color: var(--accent-orange);">Fail-safe Logic</span>
-        <span style="color: #333;">//</span>
-        <span style="color: var(--accent-purple); font-weight: bold;">MBSE (Rhapsody)</span>
-    </div>
     <p style="font-size: 1.1rem; color: #888; max-width: 600px; line-height: 1.6;">
         데이터에 기반한 의사결정과 정밀한 제어를 지향합니다.<br>
         <strong>Linux System</strong>과 <strong>Hard Real-time</strong> 환경을 오가며<br>
@@ -36,146 +25,190 @@
     </div>
 </div>
 
+<!-- ===== Tech Stack (Icon Grid) ===== -->
 <style>
-    /* Modern Bento Grid Layout */
-    .bento-grid {
+    .stack-section { margin-top: 40px; padding-top: 40px; border-top: 1px solid #222; }
+    .stack-section-title {
+        font-size: 0.72rem; font-weight: 800; letter-spacing: 2px;
+        text-transform: uppercase; margin-bottom: 20px; color: #555;
+    }
+    .stack-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr); /* 2열 구조로 변경 */
-        gap: 20px;
-        padding: 40px 0;
-        border-top: 1px solid #222;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 12px;
+        margin-bottom: 35px;
     }
-
-    .bento-card {
+    .stack-item {
         background: rgba(255, 255, 255, 0.03);
-        border: 1px solid #333;
-        border-radius: 12px;
-        padding: 25px;
+        border: 1px solid #2a2a2a;
+        border-radius: 10px;
+        padding: 16px 14px;
         display: flex;
-        flex-direction: column;
-        transition: transform 0.2s, border-color 0.2s;
-        min-height: 180px; /* 높이 통일감 */
+        align-items: center;
+        gap: 10px;
+        transition: all 0.2s ease;
     }
-    
-    .bento-card:hover {
-        transform: translateY(-5px);
-        border-color: #555;
+    .stack-item:hover {
         background: #1a1a1a;
+        border-color: #444;
+        transform: translateY(-2px);
+    }
+    .stack-item img {
+        width: 22px; height: 22px; object-fit: contain;
+        filter: brightness(0.9);
+    }
+    .stack-item .stack-icon-fa {
+        width: 22px; height: 22px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem;
+    }
+    .stack-item span {
+        font-size: 0.85rem; color: #ccc; font-weight: 500;
+        font-family: 'Inter', sans-serif;
     }
 
-    @media (max-width: 768px) {
-        .bento-grid { grid-template-columns: 1fr; }
-    }
-
-    .card-title {
-        font-size: 0.8rem;
-        font-weight: 800;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        margin-bottom: 20px;
-        color: #666;
+    /* 프로젝트 배너 */
+    .project-banner {
+        margin: 35px 0 0;
+        padding: 22px 28px;
+        background: linear-gradient(135deg, rgba(59,130,246,0.06), rgba(245,158,11,0.04));
+        border: 1px solid rgba(59, 130, 246, 0.15);
+        border-radius: 10px;
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 10px;
+        cursor: pointer;
+        transition: 0.2s;
     }
-
-    .skill-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 15px;
-    }
-
-    .skill-pill {
-        background: #000;
-        border: 1px solid #333;
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        color: #ccc;
-        font-family: 'JetBrains Mono', monospace;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .card-desc {
-        margin-top: auto; /* 설명을 항상 바닥에 붙임 */
-        font-size: 0.85rem; 
-        color: #888; 
-        line-height: 1.5;
+    .project-banner:hover {
+        border-color: rgba(59, 130, 246, 0.35);
+        background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(245,158,11,0.06));
     }
 </style>
 
-<div class="bento-grid">
+<div class="stack-section">
 
-    <div class="bento-card">
-        <div class="card-title" style="color: var(--accent-green);">
-            <i class="fas fa-microchip" style="font-size: 1.2rem;"></i> Firmware & RTOS
+    <!-- LANGUAGES -->
+    <div class="stack-section-title" style="color: var(--accent-blue);">
+        <i class="fas fa-code" style="margin-right: 6px;"></i> Languages
+    </div>
+    <div class="stack-grid">
+        <div class="stack-item">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" alt="C++">
+            <span>C / C++</span>
         </div>
-        <div class="skill-list">
-            <div class="skill-pill" style="border-color: var(--accent-green); color: #fff;">
-                <i class="fas fa-check"></i> STM32 HAL
-            </div>
-            <div class="skill-pill">FreeRTOS</div>
-            <div class="skill-pill">UART/DMA</div>
-            <div class="skill-pill">Interrupt</div>
+        <div class="stack-item">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="Python">
+            <span>Python</span>
         </div>
-        <p class="card-desc">
-            Cortex-M4 기반의 Bare-metal 및 RTOS 펌웨어 개발.<br>
-            폴링을 넘어 <strong>인터럽트와 DMA</strong>를 활용한 Non-blocking 제어 구현.
-        </p>
+        <div class="stack-item">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="JS">
+            <span>JavaScript</span>
+        </div>
+        <div class="stack-item">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" alt="HTML">
+            <span>HTML / CSS</span>
+        </div>
     </div>
 
-    <div class="bento-card">
-        <div class="card-title" style="color: #d63384;">
-            <i class="fab fa-linux" style="font-size: 1.2rem;"></i> Embedded Linux
+    <!-- HARDWARE & PLATFORM -->
+    <div class="stack-section-title" style="color: var(--accent-green);">
+        <i class="fas fa-microchip" style="margin-right: 6px;"></i> Hardware & Platform
+    </div>
+    <div class="stack-grid">
+        <div class="stack-item" style="border-color: rgba(16, 185, 129, 0.2);">
+            <div class="stack-icon-fa"><i class="fas fa-microchip" style="color: #10b981;"></i></div>
+            <span>STM32</span>
         </div>
-        <div class="skill-list">
-            <div class="skill-pill">Raspberry Pi 5</div>
-            <div class="skill-pill">Shell Script</div>
-            <div class="skill-pill">Systemd</div>
-            <div class="skill-pill">Socket IPC</div>
+        <div class="stack-item">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/raspberrypi/raspberrypi-original.svg" alt="RPi">
+            <span>Raspberry Pi 5</span>
         </div>
-        <p class="card-desc">
-            리눅스 커널 기반의 상위 제어기(Brain) 환경 구축.<br>
-            <strong>프로세스 관리 및 IPC 통신 설계</strong> 능력 보유.
-        </p>
+        <div class="stack-item">
+            <div class="stack-icon-fa"><i class="fas fa-cogs" style="color: #f59e0b;"></i></div>
+            <span>FreeRTOS</span>
+        </div>
+        <div class="stack-item">
+            <div class="stack-icon-fa"><i class="fas fa-bolt" style="color: #ef4444;"></i></div>
+            <span>STM32 HAL</span>
+        </div>
     </div>
 
-    <div class="bento-card">
-        <div class="card-title" style="color: var(--accent-purple);">
-            <i class="fas fa-eye" style="font-size: 1.2rem;"></i> Computer Vision
+    <!-- COMMUNICATION -->
+    <div class="stack-section-title" style="color: var(--accent-orange);">
+        <i class="fas fa-exchange-alt" style="margin-right: 6px;"></i> Communication
+    </div>
+    <div class="stack-grid">
+        <div class="stack-item">
+            <div class="stack-icon-fa"><i class="fas fa-plug" style="color: #ef4444;"></i></div>
+            <span>UART</span>
         </div>
-        <div class="skill-list">
-            <div class="skill-pill">OpenCV (C++/Py)</div>
-            <div class="skill-pill">YOLOv8 Nano</div>
-            <div class="skill-pill">GStreamer</div>
+        <div class="stack-item">
+            <div class="stack-icon-fa"><i class="fas fa-network-wired" style="color: #3b82f6;"></i></div>
+            <span>UDP Socket</span>
         </div>
-        <p class="card-desc">
-            카메라 센서 기반의 <strong>차선 인식(Lane Keeping)</strong> 및 객체 탐지.<br>
-            임베디드 NPU 가속을 활용한 경량 모델 최적화.
-        </p>
+        <div class="stack-item">
+            <div class="stack-icon-fa"><i class="fas fa-wifi" style="color: #8b5cf6;"></i></div>
+            <span>WebSocket</span>
+        </div>
     </div>
 
-<div class="bento-card">
-        <div class="card-title" style="color: var(--accent-blue);">
-            <i class="fas fa-tools" style="font-size: 1.2rem;"></i> Design & Tools
+    <!-- TOOLS -->
+    <div class="stack-section-title" style="color: var(--accent-purple);">
+        <i class="fas fa-tools" style="margin-right: 6px;"></i> Tools & Design
+    </div>
+    <div class="stack-grid">
+        <div class="stack-item">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg" alt="VS Code">
+            <span>VS Code</span>
         </div>
-        <div class="skill-list">
-            <div class="skill-pill"><i class="fas fa-circle" style="font-size:0.6rem; color:#659ad2;"></i> C / C++</div>
-            <div class="skill-pill"><i class="fas fa-circle" style="font-size:0.6rem; color:#ffd43b;"></i> Python</div>
-            <div class="skill-pill">IBM Rhapsody</div>
-            <div class="skill-pill">Git / GitHub</div>
+        <div class="stack-item">
+            <div class="stack-icon-fa"><i class="fas fa-cube" style="color: #f59e0b;"></i></div>
+            <span>CubeIDE</span>
         </div>
-        <p class="card-desc">
-            객체지향 설계(OOP)와 <strong>형상 관리(Git)</strong>를 통한 협업 준비 완료.<br>
-            <strong>MBSE(모델 기반 시스템 엔지니어링)</strong>를 적용한 상태 머신 및 아키텍처 설계.
-        </p>
+        <div class="stack-item">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" alt="Git">
+            <span>Git / GitHub</span>
+        </div>
+        <div class="stack-item">
+            <div class="stack-icon-fa"><i class="fas fa-project-diagram" style="color: #3b82f6;"></i></div>
+            <span>IBM Rhapsody</span>
+        </div>
+    </div>
+
+    <!-- CONCEPTS -->
+    <div class="stack-section-title" style="color: #888;">
+        <i class="fas fa-brain" style="margin-right: 6px;"></i> Concepts
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 35px;">
+        <span class="spec-badge">MBSE</span>
+        <span class="spec-badge">OOP Design</span>
+        <span class="spec-badge">Mutex / Atomic</span>
+        <span class="spec-badge">PID Control</span>
+        <span class="spec-badge">Interrupt-Driven</span>
+        <span class="spec-badge">Fail-safe Logic</span>
+        <span class="spec-badge">IPC (Inter-Process)</span>
     </div>
 
 </div>
 
+<!-- ===== Main Project Banner ===== -->
+<div class="project-banner" onclick="loadPage('roadmap')">
+    <div>
+        <span style="font-size: 0.68rem; color: var(--accent-blue); font-weight: 700; letter-spacing: 1.5px;">MAIN PROJECT</span>
+        <div style="font-size: 1.15rem; color: #fff; font-weight: 700; margin-top: 5px;">
+            Neuro-Drive Control System
+        </div>
+        <div style="font-size: 0.82rem; color: #888; margin-top: 5px;">
+            RPi5 + STM32 분산 제어 · FreeRTOS · 엔코더 RTH · MBSE 설계 — <strong style="color: #aaa;">Phase 1~4 완료</strong>
+        </div>
+    </div>
+    <span style="color: var(--accent-blue); font-size: 0.9rem; font-weight: 600; white-space: nowrap;">
+        View Roadmap <i class="fas fa-arrow-right" style="margin-left: 4px;"></i>
+    </span>
+</div>
+
+<!-- ===== Engineering Journey (기존 유지) ===== -->
 <style>
     .bio-timeline { position: relative; padding-left: 30px; border-left: 2px solid #333; }
     .bio-item { position: relative; margin-bottom: 40px; }
@@ -190,7 +223,7 @@
     .bio-tag { font-size: 0.75rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; color: #ccc; margin-right: 5px; }
 </style>
 
-<div style="margin-top: 40px;">
+<div style="margin-top: 50px;">
     <h3 style="color: #fff; font-size: 1.2rem; margin-bottom: 30px; display: flex; align-items: center; gap: 10px;">
         <i class="fas fa-history" style="color: var(--accent-blue);"></i> My Engineering Journey
     </h3>

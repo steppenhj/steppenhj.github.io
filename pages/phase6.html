@@ -1,80 +1,105 @@
 <div class="phase-header">
-    <span style="color: #db2777; font-weight: bold; letter-spacing: 2px;">PHASE 06: FIRMWARE UPDATE</span>
-    <h1>OTA & Bootloader</h1>
+    <span style="color: var(--accent-purple); font-weight: bold; letter-spacing: 2px;">PHASE 05: 자율주행 (계획)</span>
+    <h1>Visual Perception & Autonomy</h1>
     <p class="page-subtitle">
-        유지보수 효율성을 극대화하기 위해, JTAG/ST-Link 없이도<br>
-        라즈베리파이를 통해 STM32의 펌웨어를 원격으로 업데이트하는 <strong>OTA(Over-The-Air)</strong> 시스템을 구축했습니다.
+        단순한 원격 제어를 넘어, 카메라 센서를 통해 도로 상황을 인지(Perception)하고<br>
+        스스로 경로를 판단(Decision)하는 <strong>자율주행 시스템</strong> 구현 단계입니다.<br>
+        <span style="color: #f59e0b; font-size: 0.85rem;">⚠ 본 Phase는 향후 구현 예정이며, 아래는 설계 계획입니다.</span>
     </p>
 </div>
 
 <div class="feature-card">
-    <h3><i class="fas fa-satellite-dish" style="color: #db2777;"></i> System Architecture</h3>
-    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-top: 20px;">
-        <div style="flex: 1; min-width: 300px;">
-            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
-                차량(RC카)이 주행 불가능한 위치에 있거나 케이스를 분해하기 어려운 상황에서도 
-                소프트웨어 패치(Bug fix)가 가능해야 합니다. 이를 위해 <strong>Custom Bootloader</strong>를 개발했습니다.
-            </p>
+    <h3><i class="fas fa-sitemap" style="color: var(--accent-purple);"></i> Perception Pipeline</h3>
+    <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px; text-align: center; margin-top: 30px;">
+        
+        <div style="background: #222; padding: 15px; border-radius: 12px; border: 1px solid #444;">
+            <h4 style="color: #fff; margin-bottom: 5px;">Camera</h4>
+            <small style="color: var(--text-muted);">Raw Frame (30 FPS)</small>
         </div>
         
-        <div style="flex: 1; background: #222; padding: 20px; border-radius: 8px; border: 1px solid #444; font-size: 0.85rem;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span style="color: #888;">0x0800 0000</span>
-                <span style="color: #db2777; font-weight: bold;">Bootloader (16KB)</span>
+        <i class="fas fa-arrow-right" style="color: var(--text-muted);"></i>
+        
+        <div style="background: linear-gradient(145deg, #222, #1a102e); padding: 20px; border-radius: 12px; border: 1px solid var(--accent-purple); box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);">
+            <h4 style="color: var(--accent-purple);">RPi 5 (Brain)</h4>
+            <div style="margin-top: 10px; font-size: 0.8rem; color: #ccc;">
+                <span style="display:block; margin-bottom:4px;">🔹 Lane Keeping (OpenCV)</span>
+                <span style="display:block;">🔸 Object Detection (AI)</span>
             </div>
-            <div style="height: 10px; background: #db2777; border-radius: 2px; margin-bottom: 20px;"></div>
-
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span style="color: #888;">0x0800 4000</span>
-                <span style="color: var(--accent-green); font-weight: bold;">Application (User Code)</span>
-            </div>
-            <div style="height: 40px; background: linear-gradient(to bottom, var(--accent-green), #222); border-radius: 2px;"></div>
         </div>
+        
+        <i class="fas fa-arrow-right" style="color: var(--text-muted);"></i>
+        
+        <div style="background: #222; padding: 15px; border-radius: 12px; border: 1px solid #444;">
+            <h4 style="color: #fff; margin-bottom: 5px;">Arbitrator</h4>
+            <small style="color: var(--text-muted);">Safety Logic</small>
+        </div>
+
+        <i class="fas fa-arrow-right" style="color: var(--text-muted);"></i>
+
+        <div style="background: #222; padding: 15px; border-radius: 12px; border: 1px solid var(--accent-green);">
+            <h4 style="color: var(--accent-green);">STM32</h4>
+            <small style="color: var(--text-muted);">Actuation (Phase 2)</small>
+        </div>
+
     </div>
 </div>
+
+
+
+<h3 style="color: #fff; margin-bottom: 20px; border-left: 3px solid var(--accent-purple); padding-left: 15px;">
+    Core Algorithms: Hybrid Approach
+</h3>
 
 <div class="grid-container">
     <div class="feature-card">
-        <h3><i class="fas fa-sync-alt" style="color: #db2777;"></i> Update Sequence</h3>
-        <ol style="color: #ccc; font-size: 0.9rem; line-height: 1.8; padding-left: 20px;">
-            <li><strong style="color: #fff;">Trigger:</strong> RPi가 UART로 "UPDATE_REQ" 커맨드 전송</li>
-            <li><strong style="color: #fff;">Reset:</strong> STM32가 이를 감지하고 Soft Reset 수행</li>
-            <li><strong style="color: #fff;">Bootloader Mode:</strong> 부트로더가 실행되어 대기 상태 진입</li>
-            <li><strong style="color: #fff;">Flash Erase:</strong> App 영역(Sector 1~)을 삭제</li>
-            <li><strong style="color: #fff;">Data Stream:</strong> RPi로부터 바이너리(.bin) 수신 및 기록</li>
-            <li><strong style="color: #fff;">Verify & Jump:</strong> CRC 검증 후 App 주소로 점프</li>
-        </ol>
+        <h3><i class="fas fa-road" style="color: var(--accent-blue);"></i> Lane Keeping (LKAS)</h3>
+        <span class="spec-badge" style="border-color: var(--accent-blue); color: var(--accent-blue);">Classic CV</span>
+        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
+            고속 주행 시 빠른 응답속도를 위해 가벼운 <strong>OpenCV</strong> 알고리즘을 사용합니다.
+            딥러닝보다 연산량이 적어 30 FPS 이상의 실시간성을 보장합니다.
+        </p>
+        <ul style="margin-top: 10px; font-size: 0.85rem; color: #888; padding-left: 20px; line-height: 1.6;">
+            <li>Preprocessing: Gaussian Blur + Bird's Eye View</li>
+            <li>Edge Detection: Canny & Sobel</li>
+            <li>Lane Fitting: Sliding Window + Polyfit</li>
+        </ul>
     </div>
 
-    <div class="feature-card" style="padding: 0; overflow: hidden; background: #0d0d0d;">
-        <div style="padding: 15px; border-bottom: 1px solid #333; font-size: 0.8rem; color: #888;">
-            bootloader_main.c
+    <div class="feature-card">
+        <h3><i class="fas fa-brain" style="color: var(--accent-purple);"></i> Object Detection</h3>
+        <span class="spec-badge" style="border-color: var(--accent-purple); color: var(--accent-purple);">Deep Learning</span>
+        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
+            정지 표지판, 신호등, 보행자 등 복잡한 패턴 인식을 위해 <strong>YOLOv8 Nano</strong> 모델을 도입합니다.
+            라즈베리파이 NPU/GPU 가속을 활용해 추론 시간을 최적화합니다.
+        </p>
+        <div style="margin-top: 15px; background: #111; padding: 10px; border-radius: 6px;">
+            <small style="color: #666; display: block;">Target Metrics:</small>
+            <span style="color: #fff; font-family: monospace;">Input: 320x320 | Latency: < 50ms</span>
         </div>
-        <pre style="margin: 0; border: none;"><code class="cpp"><span class="comment">// Jump to Application Function</span>
-<span class="keyword">void</span> <span class="function">JumpToApp</span>(<span class="keyword">void</span>) {
-    uint32_t JumpAddress = *(__IO uint32_t*) (APP_ADDRESS + 4);
-    
-    <span class="comment">// 1. Disable all interrupts</span>
-    __disable_irq();
-    
-    <span class="comment">// 2. Set Vector Table Offset</span>
-    SCB->VTOR = APP_ADDRESS;
-    
-    <span class="comment">// 3. Jump to Reset Handler</span>
-    Jump_To_Application = (pFunction) JumpAddress;
-    Jump_To_Application();
-}</code></pre>
     </div>
 </div>
 
-<div class="info-box" style="border-left: 4px solid #db2777;">
+<div class="info-box" style="border-left: 4px solid #f59e0b;">
     <h3 style="color: #fff; margin-bottom: 15px;">
-        <i class="fas fa-lightbulb" style="color: #fdd835; margin-right: 10px;"></i>
-        Why IAP (In-Application Programming)?
+        <i class="fas fa-balance-scale" style="color: #f59e0b; margin-right: 10px;"></i>
+        The Arbitrator: Human-in-the-loop
     </h3>
-    <p style="color: var(--text-muted); line-height: 1.7;">
-        제조 현장이나 실제 운용 환경에서는 물리적 연결(JTAG)이 어렵습니다. 
-        통신 인터페이스(UART, CAN, WiFi)를 통해 펌웨어를 자체적으로 업데이트하는 기술은 
-        <strong>전장(Automotive) 및 IoT 분야의 핵심 요구사항</strong>입니다.
+    <p style="color: var(--text-muted); margin-bottom: 20px;">
+        자율주행 시스템은 완벽하지 않으므로 언제나 사람의 개입을 최우선으로 합니다.
+        소프트웨어적인 <strong>중재자(Arbitrator)</strong> 패턴을 구현하여 제어권 충돌을 방지합니다.
     </p>
+
+    <pre><code class="cpp"><span class="comment">// Safety Override Logic (Concept)</span>
+<span class="keyword">void</span> <span class="function">Arbitrate_Control_Signal</span>() {
+    <span class="keyword">if</span> (user_joystick.is_active()) {
+        <span class="comment">// 1. Human Input Detected -> Disengage AI</span>
+        current_state = MANUAL_MODE;
+        stm32.send(user_joystick.data);
+    } 
+    <span class="keyword">else</span> {
+        <span class="comment">// 2. No User Input -> AI Auto Pilot</span>
+        current_state = AUTO_MODE;
+        stm32.send(ai_lane_follower.data);
+    }
+}</code></pre>
 </div>

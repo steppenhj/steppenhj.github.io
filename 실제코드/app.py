@@ -6,6 +6,8 @@ import eventlet #비동기 처리 라이브러리
 import os
 from eventlet.semaphore import Semaphore
 
+import serial
+
 #표준 라이브러리를 비동기 방식에 맞게 바꾸는 거임
 eventlet.monkey_patch()
 
@@ -33,6 +35,48 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 #처음에는 false로 설정해둠(껐다는 의미). 이것도 하나의 안전장치임.
 engine_running = False 
 
+#rth watchdog문제 해결
+rth_active = False
+
+rth_mode_current = 0  # 전역 변수 추가
+
+#2/26추가. 엔코더 받기
+feedback_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+feedback_sock.bind(('127.0.0.1', 5556))
+feedback_sock.settimeout(1.0)
+
+def encoder_monitor_task():
+    while True:
+        try:
+            data, _ = feedback_sock.recvfrom(64)
+            line = data.decode('utf-8', errors='ignore').strip()
+            if line.startswith("ENC:"):
+                speed = int(line.split(":")[1])
+                socketio.emit('encoder_update', {'speed': speed})
+        except:
+            pass
+        socketio.sleep(0)
+
+socketio.start_background_task(encoder_monitor_task)
+
+#rth watchdog문제
+def rth_keep_alive_task():
+    while True:
+        if rth_active:
+            send_udp_command(0.0, 0.0, 2)
+        socketio.sleep(0.1)
+
+socketio.start_background_task(rth_keep_alive_task)
+
+@socketio.on('rth_command')
+def handle_rth(data):
+    global rth_active, rth_mode_current
+    mode = int(data.get('mode', 0))
+    rth_mode_current = mode
+    rth_active = (mode == 2)
+    send_udp_command(0.0, 0.0, mode)
+    emit('rth_update', {'mode': mode})
+
 # ==========================================
 # 2. 시스템 기능
 # ==========================================
@@ -46,12 +90,14 @@ def sys_log(msg, type="INFO"):
     socketio.emit('system_log', {'type': type, 'log': formatted_msg})
 
 # C++ Core로 명령 전송 (UDP)
-def send_udp_command(throttle, steering):
+def send_udp_command(throttle, steering, mode=0):
     try:
         # C++ 구조체: struct Packet { float th; float st; };
         # Python: struct.pack('ff', ...) -> float 2개 (8바이트) 패킹
         #이진수 binary로 압축하는 걸로 보면 됨
-        packet = struct.pack('ff', float(throttle), float(steering))
+
+        #***이제 PID제어 -> RTH 기능을 추가함. RTH 모드를 패킷에 추가해야 함
+        packet = struct.pack('ffi', float(throttle), float(steering), int(mode))
         
         #sock.sendto: 만들어진 패킷을 5555번 포트로 휙 던진다(UDP)
         sock.sendto(packet, (UDP_IP, UDP_PORT))
@@ -109,8 +155,11 @@ def handle_engine():
     emit('engine_update', {'running': engine_running})
     
     # 엔진 끄면 즉시 정지 명령 전송, C++로
+    # rth모드 젤 끝에 0추가
     if not engine_running: 
-        send_udp_command(0.0, 0.0)
+        send_udp_command(0.0, 0.0, 0)
+
+
 
 #js에서 보낸 control_command 받으면 handle_control_command 함수 실행
 @socketio.on('control_command')
@@ -118,6 +167,7 @@ def handle_control_command(data):
 
     #엔진 변수 false이면 바로 return 해버림
     if not engine_running: return 
+    if rth_active: return #rth복귀중 조이스틱 무시
     try:
         # 1. 원본 데이터 받기. JSON 데이터 ({throttle:0.5, ...})을 뜯어내기
         raw_throttle = float(data.get('throttle', 0))
@@ -158,7 +208,8 @@ def handle_control_command(data):
         # print(f"[DEBUG] S: {steering:.2f} | T_Raw: {raw_throttle:.2f} -> T_Boost: {final_throttle:.2f}")
 
         # 4. C++ (UDP)로 전송
-        send_udp_command(final_throttle, steering)
+        # 0추가 : RHT모드
+        send_udp_command(final_throttle, steering, rth_mode_current)
 
     except Exception as e:
         print(f"Control Error: {e}")

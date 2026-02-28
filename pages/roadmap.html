@@ -39,28 +39,53 @@
     </div>
 
     <div class="timeline-item">
-        <div class="timeline-marker" style="background: var(--accent-purple); border-style: dashed;"></div>
-        <div class="timeline-content" style="border-top: 3px solid var(--accent-purple); opacity: 0.8;">
+        <div class="timeline-marker" style="background: var(--accent-orange); box-shadow: 0 0 10px var(--accent-orange);"></div>
+        <div class="timeline-content" style="border-top: 3px solid var(--accent-orange);">
             <div class="timeline-date">Phase 04</div>
-            <h3>Visual Perception</h3>
-            <p style="color: #888; font-size: 0.9rem;">"AI/OpenCV 기반의 자율주행 및 객체 인식"</p>
+            <h3>Active Safety Protocol</h3>
+            <p style="color: #888; font-size: 0.9rem;">
+                "PID 기반 RTH(Return to Home) 구현.<br>
+                엔코더 경로 기록 및 역추적 복귀 알고리즘"
+            </p>
             <div class="tech-tags" style="margin-top: 10px;">
-                <span>OpenCV</span>
-                <span>YOLO</span>
+                <span style="border-color: var(--accent-orange); color: var(--accent-orange);">RTH</span>
+                <span>Encoder Path Stack</span>
+                <span>Watchdog</span>
             </div>
-            <button class="nav-btn" onclick="loadPage('phase4')" style="margin-top:10px; width:auto;">Details <i class="fas fa-arrow-right"></i></button>
+            <button class="nav-btn" onclick="loadPage('phase4')" style="margin-top:10px; width:auto; background: rgba(245, 158, 11, 0.1);">Details <i class="fas fa-arrow-right"></i></button>
         </div>
     </div>
 
     <div class="timeline-item">
-        <div class="timeline-marker" style="background: var(--accent-orange);"></div>
-        <div class="timeline-content" style="border-top: 3px solid var(--accent-orange);">
-            <div class="timeline-date">Phase 05</div>
-            <h3>Active Safety Protocol</h3>
-            <p style="color: #888; font-size: 0.9rem;">"통신 두절 시 자동 정지 및 RTH 설계"</p>
+        <div class="timeline-marker" style="background: #db2777; border-style: dashed;"></div>
+        <div class="timeline-content" style="border-top: 3px solid #db2777; opacity: 0.6;">
+            <div class="timeline-date">Phase 05 <span style="font-size: 0.7rem; color: #f59e0b; margin-left: 5px;">PLANNED</span></div>
+            <h3>Firmware Update (OTA)</h3>
+            <p style="color: #888; font-size: 0.9rem;">"UART 기반 커스텀 부트로더 및 원격 펌웨어 업데이트"</p>
+            <div class="tech-tags" style="margin-top: 10px;">
+                <span>IAP</span>
+                <span>Bootloader</span>
+                <span>CRC Verify</span>
+            </div>
+            <button class="nav-btn" onclick="loadPage('phase6')" style="margin-top:10px; width:auto;">Details <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <div class="timeline-item">
+        <div class="timeline-marker" style="background: var(--accent-purple); border-style: dashed;"></div>
+        <div class="timeline-content" style="border-top: 3px solid var(--accent-purple); opacity: 0.6;">
+            <div class="timeline-date">Phase 06 <span style="font-size: 0.7rem; color: #f59e0b; margin-left: 5px;">PLANNED</span></div>
+            <h3>Visual Perception</h3>
+            <p style="color: #888; font-size: 0.9rem;">"AI/OpenCV 기반의 자율주행 및 객체 인식 (계획)"</p>
+            <div class="tech-tags" style="margin-top: 10px;">
+                <span>OpenCV</span>
+                <span>YOLO</span>
+            </div>
             <button class="nav-btn" onclick="loadPage('phase5')" style="margin-top:10px; width:auto;">Details <i class="fas fa-arrow-right"></i></button>
         </div>
     </div>
+
+
 
 
 

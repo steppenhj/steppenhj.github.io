@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>채용 공고 레퍼런스</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface2: #1e2229;
+    --border: #2a2f3a;
+    --text: #e8eaf0;
+    --text-muted: #6b7280;
+    --text-dim: #9ca3af;
+    --accent: #4f9eff;
+    --accent2: #7c6fff;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --tag-bg: #1a2035;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── 헤더 ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,15,20,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .logo span { color: var(--text-muted); }
+
+  .header-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── 레이아웃 ── */
+  .app {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* ── 사이드바 ── */
+  aside {
+    border-right: 1px solid var(--border);
+    padding: 20px 16px;
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+  }
+
+  .sidebar-section { margin-bottom: 28px; }
+
+  .sidebar-label {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* 뷰 탭 */
+  .view-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 3px;
+  }
+
+  .view-tab {
+    flex: 1;
+    padding: 6px 0;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.15s;
+  }
+
+  .view-tab.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* 필터 */
+  .filter-search {
+    width: 100%;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    margin-bottom: 10px;
+    outline: none;
+  }
+
+  .filter-search:focus { border-color: var(--accent); }
+  .filter-search::placeholder { color: var(--text-muted); }
+
+  .tag-filter-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .tag-filter {
+    padding: 3px 9px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .tag-filter:hover { border-color: var(--accent); color: var(--accent); }
+
+  .tag-filter.active {
+    background: rgba(79,158,255,0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* 회사 필터 */
+  .company-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+
+  .company-filter-item:hover { background: var(--surface2); }
+  .company-filter-item.active { background: rgba(79,158,255,0.08); }
+
+  .company-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .company-name { font-size: 12px; color: var(--text-dim); }
+  .company-filter-item.active .company-name { color: var(--accent); }
+  .company-count {
+    margin-left: auto;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+  }
+
+  /* ── 메인 ── */
+  main { padding: 24px; overflow-x: hidden; }
+
+  .main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  .result-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+  }
+
+  .result-count strong { color: var(--accent); }
+
+  .active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    flex: 1;
+  }
+
+  .active-filter-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: rgba(79,158,255,0.12);
+    border: 1px solid rgba(79,158,255,0.3);
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+  }
+
+  .active-filter-chip:hover { background: rgba(79,158,255,0.2); }
+
+  /* ── 카드 뷰 ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  .job-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .job-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--card-accent, var(--accent));
+    transform: scaleX(0);
+    transition: transform 0.2s;
+    transform-origin: left;
+  }
+
+  .job-card:hover {
+    border-color: rgba(79,158,255,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+
+  .job-card:hover::before { transform: scaleX(1); }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .card-company {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 4px;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .card-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .badge-embedded { background: rgba(52,211,153,0.12); color: var(--green); }
+  .badge-system { background: rgba(79,158,255,0.12); color: var(--accent); }
+  .badge-security { background: rgba(248,113,113,0.12); color: var(--red); }
+  .badge-common { background: rgba(251,191,36,0.12); color: var(--amber); }
+  .badge-cicd { background: rgba(124,111,255,0.12); color: var(--accent2); }
+
+  .card-location {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 14px;
+  }
+
+  .tech-tag {
+    padding: 2px 7px;
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-dim);
+    transition: all 0.1s;
+  }
+
+  .tech-tag.highlight {
+    background: rgba(79,158,255,0.15);
+    border-color: rgba(79,158,255,0.4);
+    color: var(--accent);
+  }
+
+  .card-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 0;
+  }
+
+  .card-section-title {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .card-prefer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .card-prefer-item {
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .card-prefer-item::before {
+    content: '›';
+    color: var(--accent);
+    font-size: 14px;
+    line-height: 1.4;
+    flex-shrink: 0;
+  }
+
+  .card-deadline {
+    margin-top: 14px;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .deadline-label { font-size: 11px; color: var(--text-muted); }
+  .deadline-value {
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--amber);
+  }
+
+  /* ── 비교 뷰 ── */
+  .compare-view { display: none; }
+
+  .compare-table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+  }
+
+  .compare-table th {
+    background: var(--surface);
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .compare-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    font-size: 12px;
+    background: var(--surface2);
+  }
+
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: var(--surface); }
+
+  .compare-table td:first-child {
+    min-width: 160px;
+    border-right: 1px solid var(--border);
+  }
+
+  .compare-job-name { font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .compare-company { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+  .compare-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+
+  .compare-prefer {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .compare-prefer-item {
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 5px;
+    align-items: flex-start;
+  }
+
+  .compare-prefer-item::before {
+    content: '·';
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── 스킬맵 뷰 ── */
+  .skillmap-view { display: none; }
+
+  .skill-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .skill-name {
+    width: 140px;
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  .skill-companies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    flex: 1;
+  }
+
+  .skill-company-chip {
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .skill-bar-wrap { width: 80px; flex-shrink: 0; }
+
+  .skill-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .skill-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  .skill-count {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    text-align: right;
+    margin-top: 3px;
+  }
+
+  /* ── 빈 상태 ── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    color: var(--text-muted);
+    gap: 12px;
+  }
+
+  .empty-icon { font-size: 32px; opacity: 0.3; }
+  .empty-text { font-size: 14px; }
+
+  /* ── 스크롤바 ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ── 애니메이션 ── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .job-card { animation: fadeIn 0.2s ease both; }
+
+  /* ── 추가 버튼 안내 ── */
+  .add-hint {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: rgba(79,158,255,0.05);
+    border: 1px dashed rgba(79,158,255,0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .add-hint-icon { font-size: 18px; opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">recruit<span>.</span>ref</div>
+  <div class="header-meta" id="headerMeta">로딩 중...</div>
+</header>
+
+<div class="app">
+  <!-- 사이드바 -->
+  <aside>
+    <div class="sidebar-section">
+      <div class="sidebar-label">뷰</div>
+      <div class="view-tabs">
+        <button class="view-tab active" onclick="setView('cards')">카드</button>
+        <button class="view-tab" onclick="setView('compare')">비교</button>
+        <button class="view-tab" onclick="setView('skillmap')">스킬맵</button>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">기술 스택 필터</div>
+      <input class="filter-search" type="text" placeholder="스킬 검색..." id="skillSearch" oninput="filterSkillTags()">
+      <div class="tag-filter-list" id="tagFilterList"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">회사</div>
+      <div id="companyFilterList"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">직무 분류</div>
+      <div id="categoryFilterList"></div>
+    </div>
+  </aside>
+
+  <!-- 메인 -->
+  <main>
+    <div class="main-header">
+      <div class="result-count" id="resultCount"></div>
+      <div class="active-filters" id="activeFilters"></div>
+    </div>
+
+    <!-- 카드 뷰 -->
+    <div id="cardsView">
+      <div class="cards-grid" id="cardsGrid"></div>
+    </div>
+
+    <!-- 비교 뷰 -->
+    <div class="compare-view" id="compareView">
+      <div class="compare-table-wrap">
+        <table class="compare-table" id="compareTable"></table>
+      </div>
+    </div>
+
+    <!-- 스킬맵 뷰 -->
+    <div class="skillmap-view" id="skillmapView">
+      <div id="skillmapContent"></div>
+    </div>
+
+    <div class="add-hint">
+      <span class="add-hint-icon">＋</span>
+      <span>다음 공고가 오픈되면 <strong style="color: var(--text)">jobs 배열</strong>에 항목을 추가하면 자동으로 반영됩니다.</span>
+    </div>
+  </main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  데이터
+// ══════════════════════════════════════════════
+const jobs = [
+  {
+    id: 1,
+    company: "현대모비스",
+    companyColor: "#4f9eff",
+    title: "BMS Application SW 설계",
+    division: "전동화/모듈BU",
+    category: "임베디드",
+    location: "의왕연구소",
+    deadline: "2026.03.13",
+    url: "https://www.notion.so/3131b02fff97812fbe6cd6499eadca57",
+    techStack: ["C", "C++", "AUTOSAR", "CAN", "BMS", "배터리관리", "임베디드SW", "A-SPICE", "기능안전"],
+    preferPoints: [
+      "자동차 전장 SW 개발 경험",
+      "AUTOSAR 기반 SW 개발",
+      "CAN / LIN 통신 프로토콜 이해",
+      "배터리 시스템 관련 지식",
+      "기능안전(ISO 26262) 이해"
+    ],
+    persona: "하드웨어와 SW의 경계를 이해하는 임베디드 엔지니어. 배터리 제어 알고리즘과 실시간 OS 동작 원리를 아는 사람."
+  },
+  {
+    id: 2,
+    company: "현대모비스",
+    companyColor: "#4f9eff",
+    title: "전동화 BSW 및 CDD 개발",
+    division: "전동화/모듈BU",
+    category: "시스템SW",
+    location: "의왕연구소",
+    deadline: "2026.03.13",
+    url: "https://www.notion.so/3131b02fff9781baa575c5d20496fd97",
+    techStack: ["AUTOSAR", "BSW", "CDD", "MCAL", "RTOS", "C", "Vector Tools", "DaVinci", "CAN", "Ethernet"],
+    preferPoints: [
+      "AUTOSAR Classic/Adaptive 개발 경험",
+      "BSW/CDD 설계 및 구현 경험",
+      "Vector 사의 개발 툴 사용 경험 (DaVinci, CANalyzer 등)",
+      "RTOS 기반 펌웨어 개발",
+      "차량 통신 네트워크 이해 (CAN, LIN, Ethernet)"
+    ],
+    persona: "AUTOSAR 아키텍처를 깊게 이해하고 미들웨어 레이어를 직접 설계·구현할 수 있는 SW 플랫폼 엔지니어."
+  },
+  {
+    id: 3,
+    company: "현대모비스",
+    companyColor: "#4f9eff",
+    title: "IVI SW 플랫폼 개발",
+    division: "전장BU",
+    category: "시스템SW",
+    location: "마북연구소",
+    deadline: "2026.03.13",
+    url: "https://www.notion.so/3131b02fff9781a8adc0e4ade7bb4006",
+    techStack: ["Linux", "Android", "QNX", "C", "C++", "Python", "Android Automotive", "GPU", "멀티미디어", "HMI"],
+    preferPoints: [
+      "Linux / Android / QNX 등 차량용 OS 개발 경험",
+      "멀티미디어 프레임워크 이해 (GStreamer 등)",
+      "GPU 기반 UI 렌더링 최적화",
+      "Android Automotive 플랫폼 경험",
+      "차량 네트워크 연동 (CAN, Ethernet)"
+    ],
+    persona: "OS부터 UI까지 차량 인포테인먼트 시스템 전반을 이해하는 풀스택 임베디드 SW 엔지니어."
+  },
+  {
+    id: 4,
+    company: "현대모비스",
+    companyColor: "#4f9eff",
+    title: "자율주행 시스템 개발",
+    division: "전장BU",
+    category: "시스템아키텍쳐",
+    location: "마북연구소",
+    deadline: "2026.03.13",
+    url: "https://www.notion.so/3131b02fff978113b42de5966ca90738",
+    techStack: ["AUTOSAR Adaptive", "C++", "Python", "ROS", "센서퓨전", "ADAS", "Ethernet", "SOA", "AI/ML"],
+    preferPoints: [
+      "자율주행 시스템 아키텍처 설계 경험",
+      "AUTOSAR Adaptive 기반 개발",
+      "센서 퓨전 알고리즘 이해 (카메라, 라이다, 레이더)",
+      "ROS2 기반 자율주행 SW 개발",
+      "SOA (Service Oriented Architecture) 이해"
+    ],
+    persona: "차량 전체 SW 아키텍처를 설계하고 자율주행 모듈 간 인터페이스를 정의하는 시스템 엔지니어."
+  },
+  {
+    id: 5,
+    company: "현대모비스",
+    companyColor: "#4f9eff",
+    title: "CI/CD/CT 개발",
+    division: "FTCI",
+    category: "시스템SW",
+    location: "마북연구소",
+    deadline: "2026.03.13",
+    url: "https://www.notion.so/3131b02fff9781939047cba7f2c4bc12",
+    techStack: ["Jenkins", "GitLab CI", "Docker", "Kubernetes", "Python", "SIL", "HIL", "테스트자동화", "JIRA", "A-SPICE"],
+    preferPoints: [
+      "CI/CD 파이프라인 구축 및 운영 경험",
+      "Docker / Kubernetes 환경 이해",
+      "차량 SW 테스트 자동화 (SIL/HIL)",
+      "A-SPICE 프로세스 이해",
+      "Python 기반 테스트 스크립트 작성"
+    ],
+    persona: "DevOps 경험을 자동차 SW 개발에 적용할 수 있는 엔지니어. 품질 프로세스와 자동화 툴체인 모두 이해하는 사람."
+  },
+  {
+    id: 6,
+    company: "현대모비스",
+    companyColor: "#4f9eff",
+    title: "사이버보안 기술관리",
+    division: "FTCI",
+    category: "차량보안",
+    location: "마북연구소",
+    deadline: "2026.03.13",
+    url: "https://www.notion.so/3131b02fff978135a9c3c11341c3e0a7",
+    techStack: ["ISO/SAE 21434", "TARA", "펜테스팅", "암호화", "OTA보안", "CAN보안", "네트워크보안", "Python", "C"],
+    preferPoints: [
+      "차량 사이버보안 표준 이해 (ISO/SAE 21434)",
+      "TARA (위협 분석 및 위험 평가) 수행 경험",
+      "차량 네트워크 보안 취약점 분석",
+      "암호화 알고리즘 적용 경험",
+      "보안 테스팅 / 펜테스팅 경험"
+    ],
+    persona: "차량 공격 벡터를 이해하고 설계 단계에서 보안을 내재화할 수 있는 보안 엔지니어."
+  },
+  {
+    id: 7,
+    company: "현대모비스",
+    companyColor: "#4f9eff",
+    title: "반도체 선행검증",
+    division: "반도체사업담당",
+    category: "공통R&D",
+    location: "의왕연구소",
+    deadline: "2026.03.13",
+    url: "https://www.notion.so/3131b02fff9781429bbceae6325114b4",
+    techStack: ["반도체검증", "C", "Python", "FPGA", "회로이론", "디지털설계", "SoC", "디버깅"],
+    preferPoints: [
+      "반도체 동작 원리 및 검증 방법론 이해",
+      "FPGA 기반 프로토타이핑 경험",
+      "SoC 설계 및 검증 관련 지식",
+      "디지털 회로 설계 및 시뮬레이션",
+      "C / Python 기반 검증 스크립트 작성"
+    ],
+    persona: "HW와 SW 경계에서 반도체 IP를 검증하고 선행 기술을 평가할 수 있는 검증 엔지니어."
+  }
+];
+
+// ══════════════════════════════════════════════
+//  상태
+// ══════════════════════════════════════════════
+let currentView = 'cards';
+let activeTagFilters = new Set();
+let activeCompanyFilters = new Set();
+let activeCategoryFilters = new Set();
+
+// ══════════════════════════════════════════════
+//  필터 데이터 추출
+// ══════════════════════════════════════════════
+const allTags = [...new Set(jobs.flatMap(j => j.techStack))].sort();
+const allCompanies = [...new Set(jobs.map(j => j.company))];
+const allCategories = [...new Set(jobs.map(j => j.category))];
+
+// ══════════════════════════════════════════════
+//  초기화
+// ══════════════════════════════════════════════
+function init() {
+  renderTagFilters(allTags);
+  renderCompanyFilters();
+  renderCategoryFilters();
+  renderAll();
+  updateHeaderMeta();
+}
+
+function updateHeaderMeta() {
+  document.getElementById('headerMeta').textContent =
+    `${jobs.length} jobs · ${allCompanies.length} companies`;
+}
+
+// ══════════════════════════════════════════════
+//  태그 필터 렌더
+// ══════════════════════════════════════════════
+function renderTagFilters(tags) {
+  const el = document.getElementById('tagFilterList');
+  el.innerHTML = tags.map(tag => `
+    <div class="tag-filter ${activeTagFilters.has(tag) ? 'active' : ''}"
+         onclick="toggleTag('${tag}')">${tag}</div>
+  `).join('');
+}
+
+function filterSkillTags() {
+  const q = document.getElementById('skillSearch').value.toLowerCase();
+  const filtered = allTags.filter(t => t.toLowerCase().includes(q));
+  renderTagFilters(filtered);
+}
+
+function toggleTag(tag) {
+  if (activeTagFilters.has(tag)) activeTagFilters.delete(tag);
+  else activeTagFilters.add(tag);
+  filterSkillTags();
+  renderAll();
+  renderActiveFilters();
+}
+
+// ══════════════════════════════════════════════
+//  회사 필터
+// ══════════════════════════════════════════════
+function renderCompanyFilters() {
+  const el = document.getElementById('companyFilterList');
+  el.innerHTML = allCompanies.map(c => {
+    const job = jobs.find(j => j.company === c);
+    const count = jobs.filter(j => j.company === c).length;
+    return `
+      <div class="company-filter-item ${activeCategoryFilters.has(c) ? 'active' : ''}"
+           onclick="toggleCompany('${c}')">
+        <div class="company-dot" style="background:${job.companyColor}"></div>
+        <span class="company-name">${c}</span>
+        <span class="company-count">${count}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleCompany(c) {
+  if (activeCompanyFilters.has(c)) activeCompanyFilters.delete(c);
+  else activeCompanyFilters.add(c);
+  renderCompanyFilters();
+  renderAll();
+  renderActiveFilters();
+}
+
+// ══════════════════════════════════════════════
+//  카테고리 필터
+// ══════════════════════════════════════════════
+function renderCategoryFilters() {
+  const el = document.getElementById('categoryFilterList');
+  el.innerHTML = allCategories.map(c => `
+    <div class="company-filter-item ${activeCategoryFilters.has(c) ? 'active' : ''}"
+         onclick="toggleCategory('${c}')">
+      <div class="company-dot" style="background: var(--border)"></div>
+      <span class="company-name">${c}</span>
+      <span class="company-count">${jobs.filter(j => j.category === c).length}</span>
+    </div>
+  `).join('');
+}
+
+function toggleCategory(c) {
+  if (activeCategoryFilters.has(c)) activeCategoryFilters.delete(c);
+  else activeCategoryFilters.add(c);
+  renderCategoryFilters();
+  renderAll();
+  renderActiveFilters();
+}
+
+// ══════════════════════════════════════════════
+//  활성 필터 칩
+// ══════════════════════════════════════════════
+function renderActiveFilters() {
+  const el = document.getElementById('activeFilters');
+  const chips = [];
+  activeTagFilters.forEach(t => chips.push(
+    `<div class="active-filter-chip" onclick="toggleTag('${t}')">${t} ×</div>`
+  ));
+  activeCompanyFilters.forEach(c => chips.push(
+    `<div class="active-filter-chip" onclick="toggleCompany('${c}')">${c} ×</div>`
+  ));
+  activeCategoryFilters.forEach(c => chips.push(
+    `<div class="active-filter-chip" onclick="toggleCategory('${c}')">${c} ×</div>`
+  ));
+  el.innerHTML = chips.join('');
+}
+
+// ══════════════════════════════════════════════
+//  필터 적용
+// ══════════════════════════════════════════════
+function getFilteredJobs() {
+  return jobs.filter(j => {
+    if (activeTagFilters.size > 0 && ![...activeTagFilters].every(t => j.techStack.includes(t))) return false;
+    if (activeCompanyFilters.size > 0 && !activeCompanyFilters.has(j.company)) return false;
+    if (activeCategoryFilters.size > 0 && !activeCategoryFilters.has(j.category)) return false;
+    return true;
+  });
+}
+
+// ══════════════════════════════════════════════
+//  카드 배지
+// ══════════════════════════════════════════════
+function getBadgeClass(cat) {
+  const map = { '임베디드': 'badge-embedded', '시스템SW': 'badge-system', '차량보안': 'badge-security', '공통R&D': 'badge-common', '시스템아키텍쳐': 'badge-system', 'CI/CD': 'badge-cicd' };
+  return map[cat] || 'badge-common';
+}
+
+// ══════════════════════════════════════════════
+//  카드 렌더
+// ══════════════════════════════════════════════
+function renderCards(filtered) {
+  const grid = document.getElementById('cardsGrid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">⊘</div>
+      <div class="empty-text">필터 조건에 맞는 공고가 없습니다</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((j, i) => `
+    <div class="job-card" style="--card-accent:${j.companyColor}; animation-delay:${i * 0.04}s"
+         onclick="window.open('${j.url}', '_blank')">
+      <div class="card-header">
+        <div>
+          <div class="card-company">${j.company} · ${j.division}</div>
+          <div class="card-title">${j.title}</div>
+        </div>
+        <div class="card-badge ${getBadgeClass(j.category)}">${j.category}</div>
+      </div>
+
+      <div class="card-location">📍 ${j.location}</div>
+
+      <div class="card-tags">
+        ${j.techStack.map(t => `
+          <span class="tech-tag ${activeTagFilters.has(t) ? 'highlight' : ''}">${t}</span>
+        `).join('')}
+      </div>
+
+      <div class="card-divider"></div>
+
+      <div class="card-section-title">우대사항</div>
+      <div class="card-prefer-list">
+        ${j.preferPoints.slice(0, 3).map(p => `
+          <div class="card-prefer-item">${p}</div>
+        `).join('')}
+        ${j.preferPoints.length > 3 ? `<div class="card-prefer-item" style="color:var(--text-muted)">+${j.preferPoints.length - 3}개 더</div>` : ''}
+      </div>
+
+      <div class="card-divider"></div>
+
+      <div class="card-section-title">구하는 인재상</div>
+      <div style="font-size:12px; color:var(--text-dim); line-height:1.6">${j.persona}</div>
+
+      <div class="card-deadline">
+        <span class="deadline-label">접수 마감</span>
+        <span class="deadline-value">${j.deadline}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════
+//  비교 테이블 렌더
+// ══════════════════════════════════════════════
+function renderCompare(filtered) {
+  const table = document.getElementById('compareTable');
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>직무</th>
+        <th>기술 스택</th>
+        <th>우대사항</th>
+        <th>인재상</th>
+        <th>마감</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${filtered.map(j => `
+        <tr>
+          <td>
+            <div class="compare-job-name">${j.title}</div>
+            <div class="compare-company">${j.company} · ${j.division}</div>
+          </td>
+          <td>
+            <div class="compare-tags">
+              ${j.techStack.map(t => `
+                <span class="tech-tag ${activeTagFilters.has(t) ? 'highlight' : ''}">${t}</span>
+              `).join('')}
+            </div>
+          </td>
+          <td>
+            <div class="compare-prefer">
+              ${j.preferPoints.map(p => `<div class="compare-prefer-item">${p}</div>`).join('')}
+            </div>
+          </td>
+          <td style="min-width:200px; font-size:11px; color:var(--text-dim); line-height:1.6">${j.persona}</td>
+          <td style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--amber); white-space:nowrap">${j.deadline}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
+// ══════════════════════════════════════════════
+//  스킬맵 렌더
+// ══════════════════════════════════════════════
+function renderSkillmap(filtered) {
+  const skillCount = {};
+  const skillJobs = {};
+
+  filtered.forEach(j => {
+    j.techStack.forEach(t => {
+      skillCount[t] = (skillCount[t] || 0) + 1;
+      if (!skillJobs[t]) skillJobs[t] = [];
+      skillJobs[t].push(j);
+    });
+  });
+
+  const sorted = Object.entries(skillCount).sort((a, b) => b[1] - a[1]);
+  const max = sorted[0]?.[1] || 1;
+
+  const el = document.getElementById('skillmapContent');
+  el.innerHTML = `
+    <div style="margin-bottom:16px; font-size:12px; color:var(--text-muted)">
+      필터된 ${filtered.length}개 공고에서 사용되는 기술 스택 (빈도 순)
+    </div>
+    ${sorted.map(([skill, count]) => `
+      <div class="skill-row">
+        <div class="skill-name">${skill}</div>
+        <div class="skill-companies">
+          ${skillJobs[skill].map(j => `
+            <span class="skill-company-chip"
+              style="background:${j.companyColor}18; border:1px solid ${j.companyColor}40; color:${j.companyColor}">
+              ${j.title.length > 12 ? j.title.slice(0, 12) + '…' : j.title}
+            </span>
+          `).join('')}
+        </div>
+        <div class="skill-bar-wrap">
+          <div class="skill-bar">
+            <div class="skill-bar-fill" style="width:${(count/max)*100}%"></div>
+          </div>
+          <div class="skill-count">${count}개 공고</div>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+// ══════════════════════════════════════════════
+//  뷰 전환
+// ══════════════════════════════════════════════
+function setView(view) {
+  currentView = view;
+  document.querySelectorAll('.view-tab').forEach((btn, i) => {
+    btn.classList.toggle('active', ['cards', 'compare', 'skillmap'][i] === view);
+  });
+  document.getElementById('cardsView').style.display = view === 'cards' ? 'block' : 'none';
+  document.getElementById('compareView').style.display = view === 'compare' ? 'block' : 'none';
+  document.getElementById('skillmapView').style.display = view === 'skillmap' ? 'block' : 'none';
+  renderAll();
+}
+
+// ══════════════════════════════════════════════
+//  전체 렌더
+// ══════════════════════════════════════════════
+function renderAll() {
+  const filtered = getFilteredJobs();
+  const countEl = document.getElementById('resultCount');
+  countEl.innerHTML = `<strong>${filtered.length}</strong> / ${jobs.length} 공고`;
+
+  if (currentView === 'cards') renderCards(filtered);
+  else if (currentView === 'compare') renderCompare(filtered);
+  else renderSkillmap(filtered);
+}
+
+init();
+</script>
+</body>
+</html>
