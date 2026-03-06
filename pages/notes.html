@@ -166,6 +166,24 @@
         </div>
     </div>
 
+
+    <div class="note-card" onclick="openNoteModal('note-ota-thread')">
+        <div class="note-header">
+            <span class="note-cat" style="color: #db2777;">Thread Deadlock</span>
+            <span class="note-date">Phase 5</span>
+        </div>
+        <h3>Eventlet vs RPi.GPIO: The 2% Halt</h3>
+        <p class="note-summary" style="color: #ccc; font-weight: bold;">
+            "펌웨어 전송이 항상 정확히 2%에서 멈추고 서버가 죽는다."<br>
+            <span style="color: #888; font-weight: normal; font-size: 0.9rem;">
+                비동기 이벤트 루프(eventlet)와 하드웨어 제어 스레드(lgpio) 간의 치명적 충돌. Subprocess 격리로 해결한 기록.
+            </span>
+        </p>
+        <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #333; color: var(--accent-blue); font-size: 0.85rem; font-weight: bold;">
+            Read Detail <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>
+        </div>
+    </div>
+
 </div>
 
 <div id="textModal" class="modal-overlay" onclick="closeNoteModal(event)" 
@@ -446,4 +464,66 @@
             </p>
         </div>
     </div>
+</template>
+
+    <template id="note-ota-thread">
+    <div data-title="The 2% Halt: Async Loop & Hardware Thread Collision" data-date="Web-to-Hardware Interop | Log #06">
+        
+        <h4 style="color:#db2777; margin-bottom:10px;">1. 현상 (Symptom)</h4>
+        <p>
+            웹 브라우저에서 펌웨어(.bin) 파일을 업로드하고 OTA 업데이트를 시작하면, <strong>진행률 바가 항상 정확히 2% 부근에서 멈추는</strong>현상 발생.<br>
+            Ctrl+C를 눌러야만 막혀있던 OTA 프로세스가 마저 진행되거나 종료되는 기이한 동작을 보임.
+        </p>
+        
+        <h4 style="color:#db2777; margin-top:30px; margin-bottom:10px;">2. 원인 분석 (Root Cause)</h4>
+        <p>
+            문제가 발생한 지점은 파이썬 스크립트가 STM32를 하드웨어 리셋하기 위해 <strong>GPIO 17번 핀을 제어</strong>하는 순간이었습니다.
+        </p>
+        <div style="background:rgba(219, 39, 119, 0.05); padding:15px; border-radius:6px; border:1px solid rgba(219, 39, 119, 0.3);">
+            <ul style="color:#ccc; font-size:0.9rem; padding-left:20px; line-height:1.6; margin:0;">
+                <li><strong>비동기 설계의 한계:</strong> Flask-SocketIO 서버는 <code>eventlet</code>이라는 비동기 I/O 코루틴을 기반으로 동작합니다.</li>
+                <li><strong>스레드 충돌:</strong> <code>RPi.GPIO</code> 라이브러리는 내부적으로 <code>lgpio</code>라는 C-스레드를 사용하는데, 이 스레드가 <code>eventlet</code>의 스케줄러와 충돌을 일으켰습니다.</li>
+                <li><strong>메인 루프 블로킹:</strong> GPIO 제어 함수가 이벤트 루프를 블로킹해버리면서, 브라우저로 진행률(Progress)을 쏴주어야 할 WebSocket 통신마저 멈춰버린 것입니다.</li>
+            </ul>
+        </div>
+
+        <h4 style="color:#db2777; margin-top:30px; margin-bottom:10px;">3. 해결: 프로세스 격리 & 비동기 태스크 분리</h4>
+        
+        <div style="margin-top:10px; background:rgba(55, 118, 171, 0.1); border-left:3px solid #3776ab; padding:15px; border-radius:4px;">
+            <span style="color:#3776ab; font-weight:bold; font-size:0.85rem;">Step 1: Subprocess 격리 (Hardware Layer)</span>
+            <p style="color:#ccc; font-size:0.9rem; margin-top:5px; line-height:1.5;">
+                <code>app.py</code>의 메인 이벤트 루프 안에서 직접 <code>RPi.GPIO</code>를 호출하는 코드를 전면 제거했습니다.<br>
+                대신 <code>subprocess.run()</code>을 사용하여 <strong>완전히 분리된 독립 파이썬 프로세스</strong>에서 하드웨어 리셋 스크립트를 실행하도록 아키텍처를 변경했습니다. 메모리 공간 자체가 분리되므로 스레드 충돌이 원천 차단됩니다.
+            </p>
+        </div>
+
+        <div style="margin-top:15px; background:rgba(16, 185, 129, 0.1); border-left:3px solid var(--accent-green); padding:15px; border-radius:4px;">
+            <span style="color:var(--accent-green); font-weight:bold; font-size:0.85rem;">Step 2: Background Task 분리 (Application Layer)</span>
+            <p style="color:#ccc; font-size:0.9rem; margin-top:5px; line-height:1.5;">
+                플래싱(OTA)을 수행하는 긴 작업 시간 동안 메인 루프가 블로킹되지 않도록, 전체 업데이트 프로세스를 <code>socketio.start_background_task()</code>로 위임하여 별도 스레드에서 실행되도록 수정했습니다.
+            </p>
+        </div>
+
+<div class="mac-window">
+    <div class="mac-header">
+        <div class="mac-dots">
+            <div class="mac-dot mac-red"></div>
+            <div class="mac-dot mac-yellow"></div>
+            <div class="mac-dot mac-green"></div>
+        </div>
+        <span class="mac-title">app.py — Fix</span>
+    </div>
+    <div class="mac-body">
+        <span class="comment"># 메인 루프에서 무거운 작업을 백그라운드로 밀어냄</span><br>
+        <span class="kwd">def</span> <span class="func">handle_firmware_upload</span>(data):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;socketio.<span class="func">start_background_task</span>(run_ota, data) <span class="comment"># 이벤트 루프 보호</span><br>
+        <br>
+        <span class="comment"># ota_flasher.py 내부: 이벤트 루프와 격리된 프로세스에서 GPIO 제어</span><br>
+        <span class="kwd">def</span> <span class="func">reset_stm32</span>():<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;subprocess.<span class="func">run</span>([<span class="string">'python3'</span>, <span class="string">'gpio_reset.py'</span>], check=<span class="num">True</span>) <span class="comment"># Subprocess 격리</span>
+    </div>
+</div>
+        
+    </div>
+
 </template>

@@ -8,7 +8,7 @@
     </p>
 
     <div style="margin-top: 20px; margin-bottom: 20px;">
-        <a href="https://github.com/steppenhj/Neuro-Drive-CPP/tree/main/phase_6_code" target="_blank" 
+        <a href="https://github.com/steppenhj/Neuro-Drive-CPP/tree/main/phase_5_code" target="_blank" 
            style="background: #333; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; border: 1px solid #555; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;"
            onmouseover="this.style.background='#444'" onmouseout="this.style.background='#333'">
             <i class="fab fa-github"></i> View Source Code
@@ -242,7 +242,7 @@
                 </li>
                 <li>
                     <strong style="color: #db2777;">CRC Verify:</strong> 
-                    STM32 내장 CRC 하드웨어로 전체 영역 검증. 불일치 시 재시도 요청.
+                    소프트웨어 CRC32(다항식 0xEDB88320)로 Flash 영역 전체를 검증. Python의 zlib.crc32()와 동일한 결과를 비교.
                 </li>
                 <li>
                     <strong style="color: var(--accent-green);">Jump to App:</strong> 
@@ -497,7 +497,7 @@ FLASH (rx) : ORIGIN = <span class="num">0x08004000</span>, LENGTH = <span class=
             </h4>
             <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
                 <strong>Problem:</strong> 청크 전송 도중 WiFi 끊김 → Flash가 불완전한 상태.<br>
-                <strong>Solution:</strong> ACK 5초 Timeout 시 부트로더가 Flash를 재삭제(Erase)하고 대기 상태로 복귀. <strong>부트로더 자체는 Sector 0에 있어 절대 손상되지 않으므로</strong> 전원만 넣으면 재시도 가능.
+                <strong>Solution:</strong> ACK 5초 Timeout 시 부트로더가 NVIC_SystemReset()으로 재부팅. 재전원 시 부트로더가 다시 시작되어 재시도 가능. <strong>부트로더 자체는 Sector 0에 있어 절대 손상되지 않으므로</strong> 전원만 넣으면 재시도 가능.
             </p>
         </div>
 
@@ -508,7 +508,7 @@ FLASH (rx) : ORIGIN = <span class="num">0x08004000</span>, LENGTH = <span class=
             </h4>
             <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
                 <strong>Problem:</strong> 전송 완료 후 CRC가 맞지 않음 → 손상된 펌웨어 실행 위험.<br>
-                <strong>Solution:</strong> CRC 불일치 시 <code>"NACK"</code> 전송 후 Application으로 점프하지 않음. 부트로더 대기 상태를 유지하여 <strong>재전송 요청</strong> 가능.
+                <strong>Solution:</strong> CRC 불일치 시 "NACK" 전송 후 NVIC_SystemReset()으로 재부팅. 부트로더가 다시 3초 대기하므로 재전송 가능.
             </p>
         </div>
 
