@@ -1,5 +1,12 @@
 /* --- main.js (Clean Version) --- */
 
+/* --- 0. Menu Group Toggle (Collapsible Sidebar) --- */
+function toggleMenuGroup(btn) {
+    const submenu = btn.nextElementSibling;
+    btn.classList.toggle('collapsed');
+    submenu.classList.toggle('open');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. 초기 로딩: URL에 해시가 있으면 그 페이지 로드, 없으면 home
     const page = window.location.hash.replace('#', '') || 'home';

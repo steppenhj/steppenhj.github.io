@@ -58,8 +58,80 @@ a { text-decoration: none; color: inherit; }
     padding: 30px 40px; 
     /* flex: 1; 제거 -> 그냥 흐름대로 배치 */
 }
-.menu-group { margin-bottom: 30px; }
+.menu-group { margin-bottom: 15px; }
 .group-label { font-size: 0.7rem; color: #555; font-weight: 700; margin-bottom: 10px; display: block; letter-spacing: 1px; }
+
+/* Collapsible Group Toggle */
+.group-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: 0.2s;
+    margin-bottom: 4px;
+}
+.group-toggle:hover { background: rgba(255,255,255,0.03); }
+.group-toggle-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.toggle-arrow {
+    color: #555;
+    font-size: 0.65rem;
+    transition: transform 0.3s ease;
+}
+.group-toggle .toggle-arrow { transform: rotate(0deg); }
+.group-toggle.collapsed .toggle-arrow { transform: rotate(-90deg); }
+
+/* Project badges */
+.project-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+}
+.project-badge.main {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent-blue);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+}
+.project-badge.sub {
+    background: rgba(255, 255, 255, 0.05);
+    color: #666;
+    border: 1px solid #333;
+}
+
+/* Submenu (collapsible content) */
+.submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+    padding-left: 6px;
+    border-left: 2px solid transparent;
+}
+.submenu.open {
+    max-height: 1200px; /* large enough to fit all items */
+    border-left-color: rgba(59, 130, 246, 0.15);
+}
+
+/* Placeholder for upcoming projects */
+.submenu-placeholder {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    color: #444;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+.submenu-placeholder i { font-size: 0.9rem; }
 
 .btn-text {
     display: flex;          /* 내부 요소를 플렉스 박스로 설정 */
@@ -74,6 +146,8 @@ a { text-decoration: none; color: inherit; }
     transition: 0.2s;
 }
 .nav-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.nav-btn.disabled-btn { cursor: default; opacity: 0.5; }
+.nav-btn.disabled-btn:hover { background: none; color: var(--text-muted); }
 .nav-btn.active { background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); border-left: 3px solid var(--accent-blue); }
 .nav-btn small { font-size: 0.75rem; opacity: 0.6; margin-top: 2px; }
 

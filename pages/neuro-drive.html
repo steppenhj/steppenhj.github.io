@@ -1,0 +1,344 @@
+<style>
+    .project-hero {
+        margin-bottom: 50px;
+        padding-bottom: 40px;
+        border-bottom: 1px solid #222;
+    }
+    .project-hero-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--accent-blue);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+    .project-hero h1 {
+        font-size: 2.8rem;
+        line-height: 1.1;
+        margin-bottom: 15px;
+    }
+    .project-hero-desc {
+        color: #888;
+        font-size: 1rem;
+        line-height: 1.7;
+        max-width: 650px;
+    }
+    .project-hero-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 20px;
+    }
+    .project-hero-tags span {
+        font-size: 0.75rem;
+        background: #111;
+        color: #888;
+        padding: 5px 12px;
+        border-radius: 4px;
+        border: 1px solid #2a2a2a;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    .project-quick-links {
+        display: flex;
+        gap: 12px;
+        margin-top: 25px;
+    }
+    .quick-link-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        border: none;
+        font-family: 'Inter', sans-serif;
+    }
+    .quick-link-btn.primary {
+        background: var(--accent-blue);
+        color: #fff;
+    }
+    .quick-link-btn.primary:hover { background: #2563eb; }
+    .quick-link-btn.secondary {
+        background: transparent;
+        color: #aaa;
+        border: 1px solid #333;
+    }
+    .quick-link-btn.secondary:hover { border-color: #666; color: #fff; }
+
+    /* Section titles */
+    .section-title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #555;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .section-title i { font-size: 0.8rem; }
+
+    /* Phase Cards Grid */
+    .phase-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+        gap: 16px;
+        margin-bottom: 50px;
+    }
+    .phase-card {
+        background: var(--bg-card);
+        border: 1px solid #222;
+        border-radius: 10px;
+        padding: 24px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .phase-card:hover {
+        border-color: #444;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    .phase-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+    }
+    .phase-number {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        padding: 3px 8px;
+        border-radius: 4px;
+    }
+    .phase-card-icon {
+        font-size: 1.2rem;
+        opacity: 0.6;
+    }
+    .phase-card h3 {
+        font-size: 1.05rem;
+        color: #eee;
+        font-weight: 700;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+    .phase-card p {
+        font-size: 0.85rem;
+        color: #777;
+        line-height: 1.5;
+        margin-bottom: 14px;
+    }
+    .phase-card-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .phase-card-tags span {
+        font-size: 0.68rem;
+        background: rgba(255,255,255,0.04);
+        color: #666;
+        padding: 3px 8px;
+        border-radius: 3px;
+        border: 1px solid #2a2a2a;
+    }
+    .phase-card-arrow {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        color: #333;
+        font-size: 0.85rem;
+        transition: 0.2s;
+    }
+    .phase-card:hover .phase-card-arrow { color: var(--accent-blue); transform: translateX(3px); }
+
+    /* Special card - Turning Point */
+    .phase-card.turning-point {
+        border-color: rgba(239, 68, 68, 0.2);
+        background: linear-gradient(135deg, var(--bg-card), rgba(239, 68, 68, 0.03));
+    }
+    .phase-card.turning-point:hover { border-color: rgba(239, 68, 68, 0.4); }
+
+    /* Utility links */
+    .util-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 12px;
+        margin-bottom: 40px;
+    }
+    .util-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+        background: var(--bg-card);
+        border: 1px solid #222;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .util-card:hover {
+        border-color: #444;
+        background: #1a1a1a;
+    }
+    .util-card i { font-size: 1rem; color: #666; }
+    .util-card span { font-size: 0.9rem; color: #aaa; font-weight: 500; }
+    .util-card:hover span { color: #fff; }
+</style>
+
+<!-- Hero -->
+<div class="project-hero">
+    <div class="project-hero-label">Main Project</div>
+    <h1>Neuro-Drive<br>Control System</h1>
+    <p class="project-hero-desc">
+        Raspberry Pi 5와 STM32F411RE를 기반으로 한 분산 제어 RC카 시스템.<br>
+        Brain(리눅스) & Reflex(MCU) 아키텍처로 고수준 판단과 실시간 제어를 분리하고,<br>
+        FreeRTOS 기반 100Hz PID 루프, RTH 안전 복귀, OTA 펌웨어 업데이트를 구현했습니다.
+    </p>
+    <div class="project-hero-tags">
+        <span>C++</span>
+        <span>Python</span>
+        <span>FreeRTOS</span>
+        <span>STM32 HAL</span>
+        <span>UART</span>
+        <span>WebSocket</span>
+        <span>PID Control</span>
+        <span>OTA</span>
+        <span>MBSE</span>
+    </div>
+    <div class="project-quick-links">
+        <button class="quick-link-btn primary" onclick="loadPage('architecture')">
+            <i class="fas fa-sitemap"></i> System Architecture
+        </button>
+        <button class="quick-link-btn secondary" onclick="loadPage('hardware')">
+            <i class="fas fa-memory"></i> H/W Architecture
+        </button>
+    </div>
+</div>
+
+<!-- Development Phases -->
+<div class="section-title" style="color: var(--accent-blue);">
+    <i class="fas fa-layer-group"></i> DEVELOPMENT PHASES
+</div>
+
+<div class="phase-cards">
+
+    <!-- Phase 01 -->
+    <div class="phase-card" onclick="loadPage('phase1')">
+        <div class="phase-card-top">
+            <span class="phase-number" style="background: rgba(59,130,246,0.1); color: var(--accent-blue);">PHASE 01</span>
+            <i class="fas fa-gamepad phase-card-icon" style="color: var(--accent-blue);"></i>
+        </div>
+        <h3>Monolithic Linux Control</h3>
+        <p>RPi 단일 보드 위에서 Python(웹)과 C++(제어)의 IPC 구조를 설계한 초기 아키텍처</p>
+        <div class="phase-card-tags">
+            <span>Raspberry Pi</span>
+            <span>Python-C++ IPC</span>
+            <span>I2C</span>
+        </div>
+        <i class="fas fa-arrow-right phase-card-arrow"></i>
+    </div>
+
+    <!-- Phase 02 -->
+    <div class="phase-card" onclick="loadPage('phase2')">
+        <div class="phase-card-top">
+            <span class="phase-number" style="background: rgba(16,185,129,0.1); color: var(--accent-green);">PHASE 02</span>
+            <i class="fas fa-network-wired phase-card-icon" style="color: var(--accent-green);"></i>
+        </div>
+        <h3>STM32 분산 아키텍처</h3>
+        <p>MCU를 도입하고 UART 통신으로 제어 부하를 분산. Brain & Reflex 구조의 시작</p>
+        <div class="phase-card-tags">
+            <span>STM32F411RE</span>
+            <span>UART</span>
+            <span>Distributed</span>
+        </div>
+        <i class="fas fa-arrow-right phase-card-arrow"></i>
+    </div>
+
+    <!-- Turning Point -->
+    <div class="phase-card turning-point" onclick="loadPage('turning_point')">
+        <div class="phase-card-top">
+            <span class="phase-number" style="background: rgba(239,68,68,0.1); color: #ef4444;">TURNING POINT</span>
+            <i class="fas fa-exclamation-triangle phase-card-icon" style="color: #ef4444;"></i>
+        </div>
+        <h3>In-Operation Failure & Pivot</h3>
+        <p>운행 중 실시간 제어 실패 발생. Bare-metal의 한계를 인식하고 RTOS 전환을 결정한 전환점</p>
+        <div class="phase-card-tags">
+            <span style="border-color: rgba(239,68,68,0.3); color: #ef4444;">Critical Failure</span>
+            <span>Architecture Pivot</span>
+        </div>
+        <i class="fas fa-arrow-right phase-card-arrow"></i>
+    </div>
+
+    <!-- Phase 03 -->
+    <div class="phase-card" onclick="loadPage('phase3')" style="border-color: rgba(239,68,68,0.15);">
+        <div class="phase-card-top">
+            <span class="phase-number" style="background: rgba(239,68,68,0.1); color: #ef4444;">PHASE 03</span>
+            <i class="fas fa-microchip phase-card-icon" style="color: #ef4444;"></i>
+        </div>
+        <h3>RTOS & ISR 도입</h3>
+        <p>FreeRTOS 기반 선점형 멀티태스킹 도입. 100Hz PID 제어 루프, DMA, Interrupt-Driven 아키텍처</p>
+        <div class="phase-card-tags">
+            <span>FreeRTOS</span>
+            <span>PID 100Hz</span>
+            <span>ISR</span>
+            <span>DMA</span>
+        </div>
+        <i class="fas fa-arrow-right phase-card-arrow"></i>
+    </div>
+
+    <!-- Phase 04 -->
+    <div class="phase-card" onclick="loadPage('phase4')">
+        <div class="phase-card-top">
+            <span class="phase-number" style="background: rgba(245,158,11,0.1); color: var(--accent-orange);">PHASE 04</span>
+            <i class="fas fa-route phase-card-icon" style="color: var(--accent-orange);"></i>
+        </div>
+        <h3>RTH Safety System</h3>
+        <p>엔코더 기반 경로 기록 및 PID 역추적 복귀 알고리즘. Watchdog + Keep-alive 안전 메커니즘</p>
+        <div class="phase-card-tags">
+            <span>Return-to-Home</span>
+            <span>Encoder Path</span>
+            <span>Watchdog</span>
+        </div>
+        <i class="fas fa-arrow-right phase-card-arrow"></i>
+    </div>
+
+    <!-- Phase 05 -->
+    <div class="phase-card" onclick="loadPage('phase5')">
+        <div class="phase-card-top">
+            <span class="phase-number" style="background: rgba(219,39,119,0.1); color: #db2777;">PHASE 05</span>
+            <i class="fas fa-satellite-dish phase-card-icon" style="color: #db2777;"></i>
+        </div>
+        <h3>OTA Firmware Update</h3>
+        <p>UART 기반 커스텀 부트로더 설계. Sector 단위 Flash 관리, CRC 검증, 핸드셰이크 프로토콜</p>
+        <div class="phase-card-tags">
+            <span>Bootloader</span>
+            <span>IAP</span>
+            <span>CRC Verify</span>
+        </div>
+        <i class="fas fa-arrow-right phase-card-arrow"></i>
+    </div>
+
+</div>
+
+<!-- Utility Links -->
+<div class="section-title" style="color: #888;">
+    <i class="fas fa-folder-open"></i> RESOURCES
+</div>
+
+<div class="util-cards">
+    <div class="util-card" onclick="loadPage('roadmap')">
+        <i class="fas fa-stream" style="color: var(--accent-blue);"></i>
+        <span>프로젝트 로드맵</span>
+    </div>
+    <div class="util-card" onclick="loadPage('notes')">
+        <i class="fas fa-clipboard-list" style="color: var(--accent-orange);"></i>
+        <span>문제 해결 노트</span>
+    </div>
+</div>
