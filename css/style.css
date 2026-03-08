@@ -215,6 +215,54 @@ code { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #ccc
 .function { color: #ffc66d; }
 .comment { color: #6a9955; }
 
+/* Phase 3~5 mac-window 코드 블록용 syntax highlighting */
+.kwd { color: #cc7832; }
+.func { color: #ffc66d; }
+.string { color: #6a8759; }
+.num { color: #6897bb; }
+
+/* mac-window 코드 블록 스타일 */
+.mac-window {
+    background: #0d0d0d;
+    border: 1px solid #252525;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 15px;
+}
+.mac-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #252525;
+}
+.mac-dots {
+    display: flex;
+    gap: 6px;
+    margin-right: 12px;
+}
+.mac-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.mac-red { background: #ff5f57; }
+.mac-yellow { background: #febc2e; }
+.mac-green { background: #28c840; }
+.mac-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: #666;
+}
+.mac-body {
+    padding: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: #ccc;
+    line-height: 1.7;
+    overflow-x: auto;
+}
+
 .divider { height: 1px; background: linear-gradient(to right, transparent, #333, transparent); margin: 60px 0; }
 
 /* Footer (콘텐츠 영역 안에 포함됨) */

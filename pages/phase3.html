@@ -132,7 +132,7 @@ shared_data = packet;<br>
                 </li>
                 <li>
                     <strong style="color: #10b981;">Motor Task (Consumer):</strong> 
-                    Queue에서 명령을 꺼내 <strong>PWM 듀티비</strong>에 직접 매핑. (Open-Loop)
+                    Queue에서 목표 속도를 꺼내고, 엔코더 피드백과 비교하여 <strong>P-제어(kp=0.5)</strong>로 PWM 보정. (Closed-Loop, 100Hz)
                 </li>
                 <li>
                     <strong style="color: #f7df1e;">Safety Task:</strong> 
@@ -154,13 +154,15 @@ shared_data = packet;<br>
 &nbsp;&nbsp;<span class="func">osMessageQueuePut</span>(cmdQueue, &msg, 0, 0);<br>
 }<br>
 <br>
-<span class="comment">// 2. [Consumer] Motor Task</span><br>
+<span class="comment">// 2. [Consumer] Motor Task (100Hz PID)</span><br>
 <span class="kwd">void</span> <span class="func">StartTask02</span>(...) {<br>
+&nbsp;&nbsp;PID_t pid = { .kp=<span class="num">0.5</span>, .ki=<span class="num">0</span>, .kd=<span class="num">0</span> };<br>
 &nbsp;&nbsp;<span class="kwd">while</span>(<span class="num">1</span>) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// 큐에서 데이터 수신 (Blocking)</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="func">osMessageQueueGet</span>(cmdQueue, &rcv, ...);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// PWM 하드웨어 매핑</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">__HAL_TIM_SET_COMPARE</span>(&htim2, ..., rcv.speed);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;target_speed = rcv.speed;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;error = target_speed - encoder_rpm;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output = <span class="func">PID_Calculate</span>(&pid, error);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">__HAL_TIM_SET_COMPARE</span>(&htim2, ..., output);<br>
 &nbsp;&nbsp;}<br>
 }
                 </div>
@@ -170,6 +172,53 @@ shared_data = packet;<br>
     </div>
 </div>
 
+
+<!-- ===== 2-DOF Control Structure ===== -->
+<div class="feature-card" style="border-left: 4px solid #10b981;">
+    <h3 style="color: #fff; margin-bottom: 15px;">
+        <i class="fas fa-sliders-h" style="color: #10b981; margin-right: 10px;"></i> 
+        2-DOF Control: Feedback + Feedforward
+    </h3>
+    <p style="font-size: 0.9rem; color: #ccc; line-height: 1.6; margin-bottom: 20px;">
+        단일 PID만으로는 코너링 시 토크 부족 문제를 해결할 수 없었습니다.<br>
+        <strong>STM32의 Feedback</strong>(외란 보상)과 <strong>Python의 Feedforward</strong>(선제 보상)를 결합한 <strong>2-DOF 구조</strong>로 해결했습니다.
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        
+        <div style="background: rgba(16, 185, 129, 0.05); padding: 20px; border-radius: 8px; border: 1px solid #10b981;">
+            <h4 style="color: #10b981; font-size: 0.95rem; margin-bottom: 10px;">
+                <i class="fas fa-microchip" style="margin-right: 8px;"></i>
+                Feedback (STM32)
+            </h4>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
+                <strong>P-only 속도 제어 (kp=0.5, 100Hz)</strong><br>
+                엔코더 피드백으로 외란(부하, 경사)에 의한 속도 오차를 실시간 보정.
+                TIM1 하드웨어 카운터로 CPU 부하 Zero 속도 측정.
+            </p>
+        </div>
+
+        <div style="background: rgba(55, 118, 171, 0.05); padding: 20px; border-radius: 8px; border: 1px solid #3776ab;">
+            <h4 style="color: #3776ab; font-size: 0.95rem; margin-bottom: 10px;">
+                <i class="fab fa-python" style="margin-right: 8px;"></i>
+                Feedforward (Python)
+            </h4>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
+                <strong>Cornering Boost (조향 비례 출력 증폭)</strong><br>
+                조향 시 마찰 증가를 사전 보상. 조향각 50% 이상에서 최대 3배 부스트 + 최소 토크 40% 강제 주입.
+            </p>
+        </div>
+
+    </div>
+
+    <div style="margin-top: 20px; background: #111; padding: 15px; border-radius: 6px; border: 1px solid #333;">
+        <p style="font-size: 0.85rem; color: #aaa; line-height: 1.6; margin: 0;">
+            <strong style="color: #fff;">왜 2-DOF인가?</strong> — 
+            Feedback은 "이미 발생한 오차"를 보정하고, Feedforward는 "예측 가능한 오차"를 선제 보상합니다.
+            두 제어가 독립적으로 동작하며 합산되어, 단일 PID보다 빠른 응답과 안정적인 코너링을 달성합니다.
+        </p>
+    </div>
+</div>
 
 <div class="feature-card" style="border-top: 3px solid #ef4444;">
     <h3 style="color: #fff; margin-bottom: 20px;">

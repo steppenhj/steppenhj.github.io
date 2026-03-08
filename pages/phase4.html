@@ -102,12 +102,13 @@ struct.<span class="func">pack</span>(<span class="string">'ffi'</span>, throttl
             <div class="mac-body">
 <span class="comment">// 경로 데이터 구조</span><br>
 std::vector&lt;std::pair&lt;<span class="kwd">int</span>, <span class="kwd">int</span>&gt;&gt; path;<br>
-<span class="comment">// pair = {throttle_sign, pwm_angle}</span><br>
-<span class="comment">//   throttle_sign: +1(전진) / -1(후진)</span><br>
+<span class="comment">// pair = {encoder_diff, pwm_angle}</span><br>
+<span class="comment">//   encoder_diff: 실제 이동 거리 (부호=방향)</span><br>
 <span class="comment">//   pwm_angle: 서보 조향각 (1500±900)</span><br>
 <br>
 <span class="comment">// REC: push_back (FIFO 순서 기록)</span><br>
-<span class="comment">// RTH: pop_back  (LIFO 역순 복귀)</span>
+<span class="comment">// RTH: pop_back  (LIFO 역순 복귀)</span><br>
+<span class="comment">//   → 스텝별 거리 P-제어로 감속 정지</span>
             </div>
         </div>
     </div>
@@ -129,13 +130,14 @@ std::vector&lt;std::pair&lt;<span class="kwd">int</span>, <span class="kwd">int<
             <ul style="margin-top: 15px; color: #888; font-size: 0.85rem; line-height: 1.8;">
                 <li>
                     <strong style="color: #ef4444;">Recording (mode=1):</strong> 
-                    엔코더 수신 시 throttle_sign과 현재 조향각을 path에 push.
-                    <strong>정지 구간(sign=0)은 제외</strong>하여 과주행 방지.
+                    엔코더 수신 시 <strong>{실제 이동 거리(enc_diff), 조향각}</strong>을 path에 push.
+                    <strong>노이즈 필터(|enc| > 2)</strong>로 정지 구간의 미세 진동 제외.
                 </li>
                 <li>
                     <strong style="color: var(--accent-orange);">Returning (mode=2):</strong> 
-                    엔코더 수신마다 path에서 pop → <strong>역방향 PWM</strong>을 시리얼로 전송.
-                    워치독 timeout 시 즉시 중단.
+                    path에서 pop → <strong>거리 기반 P-제어</strong>로 복귀.
+                    남은 거리에 비례하여 감속(<code>min(600, max(500, remaining×3))</code>).
+                    목표 거리 도달 시 다음 스텝 로드. 워치독 timeout 시 즉시 중단.
                 </li>
                 <li>
                     <strong style="color: var(--accent-green);">Done:</strong> 
@@ -152,18 +154,22 @@ std::vector&lt;std::pair&lt;<span class="kwd">int</span>, <span class="kwd">int<
                 </div>
                 <div class="mac-body">
 <span class="comment">// 1. [REC] 엔코더 수신 시 경로 기록</span><br>
-<span class="kwd">if</span>(rth_mode == <span class="num">1</span>) {<br>
-&nbsp;&nbsp;<span class="kwd">int</span> sign = (th > <span class="num">0.05f</span>) ? <span class="num">1</span> : <span class="num">-1</span>;<br>
-&nbsp;&nbsp;<span class="kwd">if</span>(sign != <span class="num">0</span>) <span class="comment">// 정지 구간 제외</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;path.<span class="func">push_back</span>({sign, angle});<br>
+<span class="kwd">if</span>(rth_mode == <span class="num">1</span> && <span class="func">abs</span>(enc_val) > <span class="num">2</span>) {<br>
+&nbsp;&nbsp;<span class="comment">// 노이즈 필터: 최소 이동량 이상만 기록</span><br>
+&nbsp;&nbsp;path.<span class="func">push_back</span>({enc_val, pwm_angle});<br>
 }<br>
 <br>
-<span class="comment">// 2. [RTH] 엔코더 수신 시 역주행</span><br>
+<span class="comment">// 2. [RTH] 거리 기반 P-제어 복귀</span><br>
 <span class="kwd">if</span>(rth_mode == <span class="num">2</span> && !timeout) {<br>
-&nbsp;&nbsp;<span class="kwd">auto</span> [dir, angle] = path.<span class="func">back</span>();<br>
+&nbsp;&nbsp;<span class="kwd">auto</span> [target, angle] = path.<span class="func">back</span>();<br>
 &nbsp;&nbsp;path.<span class="func">pop_back</span>();<br>
-&nbsp;&nbsp;<span class="kwd">int</span> spd = (dir > <span class="num">0</span>) ? <span class="num">-600</span> : <span class="num">600</span>;<br>
-&nbsp;&nbsp;<span class="func">write</span>(serial_fd, spd, angle);<br>
+&nbsp;&nbsp;rth_target = <span class="func">abs</span>(target);<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;<span class="comment">// 엔코더 누적 → 남은 거리 비례 감속</span><br>
+&nbsp;&nbsp;rth_acc += <span class="func">abs</span>(enc_val);<br>
+&nbsp;&nbsp;<span class="kwd">int</span> remaining = rth_target - rth_acc;<br>
+&nbsp;&nbsp;<span class="kwd">int</span> spd = <span class="func">min</span>(<span class="num">600</span>, <span class="func">max</span>(<span class="num">500</span>, remaining * <span class="num">3</span>));<br>
+&nbsp;&nbsp;<span class="func">write</span>(serial_fd, spd * direction, angle);<br>
 }
                 </div>
             </div>
@@ -271,6 +277,56 @@ std::vector&lt;std::pair&lt;<span class="kwd">int</span>, <span class="kwd">int<
     </div>
 </div>
 
+<!-- ===== 5.5. RTH System Demo ===== -->
+<div class="feature-card" style="border-top: 3px solid var(--accent-orange);">
+    <h3 style="color: #fff; margin-bottom: 20px;">
+        <i class="fas fa-video" style="color: var(--accent-orange); margin-right: 10px;"></i>
+        System Demonstration
+    </h3>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+        경로 기록(REC) → 자동 복귀(RTH)의 전체 동작 시연입니다.<br>
+        <span style="font-size: 0.8rem; color: #666;">거리 기반 P-제어로 각 스텝에서 감속하며 정확히 복귀하는 것을 확인할 수 있습니다.</span>
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        
+        <div style="background: #000; border: 1px solid #333; border-radius: 4px; overflow: hidden; position: relative; height: 400px;">
+            <!-- 영상 촬영 후 assets/phase4_rth_demo.mp4 로 교체 -->
+            <video muted loop autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9;">
+                <source src="assets/phase4_rth_demo.mp4" type="video/mp4">
+            </video>
+            
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.8); color: var(--accent-orange); padding: 8px 12px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333;">
+                <span><i class="fas fa-car"></i> RTH Field Test</span>
+                <span style="font-family: 'JetBrains Mono'; font-size: 0.7rem; color: #666;">REC → RTH RETURN</span>
+            </div>
+
+            <div style="position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 6px;">
+                <div style="width: 8px; height: 8px; background: red; border-radius: 50%; box-shadow: 0 0 5px red;"></div>
+                <span style="color: rgba(255,255,255,0.7); font-size: 0.7rem; font-weight: bold; letter-spacing: 1px;">REC</span>
+            </div>
+        </div>
+
+        <div style="background: #000; border: 1px solid #333; border-radius: 4px; overflow: hidden; position: relative; height: 400px;">
+            <!-- 영상 촬영 후 assets/phase4_rth_ui.mp4 로 교체 -->
+            <video muted loop autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9;">
+                <source src="assets/phase4_rth_ui.mp4" type="video/mp4">
+            </video>
+            
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.8); color: var(--accent-orange); padding: 8px 12px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333;">
+                <span><i class="fas fa-desktop"></i> Controller UI</span>
+                <span style="font-family: 'JetBrains Mono'; font-size: 0.7rem; color: #666;">MODE TRANSITION</span>
+            </div>
+
+            <div style="position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 6px;">
+                <div style="width: 8px; height: 8px; background: red; border-radius: 50%; box-shadow: 0 0 5px red;"></div>
+                <span style="color: rgba(255,255,255,0.7); font-size: 0.7rem; font-weight: bold; letter-spacing: 1px;">REC</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <!-- ===== 6. 해결한 문제들 ===== -->
 <div class="feature-card" style="border-top: 3px solid var(--accent-orange);">
     <h3 style="color: #fff; margin-bottom: 20px;">
@@ -294,11 +350,11 @@ std::vector&lt;std::pair&lt;<span class="kwd">int</span>, <span class="kwd">int<
         <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid #333;">
             <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 10px;">
                 <i class="fas fa-road" style="color: var(--accent-orange); margin-right: 8px;"></i>
-                정지 구간 과주행
+                노이즈 & 과주행 방지
             </h4>
             <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
-                <strong>Problem:</strong> 조이스틱 미조작 시 sign=0 기록 → 복귀 시 직진(600)으로 변환 → 과주행.<br>
-                <strong>Solution:</strong> <code>if(throttle_sign != 0)</code> 조건 추가하여 정지 구간 기록 제외.
+                <strong>Problem:</strong> 정지 상태에서도 엔코더 미세 진동 기록 → 복귀 시 불필요한 이동 발생.<br>
+                <strong>Solution:</strong> <code>if(abs(enc_val) > 2)</code> 노이즈 필터 + 거리 기반 P-제어로 목표 거리 도달 시 정확히 정지.
             </p>
         </div>
 
