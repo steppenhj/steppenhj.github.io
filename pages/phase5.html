@@ -16,6 +16,39 @@
     </div>
 </div>
 
+<!-- ===== 0. OTA Demo Video (상단 배치) ===== -->
+<div class="feature-card" style="border-top: 3px solid #db2777;">
+    <h3 style="color: #fff; margin-bottom: 20px;">
+        <i class="fas fa-video" style="color: #db2777; margin-right: 10px;"></i>
+        OTA Update Demonstration
+    </h3>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+        웹 브라우저에서 .bin 파일을 업로드하여 STM32 펌웨어를 원격 업데이트하는 전체 과정입니다.<br>
+        <span style="font-size: 0.8rem; color: #666;">파일 선택 → 업로드 → Flash Erase → 청크 전송 → CRC 검증 → 재부팅까지의 흐름을 확인할 수 있습니다.</span>
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- OTA 영상: 가로 비율 (웹 화면 녹화) -->
+        <div style="background: #000; border: 1px solid #333; border-radius: 8px; overflow: hidden; position: relative; width: 100%; aspect-ratio: 16/9; cursor: pointer;" onclick="openModal('video', 'assets/phase5_ota_demo.mp4')">
+            <video muted loop autoplay playsinline style="width: 100%; height: 100%; object-fit: contain;">
+                <source src="assets/phase5_ota_demo.mp4" type="video/mp4">
+            </video>
+            
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.8); color: #db2777; padding: 10px 15px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333;">
+                <span><i class="fas fa-cloud-upload-alt"></i> OTA Firmware Update — Web UI</span>
+                <span style="font-family: 'JetBrains Mono'; font-size: 0.7rem; color: #666;">UPLOAD → FLASH → VERIFY → REBOOT</span>
+            </div>
+
+            <div style="position: absolute; top: 15px; left: 15px; display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 4px;">
+                <i class="fas fa-expand" style="color: rgba(255,255,255,0.6); font-size: 0.7rem;"></i>
+                <span style="color: rgba(255,255,255,0.6); font-size: 0.7rem;">Click to expand</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <!-- ===== 1. Before vs After ===== -->
 <div class="feature-card" style="border-top: 4px solid #db2777;">
     <h3 style="color: #fff; margin-bottom: 20px;">
