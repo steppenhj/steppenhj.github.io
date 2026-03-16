@@ -85,12 +85,16 @@ function updateSidebarUI(pageName) {
 // 사이드바 토글 (데스크탑/모바일 통합)
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
+    const icon = document.getElementById('toggle-icon');
     const isMobile = window.innerWidth < 900;
 
     if (isMobile) {
         sidebar.classList.toggle('open');
     } else {
-        sidebar.classList.toggle('closed');
+        const isCollapsed = sidebar.classList.toggle('collapsed');
+        if (icon) {
+            icon.className = isCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+        }
     }
 }
 

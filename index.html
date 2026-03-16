@@ -11,6 +11,11 @@
 <body>
 
     <nav class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <button class="sidebar-toggle" onclick="toggleSidebar()" title="사이드바 접기/펼치기">
+                <i class="fas fa-chevron-left" id="toggle-icon"></i>
+            </button>
+        </div>
         <div class="sidebar-header">
             <div class="profile-area">
                 <img src="assets/profile.jpg" alt="Profile" class="avatar">
@@ -34,9 +39,10 @@
             <!-- PROFILE -->
             <div class="menu-group">
                 <span class="group-label">PROFILE</span>
-                <button class="nav-btn active" onclick="loadPage('home')">
-                    <i class="fas fa-user-astronaut"></i> Introduction
-                </button>
+<button class="nav-btn active" onclick="loadPage('home')">
+    <i class="fas fa-user-astronaut"></i>
+    <span class="btn-text">Introduction</span>
+</button>
             </div>
 
             <!-- PROJECTS -->
@@ -65,7 +71,7 @@
     </nav>
 
     <main class="content-area">
-        <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Menu">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()" title="메뉴">
             <i class="fas fa-bars"></i>
         </button>
 
