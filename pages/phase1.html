@@ -2,8 +2,8 @@
     <span style="color: var(--accent-blue); font-weight: bold; letter-spacing: 2px;">PHASE 01: COMPLETED</span>
     <h1>Hybrid Control Architecture</h1>
         <p class="page-subtitle">
-        이 Phase는 <strong>리눅스 기반 원격 제어 파이프라인</strong>을 빠르게 구성해
-        하드웨어 결함을 테스트 진행하는 단계입니다.
+        <strong>리눅스 기반 원격 제어 파이프라인</strong>의 프로토타입을 구성하고,
+        전체 시스템의 동작을 검증하는 단계입니다.
         </p>
 
     
@@ -154,10 +154,7 @@
         </p>
         <ul style="color: #aaa; font-size: 0.85rem; padding-left: 20px; line-height: 1.6;">
             <li>
-                <strong>Reason:</strong> 브라우저 보안 제약으로 Raw UDP 사용이 불가합니다. HTTP 오버헤드를 줄이고 연결을 유지(Keep-alive)하기 위해 WebSocket을 선택했습니다.
-            </li>
-            <li>
-                <strong>Note:</strong> UI의 Latency는 <strong>Network Round-Trip Time (RTT)</strong>을 의미합니다.
+                <strong>Reason:</strong> HTTP는 클라이언트 요청 없이 서버가 데이터를 보낼 수 없는 단방향 구조입니다. 조이스틱 명령 전송과 동시에 서버가 텔레메트리/로그를 push해야 하므로, 양방향 실시간 통신이 가능한 WebSocket을 선택했습니다.
             </li>
         </ul>
     </div>
@@ -172,7 +169,7 @@
         </p>
         <ul style="color: #aaa; font-size: 0.85rem; padding-left: 20px; line-height: 1.6;">
             <li>
-                <strong>Reason:</strong> 제어 데이터는 "과거의 확실함(TCP)"보다 <strong>"손실되더라도 현재의 데이터(UDP)"</strong>가 중요합니다. Head-of-Line Blocking을 방지했습니다.
+                <strong>Reason:</strong> 제어 명령은 항상 최신 값만 유효하므로, TCP의 재전송/순서보장 오버헤드가 불필요합니다. <code>struct.pack('ff')</code>로 8바이트 바이너리 전송 시 C++ 측에서 파싱 없이 즉시 사용 가능합니다.
             </li>
         </ul>
     </div>
@@ -222,22 +219,10 @@ setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, ...);
         Engineering Insight: OS Limitation
     </h3>
     <p style="color: var(--text-muted); line-height: 1.7;">
-        Python 대신 C++로 하드웨어 제어기를 작성하여 연산 효율을 높였지만, 
-        <strong>범용 OS(General Purpose OS)인 리눅스의 스케줄링 한계</strong>는 여전히 존재했습니다.
+        Python 대신 C++로 하드웨어 제어기를 작성하여 연산 효율을 높였지만,
+        <strong>범용 OS(Linux)는 구조적으로 Hard Real-time을 보장할 수 없습니다.</strong>
+        커널 스케줄러가 언제든 제어 프로세스를 선점할 수 있어, 안전이 요구되는 액추에이션을 OS 위에서 실행하는 것은 설계상 적절하지 않다고 판단했습니다.
     </p>
-
-    <div style="margin-top: 20px; background: rgba(255,0,0,0.05); padding: 20px; border-radius: 8px; border: 1px dashed #555;">
-        <h4 style="color: #ff6b6b; margin-bottom: 10px;">⚠️ Kernel Preemption Jitter</h4>
-        <ul style="color: #ccc; font-size: 0.95rem; line-height: 1.8;">
-            <li>
-                <strong>Issue:</strong> C++ 프로세스가 빨라도, 리눅스 커널이 백그라운드 작업(Wi-Fi 등)을 위해 
-                CPU를 선점하면 수십 ms의 지연이 발생합니다.
-            </li>
-            <li>
-                <strong>Result:</strong> "완벽한 정시성(Hard Real-time)을 위해서는 <strong>MCU(STM32)</strong>가 필수적이다."
-            </li>
-        </ul>
-    </div>
 
     <div style="margin-top: 20px; text-align: right;">
         <p style="color: var(--accent-blue); font-weight: bold; font-size: 0.9rem;">
@@ -254,9 +239,8 @@ setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, ...);
   </h3>
 
   <ul style="color:#aaa; font-size:0.9rem; line-height:1.8; padding-left:18px; margin:0;">
-    <li><strong>Issue:</strong> Linux 환경에서 제어 루프가 부하/스케줄링 영향으로 지연 변동(jitter)이 발생</li>
-    <li><strong>Risk:</strong> 폐루프 제어의 예측 가능성 저하 → 불안정/안전 리스크</li>
-    <li><strong>Requirement:</strong> 액추에이션은 <strong>Hard real-time 도메인(MCU)</strong>으로 분리 필요</li>
+    <li><strong>Finding:</strong> 범용 OS(Linux)는 커널 스케줄링 구조상 Hard Real-time을 보장할 수 없음</li>
+    <li><strong>Requirement:</strong> 액추에이션은 <strong>Hard Real-time 도메인(MCU)</strong>으로 분리 필요</li>
     <li><strong>Carried Over:</strong> 통신 두절 시 <strong>Timeout Watchdog</strong> 및 단계적 안전정지 원칙 유지</li>
   </ul>
 
@@ -274,11 +258,9 @@ setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, ...);
 <div class="engineer-note">
     <h4><i class="fas fa-pen-nib"></i> 박해진's Note</h4>
     <p>
-        "전반적으로 Linux OS 사용 및 RPi5만으로 수동 주행에는 큰 어려움이 없었습니다. 
+        "RPi5 단독으로 수동 주행에는 문제가 없었으나, 범용 OS 위에서 액추에이터를 직접 제어하는 구조의 한계를 인식했습니다.
         <br>
-        C++과 Python의 IPC 패턴 설계 부분이 조금 헷갈렸지만 빠른 시간 안에 해결했습니다.
-        <br>
-        이 과정에서 <strong>UDP 소켓을 활용한 로컬 IPC</strong> 패턴을 설계하였고, 
-        이는 추후 분산 시스템(Phase 2)을 이해하는 중요한 기반이 되었습니다."
+        이 Phase에서 설계한 <strong>UDP 기반 로컬 IPC 패턴</strong>과 <strong>다계층 Fail-safe 구조</strong>는
+        이후 분산 시스템(Phase 2)과 안전 프로토콜(Phase 4) 설계의 기반이 되었습니다."
     </p>
 </div>
