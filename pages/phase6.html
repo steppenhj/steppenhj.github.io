@@ -1,105 +1,305 @@
 <div class="phase-header">
-    <span style="color: var(--accent-purple); font-weight: bold; letter-spacing: 2px;">PHASE 06: 자율주행 (계획)</span>
-    <h1>Visual Perception & Autonomy</h1>
+    <span style="color: var(--accent-cyan); font-weight: bold; letter-spacing: 2px;">PHASE 06: IN PROGRESS</span>
+    <h1>CAN Multi-ECU Architecture</h1>
     <p class="page-subtitle">
-        단순한 원격 제어를 넘어, 카메라 센서를 통해 도로 상황을 인지(Perception)하고<br>
-        스스로 경로를 판단(Decision)하는 <strong>자율주행 시스템</strong> 구현 단계입니다.<br>
-        <span style="color: #f59e0b; font-size: 0.85rem;">⚠ 본 Phase는 향후 구현 예정이며, 아래는 설계 계획입니다.</span>
+        단일 UART의 구조적 한계를 넘어, 3노드 CAN 버스 기반 분산 제어 시스템으로 전환.<br>
+        <strong>bxCAN(하드웨어)과 MCP2515(SPI-CAN)</strong>을 동일 버스에서 운용하며,<br>
+        <span style="color: #666; font-size: 0.85rem;">CAN 프로토콜과 SPI 통신을 동시에 경험합니다.</span>
     </p>
+
+    <div style="margin-top: 20px; margin-bottom: 20px;">
+        <a href="https://github.com/steppenhj/Neuro-Drive-CPP/tree/main/phase_6_code" target="_blank" 
+           style="background: #333; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; border: 1px solid #555; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;"
+           onmouseover="this.style.background='#444'" onmouseout="this.style.background='#333'">
+            <i class="fab fa-github"></i> View Source Code
+        </a>
+    </div>
+</div>
+
+<!-- ===== 0. Baseline RTT Measurement ===== -->
+<div class="feature-card" style="border-top: 3px solid var(--accent-cyan);">
+    <h3 style="color: #fff; margin-bottom: 15px;">
+        <i class="fas fa-stopwatch" style="color: var(--accent-cyan); margin-right: 10px;"></i>
+        Baseline: UART 기반 End-to-End RTT
+    </h3>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+        CAN 전환 전, 기존 UART 아키텍처의 전체 왕복 응답 시간을 <strong>Ping-Pong Echo 방식</strong>으로 측정하여 기준선을 확보했습니다.
+    </p>
+
+    <div style="text-align: center; margin-bottom: 25px;">
+        <span style="font-size: 3rem; font-weight: 800; color: var(--accent-cyan);">40.1</span>
+        <span style="font-size: 1.5rem; color: var(--accent-cyan); opacity: 0.7;">ms</span>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">End-to-End Round-Trip Time (20회 평균)</p>
+        <p style="color: #555; font-size: 0.8rem; margin-top: 3px;">
+            Browser(JS) → WiFi → Python → UDP → C++ → UART 115200bps → STM32 → 역방향 복귀
+        </p>
+    </div>
+
+    <div class="media-thumbnail" onclick="openModal('image', 'assets/rtt_measurement.png')" style="height: 350px; margin-bottom: 20px;">
+        <img src="assets/rtt_measurement.png" alt="RTT 40.1ms 측정 결과" style="width: 100%; height: 100%; object-fit: contain;">
+        <div class="thumbnail-overlay"><i class="fas fa-search-plus"></i></div>
+        <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.7); color: #fff; padding: 8px; font-size: 0.8rem; text-align: center;">
+            PING 버튼으로 20회 연속 측정, 평균 RTT 40.1ms 확인
+        </div>
+    </div>
+
+    <div style="background: #111; padding: 15px; border-radius: 6px; border: 1px solid #333;">
+        <p style="font-size: 0.85rem; color: #aaa; line-height: 1.6; margin: 0;">
+            <strong style="color: #fff;">측정 방법:</strong> 
+            STM32 펌웨어 ISR에서 "PING" 수신 시 즉시 "PONG"을 반환하는 에코 방식.
+            이 수치에는 WiFi 왕복(~10ms), WebSocket 오버헤드(~5ms), UDP 로컬(&lt;1ms), UART 전송(~1-2ms), 
+            각 계층의 태스크 스케줄링 지연이 모두 포함되어 있습니다.
+        </p>
+    </div>
+</div>
+
+<!-- ===== 1. Why CAN? ===== -->
+<div class="feature-card" style="border-left: 4px solid var(--accent-orange);">
+    <h3 style="color: #fff; margin-bottom: 15px;">
+        <i class="fas fa-exclamation-triangle" style="color: var(--accent-orange); margin-right: 10px;"></i>
+        전환 동기: UART 단일 채널의 구조적 한계
+    </h3>
+    <ul style="color: #aaa; font-size: 0.9rem; line-height: 1.8; padding-left: 20px;">
+        <li>모터 명령(TX)과 엔코더 피드백(RX)이 동일 UART를 공유 → <strong>Blocking 전송 시 수신 인터럽트 밀림 가능</strong></li>
+        <li>ECU 추가 시 UART 채널을 물리적으로 추가해야 하는 <strong>확장성 한계</strong></li>
+        <li>에러 감지 및 재전송 메커니즘이 프로토콜 레벨에서 <strong>부재</strong> — 애플리케이션에서 직접 구현 필요</li>
+    </ul>
 </div>
 
 <div class="feature-card">
-    <h3><i class="fas fa-sitemap" style="color: var(--accent-purple);"></i> Perception Pipeline</h3>
-    <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 15px; text-align: center; margin-top: 30px;">
-        
-        <div style="background: #222; padding: 15px; border-radius: 12px; border: 1px solid #444;">
-            <h4 style="color: #fff; margin-bottom: 5px;">Camera</h4>
-            <small style="color: var(--text-muted);">Raw Frame (30 FPS)</small>
-        </div>
-        
-        <i class="fas fa-arrow-right" style="color: var(--text-muted);"></i>
-        
-        <div style="background: linear-gradient(145deg, #222, #1a102e); padding: 20px; border-radius: 12px; border: 1px solid var(--accent-purple); box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);">
-            <h4 style="color: var(--accent-purple);">RPi 5 (Brain)</h4>
-            <div style="margin-top: 10px; font-size: 0.8rem; color: #ccc;">
-                <span style="display:block; margin-bottom:4px;">🔹 Lane Keeping (OpenCV)</span>
-                <span style="display:block;">🔸 Object Detection (AI)</span>
-            </div>
-        </div>
-        
-        <i class="fas fa-arrow-right" style="color: var(--text-muted);"></i>
-        
-        <div style="background: #222; padding: 15px; border-radius: 12px; border: 1px solid #444;">
-            <h4 style="color: #fff; margin-bottom: 5px;">Arbitrator</h4>
-            <small style="color: var(--text-muted);">Safety Logic</small>
-        </div>
-
-        <i class="fas fa-arrow-right" style="color: var(--text-muted);"></i>
-
-        <div style="background: #222; padding: 15px; border-radius: 12px; border: 1px solid var(--accent-green);">
-            <h4 style="color: var(--accent-green);">STM32</h4>
-            <small style="color: var(--text-muted);">Actuation (Phase 2)</small>
-        </div>
-
+    <h3><i class="fas fa-exchange-alt" style="color: var(--accent-cyan);"></i> UART vs CAN 비교</h3>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--accent-cyan);">
+                    <th style="padding: 10px; text-align: left; color: var(--accent-cyan); font-size: 0.85rem;">관점</th>
+                    <th style="padding: 10px; text-align: left; color: #888; font-size: 0.85rem;">UART (Phase 5)</th>
+                    <th style="padding: 10px; text-align: left; color: var(--accent-cyan); font-size: 0.85rem;">CAN (Phase 6)</th>
+                </tr>
+            </thead>
+            <tbody style="color: #aaa; font-size: 0.85rem;">
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px;">토폴로지</td>
+                    <td style="padding: 10px;">1:1 Point-to-Point</td>
+                    <td style="padding: 10px; color: var(--accent-cyan);">N:N 멀티노드 버스</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px;">ECU 확장</td>
+                    <td style="padding: 10px;">UART 채널 추가 필요</td>
+                    <td style="padding: 10px; color: var(--accent-cyan);">버스에 노드 연결만으로 확장</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px;">우선순위</td>
+                    <td style="padding: 10px;">소프트웨어 레벨 구현</td>
+                    <td style="padding: 10px; color: var(--accent-cyan);">Message ID 기반 HW 아비트레이션</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px;">에러 처리</td>
+                    <td style="padding: 10px;">없음 (앱 책임)</td>
+                    <td style="padding: 10px; color: var(--accent-cyan);">CRC, ACK, 자동 재전송 내장</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;">속도</td>
+                    <td style="padding: 10px;">115200 bps</td>
+                    <td style="padding: 10px; color: var(--accent-cyan);">500 kbps (약 4.3배)</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
-
-
-<h3 style="color: #fff; margin-bottom: 20px; border-left: 3px solid var(--accent-purple); padding-left: 15px;">
-    Core Algorithms: Hybrid Approach
-</h3>
-
-<div class="grid-container">
-    <div class="feature-card">
-        <h3><i class="fas fa-road" style="color: var(--accent-blue);"></i> Lane Keeping (LKAS)</h3>
-        <span class="spec-badge" style="border-color: var(--accent-blue); color: var(--accent-blue);">Classic CV</span>
-        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
-            고속 주행 시 빠른 응답속도를 위해 가벼운 <strong>OpenCV</strong> 알고리즘을 사용합니다.
-            딥러닝보다 연산량이 적어 30 FPS 이상의 실시간성을 보장합니다.
-        </p>
-        <ul style="margin-top: 10px; font-size: 0.85rem; color: #888; padding-left: 20px; line-height: 1.6;">
-            <li>Preprocessing: Gaussian Blur + Bird's Eye View</li>
-            <li>Edge Detection: Canny & Sobel</li>
-            <li>Lane Fitting: Sliding Window + Polyfit</li>
-        </ul>
-    </div>
-
-    <div class="feature-card">
-        <h3><i class="fas fa-brain" style="color: var(--accent-purple);"></i> Object Detection</h3>
-        <span class="spec-badge" style="border-color: var(--accent-purple); color: var(--accent-purple);">Deep Learning</span>
-        <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9rem;">
-            정지 표지판, 신호등, 보행자 등 복잡한 패턴 인식을 위해 <strong>YOLOv8 Nano</strong> 모델을 도입합니다.
-            라즈베리파이 NPU/GPU 가속을 활용해 추론 시간을 최적화합니다.
-        </p>
-        <div style="margin-top: 15px; background: #111; padding: 10px; border-radius: 6px;">
-            <small style="color: #666; display: block;">Target Metrics:</small>
-            <span style="color: #fff; font-family: monospace;">Input: 320x320 | Latency: < 50ms</span>
-        </div>
-    </div>
-</div>
-
-<div class="info-box" style="border-left: 4px solid #f59e0b;">
-    <h3 style="color: #fff; margin-bottom: 15px;">
-        <i class="fas fa-balance-scale" style="color: #f59e0b; margin-right: 10px;"></i>
-        The Arbitrator: Human-in-the-loop
+<!-- ===== 2. Architecture ===== -->
+<div class="feature-card" style="border-top: 3px solid var(--accent-cyan);">
+    <h3 style="color: #fff; margin-bottom: 20px;">
+        <i class="fas fa-project-diagram" style="color: var(--accent-cyan); margin-right: 10px;"></i>
+        3-Node CAN Bus Architecture
     </h3>
-    <p style="color: var(--text-muted); margin-bottom: 20px;">
-        자율주행 시스템은 완벽하지 않으므로 언제나 사람의 개입을 최우선으로 합니다.
-        소프트웨어적인 <strong>중재자(Arbitrator)</strong> 패턴을 구현하여 제어권 충돌을 방지합니다.
+
+    <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 20px; text-align: center; margin-bottom: 30px;">
+        <div style="background: #222; padding: 20px; border-radius: 8px; border: 1px solid var(--accent-blue); min-width: 150px;">
+            <h4 style="color: var(--accent-blue); font-size: 0.9rem;"><i class="fas fa-server"></i> RPi 5</h4>
+            <small style="color: #888;">Master Node</small><br>
+            <span style="font-size: 0.7rem; background: rgba(255,146,43,0.15); color: #ff922b; padding: 2px 8px; border-radius: 3px; margin-top: 5px; display: inline-block;">MCP2515 (SPI)</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <span style="font-size: 0.65rem; color: var(--accent-green); font-weight: bold;">CAN Bus</span>
+            <i class="fas fa-exchange-alt" style="color: var(--accent-green);"></i>
+            <span style="font-size: 0.65rem; color: #666;">500 kbps</span>
+        </div>
+
+        <div style="background: #222; padding: 20px; border-radius: 8px; border: 1px solid var(--accent-cyan); min-width: 150px;">
+            <h4 style="color: var(--accent-cyan); font-size: 0.9rem;"><i class="fas fa-microchip"></i> F446RE</h4>
+            <small style="color: #888;">Motor ECU</small><br>
+            <span style="font-size: 0.7rem; background: rgba(77,171,247,0.15); color: var(--accent-blue); padding: 2px 8px; border-radius: 3px; margin-top: 5px; display: inline-block;">bxCAN + MCP2551</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <span style="font-size: 0.65rem; color: var(--accent-green); font-weight: bold;">CAN Bus</span>
+            <i class="fas fa-exchange-alt" style="color: var(--accent-green);"></i>
+            <span style="font-size: 0.65rem; color: #666;">500 kbps</span>
+        </div>
+
+        <div style="background: #222; padding: 20px; border-radius: 8px; border: 1px solid var(--accent-orange); min-width: 150px;">
+            <h4 style="color: var(--accent-orange); font-size: 0.9rem;"><i class="fas fa-satellite-dish"></i> F411RE</h4>
+            <small style="color: #888;">Sensor ECU</small><br>
+            <span style="font-size: 0.7rem; background: rgba(255,146,43,0.15); color: #ff922b; padding: 2px 8px; border-radius: 3px; margin-top: 5px; display: inline-block;">MCP2515 (SPI)</span>
+        </div>
+    </div>
+
+    <div style="background: rgba(81,207,102,0.05); padding: 15px; border-radius: 6px; border: 1px solid rgba(81,207,102,0.2); text-align: center; margin-bottom: 20px;">
+        <span style="color: var(--accent-green); font-weight: bold; font-size: 0.85rem;">
+            ═══════ CAN Bus (500 kbps) ═══════
+        </span>
+        <p style="color: #888; font-size: 0.8rem; margin-top: 5px;">120Ω 종단저항 × 2 (버스 양 끝단)</p>
+    </div>
+
+    <div class="grid-container">
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid #333;">
+            <h4 style="color: var(--accent-cyan); font-size: 0.95rem; margin-bottom: 10px;">
+                <i class="fas fa-microchip" style="margin-right: 8px;"></i> F446RE — Motor ECU
+            </h4>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
+                <strong>bxCAN 내장</strong> → 트랜시버(MCP2551)만 연결.<br>
+                기존 F411RE의 FreeRTOS + PID 코드를 포팅.<br>
+                DC 모터, 서보, 엔코더 제어 전담.
+            </p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid #333;">
+            <h4 style="color: var(--accent-orange); font-size: 0.95rem; margin-bottom: 10px;">
+                <i class="fas fa-satellite-dish" style="margin-right: 8px;"></i> F411RE — Sensor ECU
+            </h4>
+            <p style="color: #888; font-size: 0.85rem; line-height: 1.6;">
+                <strong>CAN 미내장</strong> → MCP2515(SPI-CAN)으로 CAN 참여.<br>
+                HC-SR04P 초음파 센서로 장애물 감지.<br>
+                SPI 마스터-슬레이브 통신 경험.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 3. CAN Message ID Design ===== -->
+<div class="feature-card" style="border-left: 4px solid var(--accent-cyan);">
+    <h3 style="color: #fff; margin-bottom: 15px;">
+        <i class="fas fa-envelope" style="color: var(--accent-cyan); margin-right: 10px;"></i>
+        CAN Message ID 설계
+        <span style="background: rgba(255,146,43,0.15); color: #ff922b; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; margin-left: 10px;">설계 예정</span>
+    </h3>
+    <p style="color: #aaa; font-size: 0.9rem; line-height: 1.6; margin-bottom: 15px;">
+        CAN 버스에서 Message ID가 곧 우선순위입니다. ID 값이 낮을수록 아비트레이션에서 우선권을 가지므로,
+        <strong>안전 관련 메시지에 낮은 ID를 할당</strong>합니다.
     </p>
 
-    <pre><code class="cpp"><span class="comment">// Safety Override Logic (Concept)</span>
-<span class="keyword">void</span> <span class="function">Arbitrate_Control_Signal</span>() {
-    <span class="keyword">if</span> (user_joystick.is_active()) {
-        <span class="comment">// 1. Human Input Detected -> Disengage AI</span>
-        current_state = MANUAL_MODE;
-        stm32.send(user_joystick.data);
-    } 
-    <span class="keyword">else</span> {
-        <span class="comment">// 2. No User Input -> AI Auto Pilot</span>
-        current_state = AUTO_MODE;
-        stm32.send(ai_lane_follower.data);
-    }
-}</code></pre>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--accent-cyan);">
+                    <th style="padding: 10px; text-align: left; color: var(--accent-cyan); font-size: 0.85rem;">ID (Hex)</th>
+                    <th style="padding: 10px; text-align: left; color: var(--accent-cyan); font-size: 0.85rem;">방향</th>
+                    <th style="padding: 10px; text-align: left; color: var(--accent-cyan); font-size: 0.85rem;">내용</th>
+                    <th style="padding: 10px; text-align: left; color: var(--accent-cyan); font-size: 0.85rem;">주기</th>
+                </tr>
+            </thead>
+            <tbody style="color: #aaa; font-size: 0.85rem;">
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px; font-family: 'JetBrains Mono'; color: var(--accent-red);">0x010</td>
+                    <td style="padding: 10px;">Sensor → All</td>
+                    <td style="padding: 10px;">비상 정지 (장애물 임박)</td>
+                    <td style="padding: 10px;">이벤트</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px; font-family: 'JetBrains Mono';">0x100</td>
+                    <td style="padding: 10px;">RPi → Motor ECU</td>
+                    <td style="padding: 10px;">속도 + 조향 명령</td>
+                    <td style="padding: 10px;">20ms</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px; font-family: 'JetBrains Mono';">0x200</td>
+                    <td style="padding: 10px;">Motor ECU → RPi</td>
+                    <td style="padding: 10px;">엔코더 피드백</td>
+                    <td style="padding: 10px;">50ms</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px; font-family: 'JetBrains Mono';">0x300</td>
+                    <td style="padding: 10px;">Sensor ECU → RPi</td>
+                    <td style="padding: 10px;">초음파 거리 데이터</td>
+                    <td style="padding: 10px;">100ms</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; font-family: 'JetBrains Mono';">0x7F0</td>
+                    <td style="padding: 10px;">RPi → All</td>
+                    <td style="padding: 10px;">Ping (RTT 측정)</td>
+                    <td style="padding: 10px;">요청 시</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===== 4. Implementation Status ===== -->
+<div class="feature-card">
+    <h3><i class="fas fa-tasks" style="color: var(--accent-cyan);"></i> 구현 현황</h3>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #333;">
+                    <th style="padding: 10px; text-align: left; color: #ccc; font-size: 0.85rem;">항목</th>
+                    <th style="padding: 10px; text-align: left; color: #ccc; font-size: 0.85rem;">상태</th>
+                    <th style="padding: 10px; text-align: left; color: #ccc; font-size: 0.85rem;">비고</th>
+                </tr>
+            </thead>
+            <tbody style="color: #aaa; font-size: 0.85rem;">
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px;">Baseline RTT 측정 (UART)</td>
+                    <td style="padding: 10px;"><span style="background: rgba(81,207,102,0.15); color: #51cf66; padding: 3px 10px; border-radius: 4px; font-size: 0.78rem;">완료</span></td>
+                    <td style="padding: 10px;">40.1ms (20회 평균)</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px;">부품 확보</td>
+                    <td style="padding: 10px;"><span style="background: rgba(81,207,102,0.15); color: #51cf66; padding: 3px 10px; border-radius: 4px; font-size: 0.78rem;">완료</span></td>
+                    <td style="padding: 10px;">F446RE, MCP2515×2, MCP2551, HC-SR04P×2</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px;">F446RE 모터 제어 포팅</td>
+                    <td style="padding: 10px;"><span style="background: rgba(255,146,43,0.15); color: #ff922b; padding: 3px 10px; border-radius: 4px; font-size: 0.78rem;">예정</span></td>
+                    <td style="padding: 10px;">F411RE FreeRTOS + PID 코드 포팅</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px;">CAN 버스 하드웨어 구성</td>
+                    <td style="padding: 10px;"><span style="background: rgba(255,146,43,0.15); color: #ff922b; padding: 3px 10px; border-radius: 4px; font-size: 0.78rem;">예정</span></td>
+                    <td style="padding: 10px;">배선 + 120Ω 종단저항</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px;">RPi SocketCAN 설정</td>
+                    <td style="padding: 10px;"><span style="background: rgba(255,146,43,0.15); color: #ff922b; padding: 3px 10px; border-radius: 4px; font-size: 0.78rem;">예정</span></td>
+                    <td style="padding: 10px;">MCP2515 SPI 드라이버 + can0 인터페이스</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px;">3노드 CAN 통신 검증</td>
+                    <td style="padding: 10px;"><span style="background: rgba(255,146,43,0.15); color: #ff922b; padding: 3px 10px; border-radius: 4px; font-size: 0.78rem;">예정</span></td>
+                    <td style="padding: 10px;">메시지 송수신 + 아비트레이션 테스트</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px;">Post-CAN RTT 측정</td>
+                    <td style="padding: 10px;"><span style="background: rgba(255,146,43,0.15); color: #ff922b; padding: 3px 10px; border-radius: 4px; font-size: 0.78rem;">예정</span></td>
+                    <td style="padding: 10px;">동일 Ping-Pong 방식으로 UART 대비 비교</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===== Engineer's Note ===== -->
+<div class="engineer-note phase6">
+    <h4><i class="fas fa-pen-nib"></i> 박해진's Note</h4>
+    <p>
+        "Phase 5까지의 UART 아키텍처는 단일 ECU 구성에서 잘 동작했지만, 
+        센서 노드를 추가하려는 순간 구조적 한계에 부딪혔습니다.
+        <br><br>
+        CAN 전환은 속도 개선이 아니라, 
+        <strong>멀티 ECU 확장성</strong>과 <strong>프로토콜 레벨의 에러 핸들링</strong>을 확보하기 위한 아키텍처 결정입니다.
+        bxCAN(하드웨어 CAN)과 MCP2515(SPI-CAN)을 동일 버스에서 운용하면서, 
+        <strong>SPI 통신</strong>과 <strong>CAN 프로토콜</strong> 두 가지를 동시에 경험할 수 있었습니다."
+    </p>
 </div>

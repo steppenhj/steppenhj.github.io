@@ -152,22 +152,38 @@ class OTAFlasher:
         """GPIO를 이용한 STM32 하드웨어 리셋 (NRST 핀 LOW->HIGH).
         """
         #이 부분이 좀 어려움.
-        try:
-            import RPi.GPIO as GPIO
-            GPIO.setmode(GPIO.BCM)
-            GPIO.setup(NRST_GPIO_PIN, GPIO.OUT)
+        # try:
+        #     import RPi.GPIO as GPIO
+        #     GPIO.setmode(GPIO.BCM)
+        #     GPIO.setup(NRST_GPIO_PIN, GPIO.OUT)
 
-            #NRST를 LOW로 -> 리셋
-            GPIO.output(NRST_GPIO_PIN, GPIO.LOW)
-            time.sleep(0.1)
+        #     #NRST를 LOW로 -> 리셋
+        #     GPIO.output(NRST_GPIO_PIN, GPIO.LOW)
+        #     time.sleep(0.1)
 
-            #NRST를 HIGH로 -> 부트로더 시작
-            GPIO.output(NRST_GPIO_PIN, GPIO.HIGH)
-            time.sleep(0.5) #부트로더 초기화 대기
+        #     #NRST를 HIGH로 -> 부트로더 시작
+        #     GPIO.output(NRST_GPIO_PIN, GPIO.HIGH)
+        #     time.sleep(0.5) #부트로더 초기화 대기
 
-        except ImportError:
-            raise OTAError("RPi.GPIO 모듈 없음. 하드웨어 리셋 불가")
-        
+        #     #********************
+        #     #추가: GPIO 해제 (다른 프로세스와 충돌 방지)
+        #     GPIO.cleanup(NRST_GPIO_PIN)
+
+        # except ImportError:
+        #     raise OTAError("RPi.GPIO 모듈 없음. 하드웨어 리셋 불가")
+        """subprocess로 STM32 하드웨어 리셋 (eventlet 충돌 회피)"""
+        import subprocess
+        subprocess.run([
+            'python3', '-c',
+            'import RPi.GPIO as GPIO; import time; '
+            'GPIO.setmode(GPIO.BCM); '
+            'GPIO.setup(17, GPIO.OUT); '
+            'GPIO.output(17, GPIO.LOW); '
+            'time.sleep(0.1); '
+            'GPIO.output(17, GPIO.HIGH); '
+            'time.sleep(0.5); '
+            'GPIO.cleanup(17)'
+        ], timeout=5)
 
     def _send_update_signal(self):
         """'UPDATE\\n' 전송하고 'READY' 응답 대기"""

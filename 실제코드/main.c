@@ -575,6 +575,17 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			{
 				buffer[buf_index] = 0;
 
+				//************ Phase 6 들어가기 전 *(******
+				//**************** Ping Pong 추가해서 시간 측정*********
+				if(strcmp((char*)buffer, "PING")==0)
+				{
+					HAL_UART_Transmit(&huart2, (uint8_t*)"PONG\r\n", 6, 100);
+					buf_index = 0;
+					memset(buffer, 0, sizeof(buffer));
+					HAL_UART_Receive_IT(&huart2, &rx_data, 1);
+					return; //모터 명령 파싱으로 안 넘어감
+				}
+
 				int temp_speed = 0;
 				int temp_angle = 1500;
 
@@ -737,6 +748,8 @@ void StartTask02(void *argument)
 		  .output_max = 999.0f
   };
 
+
+
   // 성능 측정용 변수
   uint32_t last_wake_time = osKernelGetTickCount();
   uint32_t current_time = 0;
@@ -846,6 +859,15 @@ void StartTask02(void *argument)
       if (current_angle > SERVO_MAX_US) current_angle = SERVO_MAX_US;
       __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (uint32_t)current_angle);
 
+      //*******
+      //중요함. OTA 성공 검증용 LED 깜빡이기
+      // *******
+      static uint16_t led_counter = 0;
+      if(++led_counter >= 100) {
+    	  //100Hz 루프에서 100번 = 1초
+    	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+    	  led_counter = 0;
+      }
       // 주기 제어 (100Hz)
       last_wake_time = current_time;
       osDelayUntil(last_wake_time + 10);
