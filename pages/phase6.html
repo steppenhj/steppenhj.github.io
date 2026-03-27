@@ -108,6 +108,53 @@
     </div>
 </div>
 
+<!-- ===== Design Diagrams ===== -->
+<div class="feature-card" style="border-top: 3px solid var(--accent-cyan);">
+    <h3 style="color: #fff; margin-bottom: 20px;">
+        <i class="fas fa-drafting-compass" style="color: var(--accent-cyan); margin-right: 10px;"></i>
+        System Design Diagrams
+    </h3>
+    <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem;">
+        CAN 구현에 앞서, 3노드 분산 시스템의 하드웨어 토폴로지와 메시지 흐름을 StarUML로 설계했습니다.
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        
+        <!-- Block Diagram -->
+        <div>
+            <span style="color: var(--accent-cyan); font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 10px;">
+                [1] Block Definition Diagram
+            </span>
+            <div class="media-thumbnail" onclick="openModal('image', 'assets/phase6_block_diagram.png')" style="height: auto; background: #fff; padding: 10px;">
+                <img src="assets/phase6_block_diagram.png" alt="Phase 6 Block Diagram" style="object-fit: contain;">
+                <div class="thumbnail-overlay"><i class="fas fa-search-plus" style="color: #222;"></i></div>
+            </div>
+            <ul style="color: #888; font-size: 0.8rem; padding-left: 16px; line-height: 1.7; margin-top: 10px;">
+                <li>bxCAN(내장) vs MCP2515(SPI-CAN) 인터페이스 분리</li>
+                <li>TJA1050 트랜시버 + 120Ω 종단저항 명시</li>
+                <li>센서 하이브리드 전송 (100ms 주기 + 임계값 이벤트)</li>
+            </ul>
+        </div>
+
+        <!-- Sequence Diagram -->
+        <div>
+            <span style="color: var(--accent-green); font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 10px;">
+                [2] Sequence Diagram
+            </span>
+            <div class="media-thumbnail" onclick="openModal('image', 'assets/phase6_sequence_diagram.png')" style="height: auto; background: #fff; padding: 10px;">
+                <img src="assets/phase6_sequence_diagram.png" alt="Phase 6 Sequence Diagram" style="object-fit: contain;">
+                <div class="thumbnail-overlay"><i class="fas fa-search-plus" style="color: #222;"></i></div>
+            </div>
+            <ul style="color: #888; font-size: 0.8rem; padding-left: 16px; line-height: 1.7; margin-top: 10px;">
+                <li>loop [every 100ms] + alt [distance &lt; 20cm] 프래그먼트</li>
+                <li>F446RE 자체 장애물 판단 → 즉시 정지 안전 설계</li>
+                <li>WebSocket ↔ CAN 브릿지 구조 명시</li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
 <!-- ===== 2. Architecture ===== -->
 <div class="feature-card" style="border-top: 3px solid var(--accent-cyan);">
     <h3 style="color: #fff; margin-bottom: 20px;">
@@ -259,6 +306,11 @@
                     <td style="padding: 10px;">부품 확보</td>
                     <td style="padding: 10px;"><span style="background: rgba(81,207,102,0.15); color: #51cf66; padding: 3px 10px; border-radius: 4px; font-size: 0.78rem;">완료</span></td>
                     <td style="padding: 10px;">F446RE, MCP2515×2, MCP2551, HC-SR04P×2</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #222;">
+                    <td style="padding: 10px;">시스템 설계 (UML 다이어그램)</td>
+                    <td style="padding: 10px;"><span style="background: rgba(81,207,102,0.15); color: #51cf66; padding: 3px 10px; border-radius: 4px; font-size: 0.78rem;">완료</span></td>
+                    <td style="padding: 10px;">Block Definition + Sequence Diagram (StarUML)</td>
                 </tr>
                 <tr style="border-bottom: 1px solid #222;">
                     <td style="padding: 10px;">F446RE 모터 제어 포팅</td>
